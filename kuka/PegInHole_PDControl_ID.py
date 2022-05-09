@@ -1,23 +1,29 @@
-import mujoco_py
+import mujoco
+import mujoco_viewer
 import os
 import time
 import numpy as np
 from controllers.pd_controller_copy import PDController
 from controllers.inverse_dynamics_controller_copy import InverseDynamicsController
 
-mj_path = mujoco_py.utils.discover_mujoco()
+## mj_path = mujoco_py.utils.discover_mujoco()
 #xml_path = 'gym-kuka-mujoco/gym_kuka_mujoco/envs/assets/full_peg_insertion_experiment.xml'
 #xml_path = 'kuka/envs/assets/full_kuka_no_collision.xml'
 xml_path = 'kuka/envs/assets/full_kuka_INRC3.xml'
-model = mujoco_py.load_model_from_path(xml_path)
-sim = mujoco_py.MjSim(model)
+## model = mujoco_py.load_model_from_path(xml_path)
+model = mujoco.MjModel.from_xml_path(xml_path)
+## sim = mujoco_py.MjSim(model)
+data = mujoco.MjData(model)
 
-print(sim.data.qpos)
+## print(sim.data.qpos)
+print(data.qpos)
 # [0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0.]
 
-viewer = mujoco_py.MjViewer(sim)
+# viewer = mujoco_py.MjViewer(sim)
+viewer = mujoco_viewer.MujocoViewer(model, data)
 #controller=PDController(sim, gravity_comp_model_path="/envs/assets/full_kuka_INRC3.xml")
-controller=InverseDynamicsController(sim, model_path="full_kuka_INRC3.xml")
+## controller=InverseDynamicsController(sim, model_path="full_kuka_INRC3.xml")
+controller=InverseDynamicsController(model, data, model_path="full_kuka_INRC3.xml")
 
 
 TEST=np.deg2rad([-10,0,0,0,0,0,0])
@@ -50,11 +56,14 @@ while (True):
     #print("Current viapoint "+str(viapoint))
     controller.set_action(np.asarray(viapoint))
     torque=controller.get_torque()
-    sim.data.ctrl[:] = np.clip(torque, -300, 300)
+    ## sim.data.ctrl[:] = np.clip(torque, -300, 300)
+    data.ctrl[:] = np.clip(torque, -300, 300)
     #self.sim.data.qfrc_applied[:] = self._get_random_applied_force()
     #print("Joint Values:"+str(sim.data.qpos))
     #print("Torques      "+str(torque))
-    print("Actions      "+str(sim.data.ctrl))
-    sim.step()
+    ## print("Actions      "+str(sim.data.ctrl))
+    print("Actions      "+str(data.ctrl))
+    ## sim.step()
+    mujoco.mj_step(model, data)
     #sim.step()
     

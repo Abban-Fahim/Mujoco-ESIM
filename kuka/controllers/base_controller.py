@@ -4,8 +4,12 @@ class BaseController(abc.ABC):
     '''
     An abstract base class for low level controllers.
     '''
-    def __init__(self, sim):
-        self.sim = sim
+    ## def __init__(self, sim):
+    ##     self.sim = sim
+    ##     self.action_space = None
+
+    def __init__(self, sim_model, sim_data):
+        self.sim_model, self.sim_data = sim_model, sim_data
         self.action_space = None
 
     @abc.abstractmethod

@@ -2,7 +2,7 @@ import os
 
 import numpy as np
 from gym import spaces
-import mujoco_py
+import mujoco
 
 import sys
 sys.path.append("..")
@@ -21,7 +21,8 @@ class FullImpedanceController(BaseController):
     '''
 
     def __init__(self,
-                 sim,
+                 sim_model, sim_data,
+                 ## sim,
                  pos_scale=1.0,
                  rot_scale=1.0,
                  pos_limit=1.0,
@@ -36,7 +37,8 @@ class FullImpedanceController(BaseController):
                  nominal_pos=None,
                  nominal_quat=None,
                  nominal_qpos=None):
-        super(FullImpedanceController, self).__init__(sim)
+        ## super(FullImpedanceController, self).__init__(sim)
+        super(FullImpedanceController, self).__init__(sim_model, sim_data)
 
         # Set the zero position and quaternion of the action space.
         if nominal_pos is None:
@@ -70,7 +72,8 @@ class FullImpedanceController(BaseController):
         kuka_asset_dir="kuka/envs/assets/"
         model_path = kuka_asset_dir+model_path
         #model_path = os.path.join(kuka_asset_dir(), model_path)
-        self.model = mujoco_py.load_model_from_path(model_path)
+        ## self.model = mujoco_py.load_model_from_path(model_path)
+        self.model = mujoco.MjModel.from_xml_path(model_path)
 
         # Construct the action space.
         high_pos = pos_limit*np.ones(3)
@@ -110,10 +113,15 @@ class FullImpedanceController(BaseController):
         # Get the position, velocity, and actuator indices for the model.
         if controlled_joints is not None:
             print('######################## control joints all')
-            self.sim_qpos_idx = get_qpos_indices(sim.model, controlled_joints)
-            self.sim_qvel_idx = get_qvel_indices(sim.model, controlled_joints)
-            self.sim_actuators_idx = get_actuator_indices(sim.model, controlled_joints)
-            self.sim_joint_idx = get_joint_indices(sim.model, controlled_joints)
+            ## self.sim_qpos_idx = get_qpos_indices(sim.model, controlled_joints)
+            ## self.sim_qvel_idx = get_qvel_indices(sim.model, controlled_joints)
+            ## self.sim_actuators_idx = get_actuator_indices(sim.model, controlled_joints)
+            ## self.sim_joint_idx = get_joint_indices(sim.model, controlled_joints)
+
+            self.sim_qpos_idx = get_qpos_indices(sim_model, controlled_joints)
+            self.sim_qvel_idx = get_qvel_indices(sim_model, controlled_joints)
+            self.sim_actuators_idx = get_actuator_indices(sim_model, controlled_joints)
+            self.sim_joint_idx = get_joint_indices(sim_model, controlled_joints)
 
             self.self_qpos_idx = get_qpos_indices(self.model, controlled_joints)
             self.self_qvel_idx = get_qvel_indices(self.model, controlled_joints)
@@ -153,9 +161,11 @@ class FullImpedanceController(BaseController):
         Update the impedance control setpoint and compute the torque.
         '''
         # Compute the pose difference.
-        pos, mat = forwardKinSite(self.sim, self.site_name, recompute=False)
+        ## pos, mat = forwardKinSite(self.sim, self.site_name, recompute=False)
+        pos, mat = forwardKinSite(self.sim_model, self.sim_data, self.site_name, recompute=False)
         quat = mat2Quat(mat)
-        print(np.rad2deg(self.sim.data.qpos))
+        ## print(np.rad2deg(self.sim.data.qpos))
+        print(np.rad2deg(self.sim_data.qpos))
         print("Pos "+str(pos)+"    Quad "+str(quat))
         dx = self.pos_set - pos
         dr = subQuat(self.quat_set, quat) # Original
@@ -163,24 +173,35 @@ class FullImpedanceController(BaseController):
         dframe = np.concatenate((dx,dr))
 
         # Compute generalized forces from a virtual external force.
-        jpos, jrot = forwardKinJacobianSite(self.sim, self.site_name, recompute=False)
+        ## jpos, jrot = forwardKinJacobianSite(self.sim, self.site_name, recompute=False)
+        ## J = np.vstack((jpos[:,self.sim_qvel_idx], jrot[:,self.sim_qvel_idx]))
+        ## cartesian_acc_des = self.stiffness*dframe - self.damping*J.dot(self.sim.data.qvel[self.sim_qvel_idx])
+        ## impedance_acc_des = J.T.dot(np.linalg.solve(J.dot(J.T) + 1e-6*np.eye(6), cartesian_acc_des))
+
+        jpos, jrot = forwardKinJacobianSite(self.sim_model, self.sim_data, self.site_name, recompute=False)
         J = np.vstack((jpos[:,self.sim_qvel_idx], jrot[:,self.sim_qvel_idx]))
-        cartesian_acc_des = self.stiffness*dframe - self.damping*J.dot(self.sim.data.qvel[self.sim_qvel_idx])
+        cartesian_acc_des = self.stiffness*dframe - self.damping*J.dot(self.sim_data.qvel[self.sim_qvel_idx])
         impedance_acc_des = J.T.dot(np.linalg.solve(J.dot(J.T) + 1e-6*np.eye(6), cartesian_acc_des))
 
         # Add stiffness and damping in the null space of the the Jacobian
         projection_matrix = J.T.dot(np.linalg.solve(J.dot(J.T), J))
         projection_matrix = np.eye(projection_matrix.shape[0]) - projection_matrix
-        null_space_control = -self.null_space_damping*self.sim.data.qvel[self.sim_qvel_idx]
-        null_space_control += -self.null_space_stiffness*(self.sim.data.qpos[self.sim_qpos_idx] - self.nominal_qpos)
+        null_space_control = -self.null_space_damping*self.self.sim_data.qvel[self.sim_qvel_idx]
+        null_space_control += -self.null_space_stiffness*(self.sim_data.qpos[self.sim_qpos_idx] - self.nominal_qpos)
         impedance_acc_des += projection_matrix.dot(null_space_control)
 
         # Compute torques via inverse dynamics.
-        acc_des = np.zeros(self.sim.model.nv)
+        ## acc_des = np.zeros(self.sim.model.nv)
+        ## acc_des[self.sim_qvel_idx] = impedance_acc_des
+        ## self.sim.data.qacc[:] = acc_des
+        ## mujoco_py.functions.mj_inverse(self.model, self.sim.data)
+        ## id_torque = self.sim.data.qfrc_inverse[self.sim_actuators_idx].copy()
+
+        acc_des = np.zeros(self.sim_model.nv)
         acc_des[self.sim_qvel_idx] = impedance_acc_des
-        self.sim.data.qacc[:] = acc_des
-        mujoco_py.functions.mj_inverse(self.model, self.sim.data)
-        id_torque = self.sim.data.qfrc_inverse[self.sim_actuators_idx].copy()
+        self.sim_data.qacc[:] = acc_des
+        mujoco.functions.mj_inverse(self.model, self.sim_data)
+        id_torque = self.sim_data.qfrc_inverse[self.sim_actuators_idx].copy()
         
         print("GET TORQUE: "+str(id_torque))
 

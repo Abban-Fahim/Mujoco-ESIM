@@ -1,8 +1,10 @@
-import mujoco_py
+import mujoco
 
 def kuka_subtree_mass(model):
     body_names = ['kuka_link_{}'.format(i + 1) for i in range(7)]
-    body_ids = [model.body_name2id(n) for n in body_names]
+    ## body_ids = [model.body_name2id(n) for n in body_names]
+    body_ids = [mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_BODY, n) for n in body_names]
+    
     return model.body_subtreemass[body_ids]
 
 def get_qpos_indices(model, joint_names):
