@@ -24,15 +24,6 @@ Install all the requirements before testing the code
 
 - pip install -r requirements.txt
 
-## For rendering and display visualization:
-
-- install GLEW:
-    sudo apt-get install libglew-dev
-
-- export the preload env variable
-    export LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libGLEW.so
-    (or add the line to the .bashrc for constat screen visualization)
-
 ## Run the code
 
 On the repository root directory run
