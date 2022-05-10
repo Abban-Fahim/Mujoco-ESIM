@@ -23,6 +23,7 @@ Activate the environment
 Install all the requirements before testing the code
 
 - pip install -r requirements.txt
+- install modified mujoco-python-viewer from https://github.com/gintautas12358/mujoco-python-viewer/blob/event-camera/mujoco_viewer/mujoco_viewer.py
 
 ## Run the code
 
