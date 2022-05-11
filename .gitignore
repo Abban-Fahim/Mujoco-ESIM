@@ -1,4 +1,5 @@
 /MujocoEleanor
 *.png
 *.gif
+*.npz
 MUJOCO_LOG.TXT
