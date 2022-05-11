@@ -1,5 +1,4 @@
 /MujocoEleanor
-*.png
-*.gif
-*.npz
+/img/original/*.png
+/img/subtracted/*.png
 MUJOCO_LOG.TXT
