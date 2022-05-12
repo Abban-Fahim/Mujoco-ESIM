@@ -6,15 +6,20 @@ import numpy as np
 import itertools
 
 # parameter
-simulation_time = 3
+cp = 0.5
+cn = 0.1
+
+
+simulation_time = 1000
+sim_steps = 20
 test_camera_on = False
 camera_id = 0
 overlay_on = True
 save_path = "/home/palinauskas/Documents/mujoco-eleanor/img"
 save_path_original = save_path + "/original/seq0/imgs"
 save_path_subtracted = save_path + "/subtracted/seq0/imgs"
-save_path_events = save_path + "/events/seq0/imgs"
-xml_path = 'kuka/envs/assets/full_kuka_INRC3_camera.xml'
+save_path_events = save_path + "/events2/seq0/imgs"
+xml_path = 'kuka/envs/assets/full_kuka_INRC3_mounted_camera.xml'
 
 
 
@@ -25,15 +30,24 @@ data = mujoco.MjData(model)
 print(data.qpos)
 
 viewer = mujoco_viewer.MujocoViewer(model, data)
+viewer.init_esim()
 
 t_0 = time.time()
 t = 0
 
-while (t < simulation_time) or test_camera_on:
+step = 0
+while (step < sim_steps) or test_camera_on:
     if not test_camera_on:
-        viewer.capture_frame(camera_id, path=save_path_original)
-        # viewer.capture_event_prototype(camera_id, path=save_path_subtracted)
+        print("#1")
         viewer.render(overlay_on=False)
+
+        # viewer.capture_frame(camera_id, path=save_path_original)
+        # viewer.capture_event_prototype(camera_id, path=save_path_subtracted)
+        timestamp = data.time        
+        print(timestamp)
+        np_timestamp = np.array([timestamp])
+        viewer.capture_event(camera_id, np_timestamp, path=save_path_events)
+        print("#2")
     else:
         viewer.render(overlay_on=overlay_on)
     
@@ -42,4 +56,4 @@ while (t < simulation_time) or test_camera_on:
     data.ctrl[:] = np.clip(torque, -300, 300)
     mujoco.mj_step(model, data)
     t = time.time() - t_0
-    print(t)
+    step += 1

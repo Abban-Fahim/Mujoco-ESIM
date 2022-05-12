@@ -18,6 +18,14 @@ def viz_events(events, resolution):
     image_pos = np.zeros(resolution[0]*resolution[1], dtype="uint8")
     image_neg = np.zeros(resolution[0]*resolution[1], dtype="uint8")
 
+    # print(pos_events)
+    # print(pos_events[:,0])
+    # print(pos_events[:,1])
+    # print(resolution[1])
+    # print(pos_events[:,1]*resolution[1])
+    # print(pos_events[:,0]+pos_events[:,1]*resolution[1])
+    # print(pos_events[:,-1]**2)
+
     np.add.at(image_pos, (pos_events[:,0]+pos_events[:,1]*resolution[1]).astype("int32"), pos_events[:,-1]**2)
     np.add.at(image_neg, (neg_events[:,0]+neg_events[:,1]*resolution[1]).astype("int32"), neg_events[:,-1]**2)
 
