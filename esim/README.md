@@ -15,7 +15,7 @@
 - generate upsampled frames with specified from (takes a considerate amount of time):
 
 - `python ../esim/rpg_vid2e/upsampling/upsample.py  --input_dir=img/original --output_dir=img/upsampled`
-- `python esim/plot_virtual_events_with diff_param.py`
+- `python esim/plot_virtual_events_with_diff_param.py`
 
 ## generate event images
 

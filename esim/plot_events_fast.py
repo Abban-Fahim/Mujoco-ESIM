@@ -76,7 +76,7 @@ def process_dir(outdir, indir, args):
     num_events = 0
 
     counter = 0
-    H, W = 704, 1280
+    H, W = 720, 1280
     for image_file, timestamp_ns in zip(image_files, timestamps_ns):
         image = cv2.imread(image_file, cv2.IMREAD_GRAYSCALE)
         log_image = np.log(image.astype("float32") / 255 + 1e-5)
