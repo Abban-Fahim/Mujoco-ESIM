@@ -22,15 +22,12 @@ save_path_events = save_path + "/events2/seq0/imgs"
 xml_path = 'kuka/envs/assets/full_kuka_INRC3_mounted_camera.xml'
 
 
-
-
 model = mujoco.MjModel.from_xml_path(xml_path)
 data = mujoco.MjData(model)
 
 print(data.qpos)
 
 viewer = mujoco_viewer.MujocoViewer(model, data)
-viewer.init_esim()
 
 t_0 = time.time()
 t = 0
@@ -38,16 +35,14 @@ t = 0
 step = 0
 while (step < sim_steps) or test_camera_on:
     if not test_camera_on:
-        print("#1")
         viewer.render(overlay_on=False)
 
         # viewer.capture_frame(camera_id, path=save_path_original)
         # viewer.capture_event_prototype(camera_id, path=save_path_subtracted)
+
         timestamp = data.time        
         print(timestamp)
-        np_timestamp = np.array([timestamp])
-        viewer.capture_event(camera_id, np_timestamp, path=save_path_events)
-        print("#2")
+        viewer.capture_event(camera_id, timestamp, path=save_path_events)
     else:
         viewer.render(overlay_on=overlay_on)
     

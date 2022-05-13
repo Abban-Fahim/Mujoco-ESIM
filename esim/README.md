@@ -25,6 +25,10 @@
 
 - `python esim/plot_events_fast.py -i img/upsampled -o img/events2`
 
+## create gif
+
+- `convert -delay 20 -loop 0 *.png my.gif`
+
 ## run mujoco
 
 - `./../mujoco-2.1.5/bin/simulate `
