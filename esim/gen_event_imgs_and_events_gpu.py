@@ -18,14 +18,6 @@ def viz_events(events, resolution):
     image_pos = np.zeros(resolution[0]*resolution[1], dtype="uint8")
     image_neg = np.zeros(resolution[0]*resolution[1], dtype="uint8")
 
-    # print(pos_events)
-    # print(pos_events[:,0])
-    # print(pos_events[:,1])
-    # print(resolution[1])
-    # print(pos_events[:,1]*resolution[1])
-    # print(pos_events[:,0]+pos_events[:,1]*resolution[1])
-    # print(pos_events[:,-1]**2)
-
     np.add.at(image_pos, (pos_events[:,0]+pos_events[:,1]*resolution[1]).astype("int32"), pos_events[:,-1]**2)
     np.add.at(image_neg, (neg_events[:,0]+neg_events[:,1]*resolution[1]).astype("int32"), neg_events[:,-1]**2)
 
@@ -84,7 +76,7 @@ def process_dir(outdir, indir, args):
     num_events = 0
 
     counter = 0
-    H, W = 720, 1280
+    
     for image_file, timestamp_ns in zip(image_files, timestamps_ns):
         image = cv2.imread(image_file, cv2.IMREAD_GRAYSCALE)
         log_image = np.log(image.astype("float32") / 255 + 1e-5)
@@ -100,10 +92,11 @@ def process_dir(outdir, indir, args):
         num_events += len(sub_events['t'])
  
         # do something with the events
-        if counter:           
+        if counter:
+            H, W = image.shape           
             e = t2e(sub_events)
             im = viz_events(e, [H, W])
-            plt.imsave(outdir + "%08d.png" % counter, im)
+            plt.imsave(outdir + "/imgs/" + "%08d.png" % counter, im)
 
 
         np.savez(os.path.join(outdir, "%010d.npz" % counter), **sub_events)

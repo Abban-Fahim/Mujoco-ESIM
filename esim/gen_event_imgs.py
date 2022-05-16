@@ -14,6 +14,7 @@ image_folder = "/home/palinauskas/Documents/mujoco-eleanor/img/upsampled/seq0/im
 timestamps_file = "/home/palinauskas/Documents/mujoco-eleanor/img/upsampled/seq0/timestamps.txt"
 
 
+
 def viz_events(events, resolution):
     pos_events = events[events[:,-1]==1]
     neg_events = events[events[:,-1]==-1]

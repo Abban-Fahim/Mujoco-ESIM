@@ -11,7 +11,7 @@ cn = 0.1
 
 
 simulation_time = 1000
-sim_steps = 20
+sim_steps = 10
 test_camera_on = False
 camera_id = 0
 overlay_on = True
@@ -37,12 +37,12 @@ while (step < sim_steps) or test_camera_on:
     if not test_camera_on:
         viewer.render(overlay_on=False)
 
-        # viewer.capture_frame(camera_id, path=save_path_original)
+        viewer.capture_frame(camera_id, path=save_path_original)
         # viewer.capture_event_prototype(camera_id, path=save_path_subtracted)
 
-        timestamp = data.time        
-        print(timestamp)
-        viewer.capture_event(camera_id, timestamp, path=save_path_events)
+        # timestamp = data.time        
+        # print(timestamp)
+        # viewer.capture_event(camera_id, timestamp, path=save_path_events)
     else:
         viewer.render(overlay_on=overlay_on)
     
