@@ -55,3 +55,7 @@
 ## run mujoco
 
 - `./../mujoco-2.1.5/bin/simulate `
+
+## plot events
+
+- `python esim/plot_time_space.py`
