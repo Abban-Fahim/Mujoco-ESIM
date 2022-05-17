@@ -32,8 +32,7 @@ for f in files[-6:]:
         break
 
 time = total_data["t"]
-min_time = min(time)
-max_time = max(time)
+min_time, max_time = min(time), max(time)
 H, W = 720, 1280
 xs = float(W) / H
 ys = 1
@@ -49,8 +48,9 @@ e_pos = {key:total_data[key][np.where(total_data['p'] == 1)[0]] for key in total
 e_neg = {key:total_data[key][np.where(total_data['p'] == -1)[0]] for key in total_data}
  
 # Creating plot
-scatter1 = ax.scatter3D(e_pos["t"], e_pos["x"], e_pos["y"], s=0.01, color = "green")
-scatter2 = ax.scatter3D(e_neg["t"], e_neg["x"], e_neg["y"], s=0.01, color = "red")
+marker_size = 0.01
+scatter1 = ax.scatter3D(e_pos["t"], e_pos["x"], e_pos["y"], s=marker_size, color = "green")
+scatter2 = ax.scatter3D(e_neg["t"], e_neg["x"], e_neg["y"], s=marker_size, color = "red")
 plt.title("Space-time event plot")
 ax.set_xlabel('t', fontweight ='bold')
 ax.set_ylabel('x', fontweight ='bold')
