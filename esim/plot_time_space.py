@@ -9,7 +9,7 @@ import os
 
 # path = "/home/palinauskas/Documents/mujoco-eleanor/img/events_mujoco/seq0/0000000000.npz"
 # path = "/home/palinauskas/Documents/mujoco-eleanor/img/events/seq0/0000000000.npz"
-path = "/home/palinauskas/Documents/mujoco-eleanor/img/events/seq0"
+path = "/home/palinauskas/Documents/mujoco-eleanor/img/events_mujoco/seq0"
 
 keys = ["x", "y", "t", "p"]
 total_data = {k: np.array([]) for k in keys}
@@ -49,15 +49,15 @@ e_neg = {key:total_data[key][np.where(total_data['p'] == -1)[0]] for key in tota
  
 # Creating plot
 marker_size = 0.01
-scatter1 = ax.scatter3D(e_pos["t"], e_pos["x"], e_pos["y"], s=marker_size, color = "green")
-scatter2 = ax.scatter3D(e_neg["t"], e_neg["x"], e_neg["y"], s=marker_size, color = "red")
+scatter1 = ax.scatter3D(e_pos["t"], e_pos["x"], e_pos["y"], s=marker_size, color = "red")
+scatter2 = ax.scatter3D(e_neg["t"], e_neg["x"], e_neg["y"], s=marker_size, color = "green")
 plt.title("Space-time event plot")
 ax.set_xlabel('t', fontweight ='bold')
 ax.set_ylabel('x', fontweight ='bold')
 ax.set_zlabel('y', fontweight ='bold')
-green_patch = mpatches.Patch(color='green', label='pos events')
-red_patch = mpatches.Patch(color='red', label='neg events')
-ax.legend(handles=[green_patch, red_patch])
+pos_patch = mpatches.Patch(color='red', label='neg events')
+neg_patch = mpatches.Patch(color='green', label='pos events')
+ax.legend(handles=[pos_patch, neg_patch])
 ax.grid(True)
  
 # show plot
