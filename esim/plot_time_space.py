@@ -9,7 +9,7 @@ import os
 
 # path = "/home/palinauskas/Documents/mujoco-eleanor/img/events_mujoco/seq0/0000000000.npz"
 # path = "/home/palinauskas/Documents/mujoco-eleanor/img/events/seq0/0000000000.npz"
-path = "/home/palinauskas/Documents/mujoco-eleanor/img/events_mujoco/seq0"
+path = "/home/palinauskas/Documents/mujoco-eleanor/img/events/seq0"
 
 keys = ["x", "y", "t", "p"]
 total_data = {k: np.array([]) for k in keys}
@@ -31,13 +31,14 @@ for f in files[-6:]:
     if count > 5:
         break
 
-time = total_data["t"]
-min_time, max_time = min(time), max(time)
+min_time, max_time = min(total_data["t"]), max(total_data["t"])
+min_x, max_x = min(total_data["x"]), max(total_data["x"])
+min_y, max_y = min(total_data["y"]), max(total_data["y"])
 H, W = 720, 1280
-xs = float(W) / H
-ys = 1
+xs = (max_x - min_x) * 1e-2
+ys = (max_y - min_y) * 1e-2
 ts =  (max_time - min_time) * 1e-7
-# print(ts, xs, ys)
+print(ts, xs, ys)
 
 # Creating figure
 fig = plt.figure()
