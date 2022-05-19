@@ -6,10 +6,8 @@ import matplotlib.pyplot as plt
 import os
 
 
-
-# path = "/home/palinauskas/Documents/mujoco-eleanor/img/events_mujoco/seq0/0000000000.npz"
-# path = "/home/palinauskas/Documents/mujoco-eleanor/img/events/seq0/0000000000.npz"
-path = "/home/palinauskas/Documents/mujoco-eleanor/img/events/seq0"
+# path = "/home/palinauskas/Documents/mujoco-eleanor/img/events/seq0"
+path = "/home/palinauskas/Documents/mujoco-eleanor/img/events_mujoco/seq0"
 
 keys = ["x", "y", "t", "p"]
 total_data = {k: np.array([]) for k in keys}
