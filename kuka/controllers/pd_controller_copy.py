@@ -40,7 +40,7 @@ class PDController(BaseController):
         if gravity_comp_model_path is not None:
             self.gravity_comp = True
             kuka_asset_dir="kuka"
-            model_path = kuka_asset_dir+gravity_comp_model_path
+            model_path = kuka_asset_dir + gravity_comp_model_path
             print(model_path)
             # self.model = mujoco_py.load_model_from_path(model_path)
             # self.gravity_comp_sim = mujoco_py.MjSim(self.model)
@@ -177,7 +177,7 @@ class PDController(BaseController):
         action = action * self.action_scale
 
         nu = len(self.self_actuators_idx)
-        self.qpos_setpoint = action[0:nu]
+        self.qpos_setpoint = action[:nu]
         if self.set_velocity:
             self.qvel_setpoint = action[nu:2 * nu]
 
