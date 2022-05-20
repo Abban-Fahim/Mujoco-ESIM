@@ -28,7 +28,7 @@ data = mujoco.MjData(model)
 print(data.qpos)
 
 viewer = mujoco_viewer.MujocoViewer(model, data)
-viewer.init_esim(contrast_threshold_negative=0.1, contrast_threshold_positive=0.5, refractory_period_ns=1)
+viewer.init_esim(contrast_threshold_negative=1.7, contrast_threshold_positive=1.7, refractory_period_ns=100)
 
 t_0 = time.time()
 t = 0

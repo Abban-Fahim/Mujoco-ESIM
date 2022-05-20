@@ -115,22 +115,18 @@ def forwardKinJacobianSite(model, data, site_id, recompute=True):
     ## jacr = np.zeros(jac_shape, dtype=np.float64).flatten()
     jacp = np.zeros(jac_shape, dtype=np.float64)
     jacr = np.zeros(jac_shape, dtype=np.float64)
-
-    print("%%%%%%%%%%%", "model.nv", model.nv, "%%%%%%%%%%%")
+    jacp[0,0] = 99
 
     # Compute Kinematics and
     ## if recompute: 
     ##     sim.forward()
     ## mujoco_py.functions.mj_jacSite(sim.model, sim.data, jacp, jacr, site_id)
+
     mujoco.mj_jacSite(model, data, jacp, jacr, site_id)
 
     # Reshape the jacobian matrices and return.
     # jacp = jacp.reshape(jac_shape)
     # jacr = jacr.reshape(jac_shape)
-
-    print("%%%%%%%%%%%", "site_id", site_id, "%%%%%%%%%%%")
-    print("%%%%%%%%%%%", "jacp", jacp, "%%%%%%%%%%%")
-    print("%%%%%%%%%%%", "jacr", jacr, "%%%%%%%%%%%")
     
     return jacp, jacr
 
@@ -180,3 +176,7 @@ def inverseKin(sim, q_init, q_nom, body_pos, world_pos, world_quat, body_id, reg
         if raise_on_fail:
             raise RuntimeError("Infeasible")
     return result.x
+
+def current_ee_position(model, data):
+    current_position, _ = forwardKinSite(model, data, "ee_site", recompute=False)
+    return current_position
