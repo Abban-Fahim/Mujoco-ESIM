@@ -14,11 +14,8 @@ viewer = mujoco_viewer.MujocoViewer(model, data)
 
 print(data.qpos)
 
-# t_0 = time.time()
-# t_0 = data.time
 t = data.time
 
-#while(t-t_0<4):
 while (True):
     viewer.render()
     

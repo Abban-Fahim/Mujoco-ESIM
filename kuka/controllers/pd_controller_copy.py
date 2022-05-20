@@ -215,8 +215,10 @@ class RelativePDController(PDController):
 
         nu = len(self.self_actuators_idx)
         # Set the setpoint difference from the current position.
+        # self.qpos_setpoint = action[0:nu] + \
+        #     self.sim.data.qpos[self.sim_qpos_idx]
         self.qpos_setpoint = action[0:nu] + \
-            self.sim.data.qpos[self.sim_qpos_idx]
+            self.sim_data.qpos[self.sim_qpos_idx]
         if self.set_velocity:
             self.qvel_setpoint = action[nu:2 * nu]
 

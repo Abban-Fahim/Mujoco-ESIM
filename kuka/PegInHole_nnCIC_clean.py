@@ -20,7 +20,6 @@ data = mujoco.MjData(model)
 viewer = mujoco_viewer.MujocoViewer(model, data)
 controller=FullImpedanceController(model, data, model_path="full_kuka_INRC3.xml")
 
-
 TEST_Q = np.array(np.deg2rad([-10,0,0,0,0,0,0]))
 HOME_Q = np.array(np.deg2rad([-90,0,0,90,0,-90,0]))
 ROBOT_HOME_Q = np.array(np.deg2rad([-90,0,0,90,0,-90,0]))
@@ -43,19 +42,10 @@ viapoints = ["INSERTION", "HOME"]
 viapoint = viapoints.pop()
 
 
-#viapoints=[INSERTION, APPROACH, ROBOT_HOME,  HOME]
-#viapoints=[INSERTION, APPROACH, HOME]
-# viapoints=[APPROACH, HOME]
-# viapoint=viapoints.pop()
-
-# t_0=time.time()
-#t=t_0-time.time()
-
 t = data.time
 err_limit = 0.1
 
-#while(t-t_0<4):
-while (True and 1):
+while (True):
     viewer.render()
 
     # viapoint change when the last viapoint is reached

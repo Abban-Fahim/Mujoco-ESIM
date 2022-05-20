@@ -153,8 +153,8 @@ class FullImpedanceController(BaseController):
         self.pos_set = self.nominal_pos + dx
         self.quat_set = quatAdd(self.nominal_quat, dr)
         
-        print("POS SET: "+str(self.pos_set))
-        print("QUAT SET: "+str(self.quat_set))
+        # print("POS SET: "+str(self.pos_set))
+        # print("QUAT SET: "+str(self.quat_set))
 
     def get_torque(self):
         '''
@@ -165,11 +165,11 @@ class FullImpedanceController(BaseController):
         pos, mat = forwardKinSite(self.sim_model, self.sim_data, self.site_name, recompute=False)
         quat = mat2Quat(mat)
         ## print(np.rad2deg(self.sim.data.qpos))
-        print(np.rad2deg(self.sim_data.qpos))
-        print("Pos "+str(pos)+"    Quad "+str(quat))
+        # print(np.rad2deg(self.sim_data.qpos))
+        # print("Pos "+str(pos)+"    Quad "+str(quat))
         dx = self.pos_set - pos
         dr = subQuat(self.quat_set, quat) # Original
-        print("Desired Rotation="+str(dr))
+        # print("Desired Rotation="+str(dr))
         dframe = np.concatenate((dx,dr))
 
         # Compute generalized forces from a virtual external force.
@@ -206,6 +206,6 @@ class FullImpedanceController(BaseController):
         mujoco.mj_inverse(self.model, self.sim_data)
         id_torque = self.sim_data.qfrc_inverse[self.sim_actuators_idx].copy()
         
-        print("GET TORQUE: "+str(id_torque))
+        # print("GET TORQUE: "+str(id_torque))
 
         return id_torque

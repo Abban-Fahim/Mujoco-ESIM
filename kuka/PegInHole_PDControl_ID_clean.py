@@ -15,7 +15,7 @@ data = mujoco.MjData(model)
 print(data.qpos)
 
 viewer = mujoco_viewer.MujocoViewer(model, data)
-controller=InverseDynamicsController(model, data, kp_id=100, model_path="full_kuka_INRC3.xml")
+controller = InverseDynamicsController(model, data, kp_id=100, model_path="full_kuka_INRC3.xml")
 
 TEST = np.array(np.deg2rad([-10,0,0,0,0,0,0]))
 HOME = np.array(np.deg2rad([-90,0,0,90,0,-90,0]))
