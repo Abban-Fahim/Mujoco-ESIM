@@ -4,3 +4,4 @@
 **.npz
 MUJOCO_LOG.TXT
 .vscode
+MJDATA.TXT

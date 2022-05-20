@@ -93,6 +93,7 @@ class InverseDynamicsController(BaseController):
         self.action_scale = action_scale
         self.kp_id = kp_id
         if kd_id == 'auto':
+            #TODO check if mass makes a difference
             self.kd_id = 2 * np.sqrt(self.kp_id)
         else:
             self.kd_id = kd_id

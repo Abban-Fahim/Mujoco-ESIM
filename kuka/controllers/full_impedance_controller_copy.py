@@ -184,11 +184,14 @@ class FullImpedanceController(BaseController):
         impedance_acc_des = J.T.dot(np.linalg.solve(J.dot(J.T) + 1e-6*np.eye(6), cartesian_acc_des))
 
         # Add stiffness and damping in the null space of the the Jacobian
-        projection_matrix = J.T.dot(np.linalg.solve(J.dot(J.T), J))
+
+        #==== debug ====
+        projection_matrix = J.T.dot(np.linalg.solve(J.dot(J.T) + 1e-6*np.eye(6), J))
         projection_matrix = np.eye(projection_matrix.shape[0]) - projection_matrix
-        null_space_control = -self.null_space_damping*self.self.sim_data.qvel[self.sim_qvel_idx]
+        null_space_control = -self.null_space_damping*self.sim_data.qvel[self.sim_qvel_idx]
         null_space_control += -self.null_space_stiffness*(self.sim_data.qpos[self.sim_qpos_idx] - self.nominal_qpos)
         impedance_acc_des += projection_matrix.dot(null_space_control)
+        #==== debug ====
 
         # Compute torques via inverse dynamics.
         ## acc_des = np.zeros(self.sim.model.nv)
@@ -200,7 +203,7 @@ class FullImpedanceController(BaseController):
         acc_des = np.zeros(self.sim_model.nv)
         acc_des[self.sim_qvel_idx] = impedance_acc_des
         self.sim_data.qacc[:] = acc_des
-        mujoco.functions.mj_inverse(self.model, self.sim_data)
+        mujoco.mj_inverse(self.model, self.sim_data)
         id_torque = self.sim_data.qfrc_inverse[self.sim_actuators_idx].copy()
         
         print("GET TORQUE: "+str(id_torque))
