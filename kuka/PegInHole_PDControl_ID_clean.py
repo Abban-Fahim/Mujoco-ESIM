@@ -5,31 +5,22 @@ import time
 import numpy as np
 from controllers.pd_controller_copy import PDController
 from controllers.inverse_dynamics_controller_copy import InverseDynamicsController
+from utils.read_cfg import get_mjc_xml, get_jposes, get_err_lim
 
-#xml_path = 'gym-kuka-mujoco/gym_kuka_mujoco/envs/assets/full_peg_insertion_experiment.xml'
-#xml_path = 'kuka/envs/assets/full_kuka_no_collision.xml'
-xml_path = 'kuka/envs/assets/full_kuka_INRC3.xml'
-model = mujoco.MjModel.from_xml_path(xml_path)
+model = mujoco.MjModel.from_xml_path(get_mjc_xml())
 data = mujoco.MjData(model)
-
-print(data.qpos)
-
 viewer = mujoco_viewer.MujocoViewer(model, data)
 controller = InverseDynamicsController(model, data, kp_id=100, model_path="full_kuka_INRC3.xml")
 
-TEST = np.array(np.deg2rad([-10,0,0,0,0,0,0]))
-HOME = np.array(np.deg2rad([-90,0,0,90,0,-90,0]))
-ROBOT_HOME = np.array(np.deg2rad([-90,0,0,90,0,-90,0]))
-APPROACH = np.array(np.deg2rad([-96.20, -40.67, 0, 76.07, 0, -63.29, -6.28]))
-INSERTION = np.array(np.deg2rad([-94.99, -41.79, 0, 77.17, 0,-61.03, -5.01]))
+print(data.qpos)
 
-poses = {"INSERTION":INSERTION, "APPROACH":APPROACH, "ROBOT_HOME":ROBOT_HOME,  "HOME":HOME}
+poses = get_jposes()
 
-viapoints = ["INSERTION", "APPROACH", "ROBOT_HOME", "HOME"]
+viapoints = ["INSERTION_Q", "APPROACH_Q", "ROBOT_HOME_Q",  "HOME_Q"]
 viapoint = viapoints.pop()
 
 t = data.time
-err_limit = 0.1
+err_limit = get_err_lim()
 
 while (True):
     viewer.render()

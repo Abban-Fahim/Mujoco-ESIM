@@ -1,14 +1,13 @@
 import mujoco
 import mujoco_viewer
-import os
 import time
 import numpy as np
+import yaml
+from yaml.loader import SafeLoader
+import sys,os
+from utils.read_cfg import get_mjc_xml
 
-## mj_path = mujoco.utils.discover_mujoco()
-#xml_path = 'gym-kuka-mujoco/gym_kuka_mujoco/envs/assets/full_peg_insertion_experiment.xml'
-#xml_path = 'kuka/envs/assets/full_kuka_no_collision.xml'
-xml_path = 'kuka/envs/assets/full_kuka_INRC3.xml'
-model = mujoco.MjModel.from_xml_path(xml_path)
+model = mujoco.MjModel.from_xml_path(get_mjc_xml())
 data = mujoco.MjData(model)
 viewer = mujoco_viewer.MujocoViewer(model, data)
 
