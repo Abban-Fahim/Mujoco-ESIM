@@ -3,8 +3,7 @@ import mujoco_viewer
 import os
 import time
 import numpy as np
-from controllers.pd_controller_copy import PDController
-from controllers.inverse_dynamics_controller_copy import InverseDynamicsController
+from controllers.pd_controller_copy_clean import PDController
 from utils.read_cfg import get_mjc_xml, get_jposes, get_err_lim
 
 model = mujoco.MjModel.from_xml_path(get_mjc_xml())
