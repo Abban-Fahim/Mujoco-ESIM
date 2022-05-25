@@ -29,9 +29,13 @@ def get_cposes():
 
     return cposes
 
-def get_err_lim():
+def get_jerr_lim():
     cfg = read_cfg()
-    return cfg["err_limit"]
+    return cfg["jerr_limit"]
+
+def get_cerr_lim():
+    cfg = read_cfg()
+    return cfg["cerr_limit"]
 
 def get_mjc_xml():
     cfg = read_cfg()

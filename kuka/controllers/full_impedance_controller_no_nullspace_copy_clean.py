@@ -12,7 +12,7 @@ from utils.quaternion import identity_quat, subQuat, quatAdd, mat2Quat
 from utils.kinematics import forwardKinSite, forwardKinJacobianSite
 from .base_controller import BaseController
 #from . import register_controller
-from utils.mujoco_utils import get_qpos_indices, get_qvel_indices, get_actuator_indices, get_joint_indices, kuka_subtree_mass
+from utils.mujoco_utils import get_qpos_indices, get_qvel_indices, get_actuator_indices, get_joint_indices 
 
 
 class FullImpedanceController(BaseController):
@@ -22,6 +22,7 @@ class FullImpedanceController(BaseController):
 
     def __init__(self,
                  sim_model, sim_data,
+                 ## sim,
                  pos_scale=1.0,
                  rot_scale=1.0,
                  pos_limit=1.0,
@@ -39,8 +40,6 @@ class FullImpedanceController(BaseController):
         super(FullImpedanceController, self).__init__(sim_model, sim_data)
 
         mujoco.mj_forward(sim_model, sim_data)
-
-        # self.init_indices(controlled_joints)
 
         # Set the zero position and quaternion of the action space.
         if nominal_pos is None:
@@ -67,26 +66,24 @@ class FullImpedanceController(BaseController):
         self.scale[3:6] *= rot_scale
 
         self.site_name = site_name
-        self.pos_set = None
-        self.quat_set = None
+        self.pos_set = self.nominal_pos.copy()
+        self.quat_set = self.nominal_quat.copy()
 
-        # Default stiffness and damping in cartesian space
+        # Default stiffness and damping.
         if stiffness is None:
-            # self.stiffness = np.array([10000.0, 10000.0, 10000.0, 10000.3, 10000.3, 10000.3])
+            #self.stiffness = np.array([10000.0, 10000.0, 10000.0, 10000.3, 10000.3, 10000.3])
             self.stiffness = np.array([300.0, 300.0, 300.0, 200.0, 200.0, 200.0])
-            # self.stiffness = np.array([10.0, 10.0, 10.0, 10.0, 10.0, 10.0])
+            #self.stiffness = np.array([10.0, 10.0, 10.0, 10.0, 10.0, 10.0])
         else:
             self.stiffness = np.ones(6)*stiffness
 
         if damping=='auto':
-            self.damping = 2 * np.sqrt(self.stiffness)
-
+            self.damping = 2*np.sqrt(self.stiffness)
         else:
             self.damping = 2*np.sqrt(self.stiffness)*damping
 
         self.null_space_damping = null_space_damping
         self.null_space_stiffness = null_space_stiffness
-
 
         self.init_indices(controlled_joints)
 
@@ -99,21 +96,24 @@ class FullImpedanceController(BaseController):
         dx = action[0:3].astype(np.float64)
         dr = action[3:6].astype(np.float64)
 
-        self.pos_set = dx
-        self.quat_set = quatAdd(np.array([1., 0., 0., 0.]), dr)
+        self.pos_set = self.nominal_pos + dx
+        self.quat_set = quatAdd(self.nominal_quat, dr)
+        
+        print("POS SET: "+str(self.pos_set))
+        print("QUAT SET: "+str(self.quat_set))
 
     def get_torque(self):
         '''
         Update the impedance control setpoint and compute the torque.
         '''
-        projection_matrix = self.null_space_proj_m()
-        self.sim_data.qacc = self.impedance_controller() + projection_matrix @ self.null_space_controller()
+        self.sim_data.qacc = self.impedance_controller()
 
         mujoco.mj_inverse(self.sim_model, self.sim_data)
         id_torque = self.sim_data.qfrc_inverse[self.sim_actuators_idx].copy()
         
-        return id_torque
+        print("GET TORQUE: "+str(id_torque))
 
+        return id_torque
 
     def pose_error(self):
         # Compute the pose difference.
@@ -189,4 +189,3 @@ class FullImpedanceController(BaseController):
             self.sim_qvel_idx = range(self.sim_model.nv)
             self.sim_actuators_idx = range(self.sim_model.nu)
             self.sim_joint_idx = range(self.sim_model.nu)
-

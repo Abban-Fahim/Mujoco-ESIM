@@ -3,9 +3,8 @@ import mujoco_viewer
 import os
 import time
 import numpy as np
-#from controllers.pd_controller_copy import PDController
-from controllers.full_impedance_controller_copy import FullImpedanceController
-from utils.read_cfg import get_mjc_xml, get_jposes, get_cposes, get_err_lim
+from controllers.full_impedance_controller_copy_clean import FullImpedanceController
+from utils.read_cfg import get_mjc_xml, get_jposes, get_cposes, get_cerr_lim
 
 from utils.kinematics import current_ee_position
 
@@ -18,7 +17,7 @@ viewer = mujoco_viewer.MujocoViewer(model, data)
 controller = FullImpedanceController(model, data, model_path="full_kuka_INRC3.xml") #TODO model_path should be reletive to root dir
 
 
-#TODO should be inside the controller
+
 # init first position
 jposes = get_jposes()
 data.qpos = jposes["HOME_Q"]
@@ -30,7 +29,7 @@ viapoint = viapoints.pop()
 
 
 t = data.time
-err_limit = get_err_lim()
+err_limit = get_cerr_lim()
 
 while (True):
     viewer.render()

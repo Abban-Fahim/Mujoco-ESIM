@@ -4,8 +4,8 @@ import os
 import time
 import numpy as np
 #from controllers.pd_controller_copy import PDController
-from controllers.full_impedance_controller_no_nullspace_copy import FullImpedanceController
-from utils.read_cfg import get_mjc_xml, get_jposes, get_cposes, get_err_lim
+from controllers.full_impedance_controller_no_nullspace_copy_clean import FullImpedanceController
+from utils.read_cfg import get_mjc_xml, get_jposes, get_cposes, get_cerr_lim
 
 from utils.kinematics import current_ee_position
 
@@ -30,7 +30,7 @@ viapoint = viapoints.pop()
 
 
 t = data.time
-err_limit = 0.1
+err_limit = get_cerr_lim()
 
 while (True):
     viewer.render()
@@ -38,6 +38,8 @@ while (True):
     # viapoint change when the last viapoint is reached
     viapoint_position = poses[viapoint][:3]
     err = np.linalg.norm(viapoint_position - current_ee_position(model, data))
+    # err = np.linalg.norm(viapoint_position - controller.pose_error()[:3])
+
     if err_limit > err  and viapoints:
         viapoint = viapoints.pop()
 

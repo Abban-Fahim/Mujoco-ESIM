@@ -4,7 +4,7 @@ import os
 import time
 import numpy as np
 from controllers.pd_controller_copy_clean import PDController
-from utils.read_cfg import get_mjc_xml, get_jposes, get_err_lim
+from utils.read_cfg import get_mjc_xml, get_jposes, get_jerr_lim
 
 model = mujoco.MjModel.from_xml_path(get_mjc_xml())
 data = mujoco.MjData(model)
@@ -20,7 +20,7 @@ viapoint = viapoints.pop()
 
 
 t = data.time
-err_limit = get_err_lim()
+err_limit = get_jerr_lim()
 
 while (True):
     viewer.render()

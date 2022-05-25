@@ -37,7 +37,7 @@ class PDController(Joint_controller):
                     set_velocity,
                     keep_finite)
         
-
+        #TODO is it needed? or there is another way to reuse self.model
         if gravity_comp_model_path is not None:
             self.gravity_comp = True
             kuka_asset_dir="kuka"

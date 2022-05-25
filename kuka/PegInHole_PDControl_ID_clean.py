@@ -4,7 +4,7 @@ import os
 import time
 import numpy as np
 from controllers.inverse_dynamics_controller_copy_clean import InverseDynamicsController
-from utils.read_cfg import get_mjc_xml, get_jposes, get_err_lim
+from utils.read_cfg import get_mjc_xml, get_jposes, get_jerr_lim
 
 model = mujoco.MjModel.from_xml_path(get_mjc_xml())
 data = mujoco.MjData(model)
@@ -19,7 +19,7 @@ viapoints = ["INSERTION_Q", "APPROACH_Q", "ROBOT_HOME_Q",  "HOME_Q"]
 viapoint = viapoints.pop()
 
 t = data.time
-err_limit = get_err_lim()
+err_limit = get_jerr_lim()
 
 while (True):
     viewer.render()
