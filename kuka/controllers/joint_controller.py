@@ -80,3 +80,9 @@ class Joint_controller(BaseController):
 
         else:
             self.kd = kd
+
+    def joint_error(self):
+        return self.sim_qpos_set - self.sim_data.qpos[self.sim_qpos_idx]
+
+    def joint_vel_error(self):
+        return self.sim_qvel_set - self.sim_data.qvel[self.sim_qvel_idx]

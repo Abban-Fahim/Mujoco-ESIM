@@ -72,10 +72,7 @@ class PDController(Joint_controller):
         Computes the torques from the setpoints and the current state.
         '''
 
-        torque = self.kp * (
-             self.sim_qpos_set - self.sim_data.qpos[self.sim_qpos_idx]
-         ) + self.kd * (
-             self.sim_qvel_set - self.sim_data.qvel[self.sim_qvel_idx])
+        torque = self.kp * self.joint_error() + self.kd * self.joint_vel_error()
 
         # Add gravity compensation if necessary
         if self.gravity_comp:

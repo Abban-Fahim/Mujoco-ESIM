@@ -25,7 +25,7 @@ while (True):
     viewer.render()
 
     # viapoint change when the last viapoint is reached
-    err = np.linalg.norm(poses[viapoint] - data.qpos)
+    err = np.linalg.norm(controller.joint_error())
     if err_limit > err  and viapoints:
         viapoint = viapoints.pop()
 
