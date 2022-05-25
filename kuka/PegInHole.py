@@ -3,27 +3,14 @@ import mujoco_viewer
 import os
 import time
 import numpy as np
+from utils.read_cfg import get_mjc_xml
 
-
-
-## mj_path = mujoco.utils.discover_mujoco()
-#xml_path = 'gym-kuka-mujoco/gym_kuka_mujoco/envs/assets/full_peg_insertion_experiment.xml'
-#xml_path = 'kuka/envs/assets/full_kuka_no_collision.xml'
-xml_path = 'kuka/envs/assets/full_kuka_INRC3.xml'
-model = mujoco.MjModel.from_xml_path(xml_path)
-## sim = mujoco.MjSim(model)
+model = mujoco.MjModel.from_xml_path(get_mjc_xml())
 data = mujoco.MjData(model)
+viewer = mujoco_viewer.MujocoViewer(model, data)
 
-# print(sim.data.qpos)
 print(data.qpos)
-# [0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0.]
 
-# ctx = mujoco.GLContext(600, 400)
-# ctx.make_current()
-# window = ctx._context
-
-
-## viewer = mujoco.MjViewer(data)
 viewer = mujoco_viewer.MujocoViewer(model, data)
 
 t_0=time.time()
@@ -40,6 +27,5 @@ while (True):
     data.ctrl[:] = np.clip(torque, -300, 300)
     #self.sim.data.qfrc_applied[:] = self._get_random_applied_force()
     mujoco.mj_step(model, data)
-    ## sim.step()
-    #sim.step()
+
     print(data.qpos)
