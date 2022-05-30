@@ -1,3 +1,0 @@
-[console_scripts]
-mujoco_events = mujoco_sim.events_publisher:main
-
