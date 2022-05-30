@@ -5,3 +5,5 @@
 MUJOCO_LOG.TXT
 .vscode
 MJDATA.TXT
+__pycache__
+!ros2_ws

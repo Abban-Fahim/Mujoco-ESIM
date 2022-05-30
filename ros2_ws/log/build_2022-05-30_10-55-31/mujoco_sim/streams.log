@@ -1,0 +1,37 @@
+[1.275s] Invoking command in '/home/palinauskas/Documents/mujoco-eleanor/ros2_ws/src/mujoco_sim': PYTHONPATH=/home/palinauskas/Documents/mujoco-eleanor/ros2_ws/install/mujoco_sim/lib/python3.8/site-packages:${PYTHONPATH} /usr/bin/python3 setup.py egg_info --egg-base ../../build/mujoco_sim build --build-base /home/palinauskas/Documents/mujoco-eleanor/ros2_ws/build/mujoco_sim/build install --prefix /home/palinauskas/Documents/mujoco-eleanor/ros2_ws/install/mujoco_sim --record /home/palinauskas/Documents/mujoco-eleanor/ros2_ws/build/mujoco_sim/install.log --single-version-externally-managed
+[1.678s] running egg_info
+[1.679s] creating ../../build/mujoco_sim/mujoco_sim.egg-info
+[1.692s] writing ../../build/mujoco_sim/mujoco_sim.egg-info/PKG-INFO
+[1.692s] writing dependency_links to ../../build/mujoco_sim/mujoco_sim.egg-info/dependency_links.txt
+[1.692s] writing entry points to ../../build/mujoco_sim/mujoco_sim.egg-info/entry_points.txt
+[1.692s] writing requirements to ../../build/mujoco_sim/mujoco_sim.egg-info/requires.txt
+[1.693s] writing top-level names to ../../build/mujoco_sim/mujoco_sim.egg-info/top_level.txt
+[1.693s] writing manifest file '../../build/mujoco_sim/mujoco_sim.egg-info/SOURCES.txt'
+[1.730s] reading manifest file '../../build/mujoco_sim/mujoco_sim.egg-info/SOURCES.txt'
+[1.731s] writing manifest file '../../build/mujoco_sim/mujoco_sim.egg-info/SOURCES.txt'
+[1.731s] running build
+[1.732s] running build_py
+[1.732s] creating /home/palinauskas/Documents/mujoco-eleanor/ros2_ws/build/mujoco_sim/build
+[1.732s] creating /home/palinauskas/Documents/mujoco-eleanor/ros2_ws/build/mujoco_sim/build/lib
+[1.732s] creating /home/palinauskas/Documents/mujoco-eleanor/ros2_ws/build/mujoco_sim/build/lib/mujoco_sim
+[1.732s] copying mujoco_sim/__init__.py -> /home/palinauskas/Documents/mujoco-eleanor/ros2_ws/build/mujoco_sim/build/lib/mujoco_sim
+[1.732s] copying mujoco_sim/events_publisher.py -> /home/palinauskas/Documents/mujoco-eleanor/ros2_ws/build/mujoco_sim/build/lib/mujoco_sim
+[1.733s] running install
+[1.734s] running install_lib
+[1.735s] creating /home/palinauskas/Documents/mujoco-eleanor/ros2_ws/install/mujoco_sim/lib/python3.8/site-packages/mujoco_sim
+[1.735s] copying /home/palinauskas/Documents/mujoco-eleanor/ros2_ws/build/mujoco_sim/build/lib/mujoco_sim/__init__.py -> /home/palinauskas/Documents/mujoco-eleanor/ros2_ws/install/mujoco_sim/lib/python3.8/site-packages/mujoco_sim
+[1.735s] copying /home/palinauskas/Documents/mujoco-eleanor/ros2_ws/build/mujoco_sim/build/lib/mujoco_sim/events_publisher.py -> /home/palinauskas/Documents/mujoco-eleanor/ros2_ws/install/mujoco_sim/lib/python3.8/site-packages/mujoco_sim
+[1.736s] byte-compiling /home/palinauskas/Documents/mujoco-eleanor/ros2_ws/install/mujoco_sim/lib/python3.8/site-packages/mujoco_sim/__init__.py to __init__.cpython-38.pyc
+[1.736s] byte-compiling /home/palinauskas/Documents/mujoco-eleanor/ros2_ws/install/mujoco_sim/lib/python3.8/site-packages/mujoco_sim/events_publisher.py to events_publisher.cpython-38.pyc
+[1.737s] running install_data
+[1.738s] creating /home/palinauskas/Documents/mujoco-eleanor/ros2_ws/install/mujoco_sim/share/ament_index
+[1.738s] creating /home/palinauskas/Documents/mujoco-eleanor/ros2_ws/install/mujoco_sim/share/ament_index/resource_index
+[1.738s] creating /home/palinauskas/Documents/mujoco-eleanor/ros2_ws/install/mujoco_sim/share/ament_index/resource_index/packages
+[1.739s] copying resource/mujoco_sim -> /home/palinauskas/Documents/mujoco-eleanor/ros2_ws/install/mujoco_sim/share/ament_index/resource_index/packages
+[1.739s] copying package.xml -> /home/palinauskas/Documents/mujoco-eleanor/ros2_ws/install/mujoco_sim/share/mujoco_sim
+[1.739s] running install_egg_info
+[1.741s] Copying ../../build/mujoco_sim/mujoco_sim.egg-info to /home/palinauskas/Documents/mujoco-eleanor/ros2_ws/install/mujoco_sim/lib/python3.8/site-packages/mujoco_sim-0.0.0-py3.8.egg-info
+[1.743s] running install_scripts
+[1.762s] Installing talker script to /home/palinauskas/Documents/mujoco-eleanor/ros2_ws/install/mujoco_sim/lib/mujoco_sim
+[1.762s] writing list of installed files to '/home/palinauskas/Documents/mujoco-eleanor/ros2_ws/build/mujoco_sim/install.log'
+[1.789s] Invoked command in '/home/palinauskas/Documents/mujoco-eleanor/ros2_ws/src/mujoco_sim' returned '0': PYTHONPATH=/home/palinauskas/Documents/mujoco-eleanor/ros2_ws/install/mujoco_sim/lib/python3.8/site-packages:${PYTHONPATH} /usr/bin/python3 setup.py egg_info --egg-base ../../build/mujoco_sim build --build-base /home/palinauskas/Documents/mujoco-eleanor/ros2_ws/build/mujoco_sim/build install --prefix /home/palinauskas/Documents/mujoco-eleanor/ros2_ws/install/mujoco_sim --record /home/palinauskas/Documents/mujoco-eleanor/ros2_ws/build/mujoco_sim/install.log --single-version-externally-managed
