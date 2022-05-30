@@ -1,7 +1,10 @@
+from ast import Mult
 import rclpy
 from rclpy.node import Node
 
 from std_msgs.msg import String
+
+from .simple_mujoco_env import EsimMujoco
 
 
 class EventsPublisher(Node):
@@ -13,9 +16,14 @@ class EventsPublisher(Node):
         self.timer = self.create_timer(timer_period, self.timer_callback)
         self.i = 0
 
+        self.mj = EsimMujoco()
+
     def timer_callback(self):
         msg = String()
-        msg.data = 'Hello World: %d' % self.i
+
+        events = self.mj.loop()
+
+        msg.data = 'got events'
         self.publisher_.publish(msg)
         self.get_logger().info('Publishing: "%s"' % msg.data)
         self.i += 1

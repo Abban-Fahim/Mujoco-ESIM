@@ -15,10 +15,10 @@ sim_steps = 10
 test_camera_on = False
 camera_id = 0
 overlay_on = True
-save_path = "/home/palinauskas/Documents/mujoco-eleanor/img"
-save_path_original = save_path + "/original/seq0/imgs"
-save_path_subtracted = save_path + "/subtracted/seq0/imgs"
-save_path_events = save_path + "/events_mujoco/seq0"
+# save_path = "/home/palinauskas/Documents/mujoco-eleanor/img"
+# save_path_original = save_path + "/original/seq0/imgs"
+# save_path_subtracted = save_path + "/subtracted/seq0/imgs"
+# save_path_events = save_path + "/events_mujoco/seq0"
 xml_path = 'kuka/envs/assets/full_kuka_INRC3_mounted_camera.xml'
 
 
@@ -41,7 +41,7 @@ while (step < sim_steps) or test_camera_on:
         timestamp = data.time        
         print(timestamp)
         
-        viewer.capture_event(camera_id, timestamp, path=save_path_events)
+        viewer.capture_event(camera_id, timestamp, save_it=False)
     else:
         viewer.render(overlay_on=overlay_on)
     

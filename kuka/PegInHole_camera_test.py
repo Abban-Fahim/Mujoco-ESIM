@@ -43,7 +43,7 @@ while (step < sim_steps) or test_camera_on:
 
         timestamp = data.time        
         print(timestamp)
-        # viewer.capture_event(camera_id, timestamp, path=save_path_events)
+        # viewer.capture_event(camera_id, timestamp, save_it=True, path=save_path_events)
         viewer.capture_event_with_upsampling(camera_id, timestamp, path=save_path_events)
     else:
         viewer.render(overlay_on=overlay_on)
