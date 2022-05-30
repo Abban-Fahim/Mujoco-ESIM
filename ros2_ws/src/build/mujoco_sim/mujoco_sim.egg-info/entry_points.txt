@@ -1,3 +1,0 @@
-[console_scripts]
-talker = mujoco_sim.events_publisher:main
-

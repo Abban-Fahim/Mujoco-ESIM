@@ -1,3 +1,0 @@
-[0.000000] (-) TimerEvent: {}
-[0.000264] (-) JobUnselected: {'identifier': 'mujoco_sim'}
-[0.000670] (-) EventReactorShutdown: {}
