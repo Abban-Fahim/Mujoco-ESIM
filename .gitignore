@@ -6,3 +6,6 @@ MUJOCO_LOG.TXT
 .vscode
 MJDATA.TXT
 __pycache__
+ros2_ws/build/
+ros2_ws/install/
+ros2_ws/log/
