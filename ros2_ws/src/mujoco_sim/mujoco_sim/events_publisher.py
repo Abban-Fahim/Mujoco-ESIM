@@ -24,18 +24,19 @@ class EventsPublisher(Node):
             self.publisher_.publish(msg)
 
     def fill_msg_with_events(self, msg, events):
-        
+        log_start = "Publishing: "
+        log_amount = "amount of events-"
         if events is not None:
-            self.get_logger().info(f'Publishing: len {events["x"].shape[0]}')
+            log_input = f'{events["x"].shape[0]}'
+            self.get_logger().info(log_start + log_amount + log_input)
             msg.x = self.cast2msg(events["x"])
             msg.y = self.cast2msg(events["y"])
             msg.t = self.cast2msg(events["t"])
             msg.p = self.cast2msg(events["p"])
-
-            
             return True
         else:
-            self.get_logger().info(f'Publishing: len 0')
+            log_input = f'{0}'
+            self.get_logger().info(log_start + log_amount + log_input)
             return False
 
     def cast2msg(self, tensor):

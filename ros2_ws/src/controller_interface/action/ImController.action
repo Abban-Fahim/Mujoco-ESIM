@@ -1,0 +1,9 @@
+# Defines an action msg for the impedance controller
+# goal position
+string position_name
+---
+# position error after reaching the goal
+float32 feedback_error
+---
+# position error feedback
+float32 error
