@@ -20,6 +20,7 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
+            'simple_mujoco_events = mujoco_sim.simple_events_publisher:main',
             'mujoco_events = mujoco_sim.events_publisher:main',
         ],
     },

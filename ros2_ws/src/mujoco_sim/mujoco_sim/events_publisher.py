@@ -2,31 +2,44 @@ from ast import Mult
 import rclpy
 from rclpy.node import Node
 
-from std_msgs.msg import String
+from event_data_interface.msg import Events
 
-from .simple_mujoco_env import EsimMujoco
+from .simple_mujoco_env import EsimMujoco # runs on 2.5 Hz rate
 
 
 class EventsPublisher(Node):
 
     def __init__(self):
         super().__init__('events_publisher')
-        self.publisher_ = self.create_publisher(String, 'mujoco_events', 10)
-        timer_period = 0.5  # seconds
+        self.publisher_ = self.create_publisher(Events, 'mujoco_events', 10)
+        timer_period = 1.0/60  # seconds
         self.timer = self.create_timer(timer_period, self.timer_callback)
-        self.i = 0
 
         self.mj = EsimMujoco()
 
     def timer_callback(self):
-        msg = String()
-
+        msg = Events()
         events = self.mj.loop()
+        if self.fill_msg_with_events(msg, events):
+            self.publisher_.publish(msg)
 
-        msg.data = 'got events'
-        self.publisher_.publish(msg)
-        self.get_logger().info('Publishing: "%s"' % msg.data)
-        self.i += 1
+    def fill_msg_with_events(self, msg, events):
+        
+        if events is not None:
+            self.get_logger().info(f'Publishing: len {events["x"].shape[0]}')
+            msg.x = self.cast2msg(events["x"])
+            msg.y = self.cast2msg(events["y"])
+            msg.t = self.cast2msg(events["t"])
+            msg.p = self.cast2msg(events["p"])
+
+            
+            return True
+        else:
+            self.get_logger().info(f'Publishing: len 0')
+            return False
+
+    def cast2msg(self, tensor):
+        return tensor.tolist()
 
 
 def main(args=None):

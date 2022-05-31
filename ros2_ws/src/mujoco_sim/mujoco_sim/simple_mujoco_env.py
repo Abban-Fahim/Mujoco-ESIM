@@ -1,14 +1,18 @@
 import mujoco
 import mujoco_viewer
-import os
+import os, sys
 import time
 import numpy as np
 import itertools
 
+sys.path.append(os.path.dirname(__file__))
+
 class EsimMujoco:
 
     def __init__(self) -> None:
-        pass
+        
+        # dirname = os.path.dirname(__file__)
+        # filename = os.path.join(dirname, 'resource/full_kuka_INRC3_mounted_camera.xml')
 
         # parameter
         self.cp = 0.5
@@ -25,6 +29,7 @@ class EsimMujoco:
         # save_path_subtracted = save_path + "/subtracted/seq0/imgs"
         # save_path_events = save_path + "/events_mujoco/seq0"
         self.xml_path = '/home/palinauskas/Documents/mujoco-eleanor/ros2_ws/src/mujoco_sim/resource/full_kuka_INRC3_mounted_camera.xml'
+        # self.xml_path = filename
 
 
         self.model = mujoco.MjModel.from_xml_path(self.xml_path)
