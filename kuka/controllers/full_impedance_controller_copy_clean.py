@@ -120,7 +120,6 @@ class FullImpedanceController(BaseController):
         pos, mat = forwardKinSite(self.sim_model, self.sim_data, self.site_name, recompute=False)
         quat = mat2Quat(mat)
         
-        print("############22")
         dx = self.pos_set - pos
         dr = subQuat(self.quat_set, quat) # Original
         dframe = np.concatenate((dx,dr))
