@@ -35,15 +35,14 @@ err_limit = get_cerr_lim()
 while (True):
     viewer.render()
 
+    controller.set_action(poses[viapoint])
+
     # viapoint change when the last viapoint is reached
     viapoint_position = poses[viapoint][:3]
-    err = np.linalg.norm(viapoint_position - current_ee_position(model, data))
-    # err = np.linalg.norm(viapoint_position - controller.pose_error()[:3])
-
+    err = np.linalg.norm(controller.pose_error()[:3])
     if err_limit > err  and viapoints:
         viapoint = viapoints.pop()
 
-    controller.set_action(poses[viapoint])
     torque = controller.get_torque()
     data.ctrl[:] = np.clip(torque, -300, 300)
     #self.sim.data.qfrc_applied[:] = self._get_random_applied_force()

@@ -34,9 +34,11 @@ err_limit = get_cerr_lim()
 while (True):
     viewer.render()
 
+    controller.set_action(poses[viapoint])
+
     # viapoint change when the last viapoint is reached
     viapoint_position = poses[viapoint][:3]
-    err = np.linalg.norm(viapoint_position - current_ee_position(model, data))
+    err = np.linalg.norm(controller.pose_error()[:3])
     if err_limit > err  and viapoints:
         viapoint = viapoints.pop()
 
