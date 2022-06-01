@@ -49,15 +49,12 @@ class ImControllerActionServer(Node):
 
         feedback_msg = ImController.Feedback()
         feedback_msg.feedback_error = self.mj.position_err()
-        # print(feedback_msg.feedback_error)
 
         self.get_logger().info(f'Feedback error to {des_pose_name}: {feedback_msg.feedback_error}')
         goal_handle.publish_feedback(feedback_msg)
 
         result = ImController.Result()
         result.error = feedback_msg.feedback_error
-
-        # goal_handle.succeed()
 
         if self.mj.is_position_reached():
             goal_handle.succeed()
