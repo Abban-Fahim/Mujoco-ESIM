@@ -22,6 +22,8 @@ setup(
         'console_scripts': [
             'simple_mujoco_events = mujoco_sim.simple_events_publisher:main',
             'mujoco_events = mujoco_sim.events_publisher:main',
+            'im_mujoco = mujoco_sim.mujoco_action_server:main',
+            'pose_parameters = mujoco_sim.pose_parameters:main'
         ],
     },
 )
