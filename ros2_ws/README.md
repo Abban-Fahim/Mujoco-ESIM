@@ -18,4 +18,13 @@ Only specific packages:
 
 - `source /opt/ros/galactic/setup.bash`
 - `. install/setup.bash `
-- `ros2 run mujoco_sim mujoco_events`
+- `ros2 run mujoco_sim im_mujoco `
+
+## Sending goal poses to the action server
+
+Possible goal poses are are defined as ROS2 parameters and can be view with:
+- `ros2 param list`
+
+Sending a request to the action server example
+- `ros2 action send_goal --feedback  /im_controller controller_interface/action/ImController "{des_pose_name: "LOOK"}"`
+

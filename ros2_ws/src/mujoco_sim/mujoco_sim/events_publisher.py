@@ -4,7 +4,7 @@ from rclpy.node import Node
 
 from event_data_interface.msg import Events
 
-from .simple_mujoco_env import EsimMujoco # runs on 2.5 Hz rate
+from .mujoco_env.simple_mujoco_env import EsimMujoco
 
 
 class EventsPublisher(Node):

@@ -4,10 +4,10 @@ import numpy as np
 from gym import spaces
 import mujoco
 
-from .quaternion import identity_quat, subQuat, quatAdd, mat2Quat
-from .kinematics import forwardKinSite, forwardKinJacobianSite
+from ..utils.quaternion import identity_quat, subQuat, quatAdd, mat2Quat
+from ..utils.kinematics import forwardKinSite, forwardKinJacobianSite
 from .base_controller import BaseController
-from .mujoco_utils import get_qpos_indices, get_qvel_indices, get_actuator_indices, get_joint_indices
+from ..utils.mujoco_utils import get_qpos_indices, get_qvel_indices, get_actuator_indices, get_joint_indices
 
 
 class FullImpedanceController(BaseController):

@@ -5,8 +5,6 @@ import time
 import numpy as np
 import itertools
 
-sys.path.append(os.path.dirname(__file__))
-
 class EsimMujoco:
 
     def __init__(self) -> None:
