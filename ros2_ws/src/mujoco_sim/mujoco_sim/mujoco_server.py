@@ -31,13 +31,7 @@ class ImControllerActionServer(Node):
         err_limit = self.get_parameter('cerr_limit').get_parameter_value().double_value
         des_pose = np.array(self.get_parameter('HOME').get_parameter_value().double_array_value)
 
-        # self.get_logger().info(f'{init_pose} ')
-        # self.get_logger().info( f'{err_limit}')
-        # self.get_logger().info( f'{des_pose_name}')
-
         self.mj = EsimMujoco(init_pose, err_limit, des_pose)
-        # self.mj = EsimMujoco(get_jposes()['HOME_Q'], get_cerr_lim(), get_cposes()['HOME'])
-
 
     def execute_callback(self, goal_handle):
         self.get_logger().info('Executing goal...')
@@ -45,27 +39,28 @@ class ImControllerActionServer(Node):
         des_pose_name = goal_handle.request.des_pose_name
         des_pose = np.array(self.get_parameter(des_pose_name).get_parameter_value().double_array_value)
         self.mj.set_des_pose(des_pose)
-        time.sleep(1)
+        self.timer_callback()
 
         feedback_msg = ImController.Feedback()
-        feedback_msg.feedback_error = self.mj.position_err()
-
-        self.get_logger().info(f'Feedback error to {des_pose_name}: {feedback_msg.feedback_error}')
-        goal_handle.publish_feedback(feedback_msg)
-
         result = ImController.Result()
-        result.error = feedback_msg.feedback_error
+        while not self.mj.is_position_reached():
+            self.timer_callback()
 
-        if self.mj.is_position_reached():
-            goal_handle.succeed()
-        else:
-            goal_handle.execute()
+            feedback_msg.feedback_error = self.mj.position_err()
+
+            # self.get_logger().info(f'Feedback error to {des_pose_name}: {feedback_msg.feedback_error}')
+            goal_handle.publish_feedback(feedback_msg)
+
+            
+            result.error = feedback_msg.feedback_error
+
+
+        goal_handle.succeed()
 
         return result
 
     def init_params(self):
         self.poses_dic = get_cposes()
-        # print(self.poses_dic)
         for k, v in self.poses_dic.items():
             self.declare_parameter(k, v.tolist())
 
@@ -74,7 +69,6 @@ class ImControllerActionServer(Node):
             self.declare_parameter(k, v.tolist())
         
         self.declare_parameter("cerr_limit", get_cerr_lim())
-        # time.sleep(5)
 
     def timer_callback(self):
         msg = Events()
@@ -87,7 +81,7 @@ class ImControllerActionServer(Node):
         log_amount = "amount of events-"
         if events is not None:
             log_input = f'{events["x"].shape[0]}'
-            # self.get_logger().info(log_start + log_amount + log_input) 
+            self.get_logger().info(log_start + log_amount + log_input) 
             msg.x = self.cast2msg(events["x"])
             msg.y = self.cast2msg(events["y"])
             msg.t = self.cast2msg(events["t"])
@@ -95,7 +89,7 @@ class ImControllerActionServer(Node):
             return True
         else:
             log_input = f'{0}'
-            # self.get_logger().info(log_start + log_amount + log_input)
+            self.get_logger().info(log_start + log_amount + log_input)
             return False
 
     def cast2msg(self, tensor):

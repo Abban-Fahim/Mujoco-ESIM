@@ -56,8 +56,6 @@ class EsimMujoco:
         self.viewer.render(overlay_on=False)
 
         timestamp = self.data.time        
-        # print(timestamp)
-        
         out = self.viewer.capture_event(self.camera_id, timestamp, save_it=False)
         if out is not None:
             _, events = out
