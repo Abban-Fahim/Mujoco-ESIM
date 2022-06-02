@@ -17,6 +17,6 @@
   </export>
 
   <exec_depend>rclpy</exec_depend>
-  <exec_depend>event_data_interface</exec_depend>
+  <exec_depend>camera_event_data_interface</exec_depend>
   <exec_depend>controller_interface</exec_depend>
 </package>

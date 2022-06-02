@@ -2,7 +2,7 @@ from ast import Mult
 import rclpy
 from rclpy.node import Node
 
-from event_data_interface.msg import Events
+from camera_event_data_interface.msg import CameraEvents
 
 from .mujoco_env.simple_mujoco_env import EsimMujoco
 
@@ -11,7 +11,7 @@ class EventsPublisher(Node):
 
     def __init__(self):
         super().__init__('events_publisher')
-        self.publisher_ = self.create_publisher(Events, 'mujoco_events', 10)
+        self.publisher_ = self.create_publisher(CameraEvents, 'camera_events_topic', 10)
         timer_period = 1.0/60  # seconds
         self.timer = self.create_timer(timer_period, self.timer_callback)
 

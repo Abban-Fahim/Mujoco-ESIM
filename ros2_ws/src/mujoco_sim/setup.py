@@ -22,9 +22,8 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'simple_mujoco_events = mujoco_sim.simple_events_publisher:main',
-            'mujoco_events = mujoco_sim.events_publisher:main',
-            'im_mujoco = mujoco_sim.im_mujoco_server:main',
+            'camera_events_publisher = mujoco_sim.camera_events_publisher:main',
+            'impedance_controller_server = mujoco_sim.impedance_controller_server:main',
         ],
     },
 )

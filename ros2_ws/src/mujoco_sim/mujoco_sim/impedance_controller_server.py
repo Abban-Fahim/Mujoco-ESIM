@@ -2,8 +2,8 @@ import rclpy
 from rclpy.action import ActionServer
 from rclpy.node import Node
 
-from controller_interface.action import ImController
-from event_data_interface.msg import Events
+from controller_interface.action import DesiredPoseName
+from camera_event_data_interface.msg import CameraEvents
 from .mujoco_env.im_mujoco_env import EsimMujoco
 from .utils.read_cfg import get_cposes, get_jposes, get_cerr_lim
 
@@ -14,17 +14,17 @@ import time
 class ImControllerActionServer(Node):
 
     def __init__(self):
-        super().__init__('controller_action_server')
+        super().__init__('impedance_controller_server_node')
 
         # action server is created
         self._action_server = ActionServer(
             self,
-            ImController,
-            'im_controller',
+            DesiredPoseName,
+            'desired_pose_topic',
             self.execute_callback)
 
         # Publisher is created
-        self.publisher_ = self.create_publisher(Events, 'mujoco_events', 10)
+        self.publisher_ = self.create_publisher(CameraEvents, 'camera_events_topic', 10)
         timer_period = 1.0/60  # seconds
         self.timer = self.create_timer(timer_period, self.timer_callback)
 
@@ -53,8 +53,8 @@ class ImControllerActionServer(Node):
         self.timer_callback()
 
         # create action messages
-        feedback_msg = ImController.Feedback()
-        result_msg = ImController.Result()
+        feedback_msg = DesiredPoseName.Feedback()
+        result_msg = DesiredPoseName.Result()
 
         # run mj loop until the robot reaches the goal pose
         while not self.mj.is_position_reached():
@@ -86,7 +86,7 @@ class ImControllerActionServer(Node):
 
     def timer_callback(self):
         # publishes events to ROS2 topic
-        msg = Events()
+        msg = CameraEvents()
         events = self.mj.loop()
         if self.fill_msg_with_events(msg, events):
             self.publisher_.publish(msg)
