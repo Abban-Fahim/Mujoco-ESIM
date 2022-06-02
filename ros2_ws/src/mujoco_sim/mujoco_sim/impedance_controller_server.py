@@ -2,7 +2,7 @@ import rclpy
 from rclpy.action import ActionServer
 from rclpy.node import Node
 
-from controller_interface.action import DesiredPoseName, RondomSaccades
+from controller_interface.action import DesiredPoseName, Saccades
 from camera_event_data_interface.msg import CameraEvents
 from geometry_msgs.msg import TransformStamped
 from tf2_ros import TransformBroadcaster
@@ -29,9 +29,16 @@ class ImControllerActionServer(Node):
         # Saccades action server is created
         self._action_server = ActionServer(
             self,
-            RondomSaccades,
+            Saccades,
             'saccades_topic',
             self.saccades_callback)
+
+        # Random Saccades action server is created
+        self._action_server = ActionServer(
+            self,
+            Saccades,
+            'random_saccades_topic',
+            self.random_saccades_callback)
 
         # Camera events Publisher is created
         self.events_publisher = self.create_publisher(CameraEvents, 'camera_events_topic', 10)
@@ -106,15 +113,18 @@ class ImControllerActionServer(Node):
         duration = goal_handle.request.duration
 
         # create action messages
-        feedback_msg = RondomSaccades.Feedback()
-        result_msg = RondomSaccades.Result()
+        feedback_msg = Saccades.Feedback()
+        result_msg = Saccades.Result()
+
+        # save current pose
+        self.current_pos, self.current_quat = self.mj.controller.fk()
 
         t_0 = self.mj.data.time
         t = 0
         # run mj loop until the robot reaches the goal pose
         while t < duration:
             # set goal pose
-            self.mj.set_des_pose(self.mj.random_circular_pose(t))
+            self.mj.set_des_pose(self.mj.circular_pose(t, self.current_pos, self.current_quat))
 
             # run one mj loop and publish
             self.composed_callback()
@@ -127,7 +137,46 @@ class ImControllerActionServer(Node):
 
         # robot reached the goal pose 
         goal_handle.succeed()
-        result_msg.time_spent = count
+        result_msg.time_spent = duration
+
+        self.get_logger().info('Action finished!')
+
+        return result_msg
+
+    def random_saccades_callback(self, goal_handle):
+        self.get_logger().info('Executing goal...')
+
+        duration = goal_handle.request.duration
+
+        # create action messages
+        feedback_msg = Saccades.Feedback()
+        result_msg = Saccades.Result()
+
+        # save current pose
+        self.current_pos, self.current_quat = self.mj.controller.fk()
+
+        t_0 = self.mj.data.time
+        t = 0
+        # run mj loop until the robot reaches the goal pose
+        while t < duration:
+            # set goal pose
+            print(t % 0.05)
+            if t % 0.05 < 0.005:
+                print("##")
+                self.mj.set_des_pose(self.mj.random_circular_pose(t, self.current_pos, self.current_quat))
+
+            # run one mj loop and publish
+            self.composed_callback()
+
+            # publish feedback
+            feedback_msg.time_left = t_0 + duration - self.mj.data.time
+            goal_handle.publish_feedback(feedback_msg)
+
+            t = self.mj.data.time - t_0
+
+        # robot reached the goal pose 
+        goal_handle.succeed()
+        result_msg.time_spent = duration
 
         self.get_logger().info('Action finished!')
 

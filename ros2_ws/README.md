@@ -30,7 +30,10 @@ Sending a request to the DesiredPoseName action server example
 - `ros2 action send_goal --feedback /desired_pose_name_topic controller_interface/action/DesiredPoseName "{des_pose_name: "LOOK"}"`
 
 Sending a request to the Saccades action server example
-- `ros2 action send_goal --feedback /saccades_topic controller_interface/action/RondomSaccades "{duration: 100.0}"`
+- `ros2 action send_goal --feedback /saccades_topic controller_interface/action/Saccades "{duration: 100.0}"`
+
+Sending a request to the Random Saccades action server example
+- `ros2 action send_goal --feedback /random_saccades_topic controller_interface/action/Saccades "{duration: 100.0}"`
 
 ## ROS2 structure
 
