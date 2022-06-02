@@ -25,9 +25,12 @@ Only specific packages:
 Possible goal poses are are defined as ROS2 parameters and can be view with:
 - `ros2 param list`
 
-Sending a request to the action server example
-- `ros2 action send_goal /desired_pose_topic controller_interface/action/DesiredPoseName "{des_pose_name: "LOOK"}"
-`
+Sending a request to the DesiredPoseName action server example
+- `ros2 action send_goal /desired_pose_name_topic controller_interface/action/DesiredPoseName "{des_pose_name: "LOOK"}"`
+- `ros2 action send_goal --feedback /desired_pose_name_topic controller_interface/action/DesiredPoseName "{des_pose_name: "LOOK"}"`
+
+Sending a request to the Saccades action server example
+- `ros2 action send_goal --feedback /saccades_topic controller_interface/action/RondomSaccades "{duration: 100.0}"`
 
 ## ROS2 structure
 
@@ -44,7 +47,7 @@ impedance_controller_server_node:
 - Service Clients:
 
 - Action Servers: \
-    /desired_pose_topic: controller_interface/action/DesiredPoseName
+    /desired_pose_name_topic: controller_interface/action/DesiredPoseName
 
 - Action Clients:
 

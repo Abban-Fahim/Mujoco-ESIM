@@ -4,8 +4,9 @@ import os, sys
 import time
 import numpy as np
 import itertools
+from scipy.spatial.transform import Rotation as R
 
-from ..utils.quaternion import identity_quat, subQuat, quatAdd, mat2Quat, quat2Vel
+from ..utils.quaternion import identity_quat, subQuat, quatAdd, mat2Quat, quat2Vel, quat2Mat
 from ..controllers.full_impedance_controller import FullImpedanceController
 import rclpy
 
@@ -76,7 +77,6 @@ class EsimMujoco:
             return True
 
     def get_camera_pose(self):
-        
         # get camera offset
         cam_id = mujoco.mj_name2id(self.model, mujoco.mjtObj.mjOBJ_CAMERA, "mounted_camera")
         pos_offset = self.model.cam_pos0[cam_id]
@@ -92,4 +92,30 @@ class EsimMujoco:
 
         return cam_pos, cam_quat
         
+    def random_circular_pose(self, t):
+        r = 0.02
+        w = 15 + 5*t
+        print(w*t, w, t)
+        dx = r * np.sin(w*t)
+        dy = r * np.cos(w*t)
+        dz = 0
+
+        # save current pose
+        self.current_pos, self.current_quat = self.controller.fk()
+
+        # print("##current")
+        # print(self.current_pos, self.current_quat)
+
+        rand_pos = np.zeros_like(self.current_pos)
+        rand_pos[0] = self.current_pos[0] + dx
+        rand_pos[1] = self.current_pos[1] + dy 
+        rand_pos[2] = self.current_pos[2] + dz
+
+        current_mat = quat2Mat(self.current_quat)
+        current_eul = R.from_matrix(current_mat.reshape(3,3)).as_euler('xyz')
+
+        # print("##midified")
+        # print(rand_pos, current_eul)
+
+        return np.append(rand_pos, current_eul)
 

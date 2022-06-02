@@ -2,7 +2,7 @@ import rclpy
 from rclpy.action import ActionServer
 from rclpy.node import Node
 
-from controller_interface.action import DesiredPoseName
+from controller_interface.action import DesiredPoseName, RondomSaccades
 from camera_event_data_interface.msg import CameraEvents
 from geometry_msgs.msg import TransformStamped
 from tf2_ros import TransformBroadcaster
@@ -19,12 +19,19 @@ class ImControllerActionServer(Node):
     def __init__(self):
         super().__init__('impedance_controller_server_node')
 
-        # action server is created
-        self._action_server = ActionServer(
+        # DesiredPoseName action server is created
+        self._desired_pose_name_action_server = ActionServer(
             self,
             DesiredPoseName,
-            'desired_pose_topic',
+            'desired_pose_name_topic',
             self.desired_pose_callback)
+
+        # Saccades action server is created
+        self._action_server = ActionServer(
+            self,
+            RondomSaccades,
+            'saccades_topic',
+            self.saccades_callback)
 
         # Camera events Publisher is created
         self.events_publisher = self.create_publisher(CameraEvents, 'camera_events_topic', 10)
@@ -89,6 +96,41 @@ class ImControllerActionServer(Node):
         goal_handle.succeed()
         result_msg.error = feedback_msg.feedback_error
 
+        self.get_logger().info('Action finished!')
+
+        return result_msg
+
+    def saccades_callback(self, goal_handle):
+        self.get_logger().info('Executing goal...')
+
+        duration = goal_handle.request.duration
+
+        # create action messages
+        feedback_msg = RondomSaccades.Feedback()
+        result_msg = RondomSaccades.Result()
+
+        t_0 = self.mj.data.time
+        t = 0
+        # run mj loop until the robot reaches the goal pose
+        while t < duration:
+            # set goal pose
+            self.mj.set_des_pose(self.mj.random_circular_pose(t))
+
+            # run one mj loop and publish
+            self.composed_callback()
+
+            # publish feedback
+            feedback_msg.time_left = t_0 + duration - self.mj.data.time
+            goal_handle.publish_feedback(feedback_msg)
+
+            t = self.mj.data.time - t_0
+
+        # robot reached the goal pose 
+        goal_handle.succeed()
+        result_msg.time_spent = count
+
+        self.get_logger().info('Action finished!')
+
         return result_msg
 
     def composed_callback(self):
@@ -125,7 +167,7 @@ class ImControllerActionServer(Node):
         if events is not None:
             # if there are some events
             log_input = f'{events["x"].shape[0]}'
-            self.get_logger().info(log_start + log_amount + log_input) 
+            # self.get_logger().info(log_start + log_amount + log_input) 
             msg.x = events["x"].tolist()
             msg.y = events["y"].tolist()
             msg.t = events["t"].tolist()
@@ -134,7 +176,7 @@ class ImControllerActionServer(Node):
         else:
             # if no events
             log_input = f'{0}'
-            self.get_logger().info(log_start + log_amount + log_input)
+            # self.get_logger().info(log_start + log_amount + log_input)
             return False
 
 def main(args=None):
