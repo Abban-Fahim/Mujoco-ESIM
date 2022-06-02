@@ -4,6 +4,9 @@ from rclpy.node import Node
 
 from controller_interface.action import DesiredPoseName
 from camera_event_data_interface.msg import CameraEvents
+from geometry_msgs.msg import TransformStamped
+from tf2_ros import TransformBroadcaster
+
 from .mujoco_env.im_mujoco_env import EsimMujoco
 from .utils.read_cfg import get_cposes, get_jposes, get_cerr_lim
 
@@ -21,12 +24,15 @@ class ImControllerActionServer(Node):
             self,
             DesiredPoseName,
             'desired_pose_topic',
-            self.execute_callback)
+            self.desired_pose_callback)
 
-        # Publisher is created
-        self.publisher_ = self.create_publisher(CameraEvents, 'camera_events_topic', 10)
+        # Camera events Publisher is created
+        self.events_publisher = self.create_publisher(CameraEvents, 'camera_events_topic', 10)
         timer_period = 1.0/60  # seconds
-        self.timer = self.create_timer(timer_period, self.timer_callback)
+        self.timer = self.create_timer(timer_period, self.composed_callback)
+        
+        # Camera events Publisher is created
+        self.transform_publisher = TransformBroadcaster(self)
 
         # Publish parameters to ROS2
         self.init_params()
@@ -38,37 +44,6 @@ class ImControllerActionServer(Node):
 
         # Create MuJoCo environment
         self.mj = EsimMujoco(init_pose, err_limit, des_pose)
-
-    def execute_callback(self, goal_handle):
-        self.get_logger().info('Executing goal...')
-
-        # get goal pose name
-        des_pose_name = goal_handle.request.des_pose_name
-
-        # set goal pose
-        des_pose = np.array(self.get_parameter(des_pose_name).get_parameter_value().double_array_value)
-        self.mj.set_des_pose(des_pose)
-
-        # run one mj loop for the changes to take effect
-        self.timer_callback()
-
-        # create action messages
-        feedback_msg = DesiredPoseName.Feedback()
-        result_msg = DesiredPoseName.Result()
-
-        # run mj loop until the robot reaches the goal pose
-        while not self.mj.is_position_reached():
-            self.timer_callback()
-
-            # publish feedback
-            feedback_msg.feedback_error = self.mj.position_err()
-            goal_handle.publish_feedback(feedback_msg)
-
-        # robot reached the goal pose 
-        goal_handle.succeed()
-        result_msg.error = feedback_msg.feedback_error
-
-        return result_msg
 
     def init_params(self):
         # publish cartesian space poses to ROS2
@@ -84,12 +59,65 @@ class ImControllerActionServer(Node):
         # publish cartesian error limit
         self.declare_parameter("cerr_limit", get_cerr_lim())
 
+    def desired_pose_callback(self, goal_handle):
+        self.get_logger().info('Executing goal...')
+
+        # get goal pose name
+        des_pose_name = goal_handle.request.des_pose_name
+
+        # set goal pose
+        des_pose = np.array(self.get_parameter(des_pose_name).get_parameter_value().double_array_value)
+        self.mj.set_des_pose(des_pose)
+
+        # run one mj loop and publish
+        self.composed_callback()
+
+        # create action messages
+        feedback_msg = DesiredPoseName.Feedback()
+        result_msg = DesiredPoseName.Result()
+
+        # run mj loop until the robot reaches the goal pose
+        while not self.mj.is_position_reached():
+            # run one mj loop and publish
+            self.composed_callback()
+
+            # publish feedback
+            feedback_msg.feedback_error = self.mj.position_err()
+            goal_handle.publish_feedback(feedback_msg)
+
+        # robot reached the goal pose 
+        goal_handle.succeed()
+        result_msg.error = feedback_msg.feedback_error
+
+        return result_msg
+
+    def composed_callback(self):
+        self.timer_callback()
+        self.transform_callback()
+
     def timer_callback(self):
         # publishes events to ROS2 topic
         msg = CameraEvents()
         events = self.mj.loop()
         if self.fill_msg_with_events(msg, events):
-            self.publisher_.publish(msg)
+            self.events_publisher.publish(msg)
+
+    def transform_callback(self):
+        pos, quat = self.mj.get_camera_pose()
+
+        t = TransformStamped()
+        t.header.stamp = self.get_clock().now().to_msg()
+        t.header.frame_id = 'mounted_camera'
+        t.child_frame_id = 'world'
+        t.transform.translation.x = pos[0]
+        t.transform.translation.y = pos[1]
+        t.transform.translation.z = pos[2]
+        t.transform.rotation.x = quat[1]
+        t.transform.rotation.y = quat[2]
+        t.transform.rotation.z = quat[3]
+        t.transform.rotation.w = quat[0]
+
+        self.transform_publisher.sendTransform(t)
 
     def fill_msg_with_events(self, msg, events):
         log_start = "Publishing: "

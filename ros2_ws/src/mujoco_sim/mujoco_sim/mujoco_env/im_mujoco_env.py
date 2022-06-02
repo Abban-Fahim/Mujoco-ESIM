@@ -5,6 +5,7 @@ import time
 import numpy as np
 import itertools
 
+from ..utils.quaternion import identity_quat, subQuat, quatAdd, mat2Quat, quat2Vel
 from ..controllers.full_impedance_controller import FullImpedanceController
 import rclpy
 
@@ -73,3 +74,22 @@ class EsimMujoco:
             return False
         else:
             return True
+
+    def get_camera_pose(self):
+        
+        # get camera offset
+        cam_id = mujoco.mj_name2id(self.model, mujoco.mjtObj.mjOBJ_CAMERA, "mounted_camera")
+        pos_offset = self.model.cam_pos0[cam_id]
+        mat_offset = self.model.cam_mat0[cam_id]
+        quat_offset = mat2Quat(np.array(mat_offset))
+
+        # get end-effector pose
+        pos, quat = self.controller.fk()
+
+        # get camera pose
+        cam_pos = pos + pos_offset
+        cam_quat = quatAdd(quat, quat2Vel(quat_offset))
+
+        return cam_pos, cam_quat
+        
+

@@ -48,7 +48,10 @@ def main(args=None):
 
     events_publisher = EventsPublisher()
 
-    rclpy.spin(events_publisher)
+    try:
+      rclpy.spin(events_publisher)
+    except KeyboardInterrupt:
+      pass
 
     # Destroy the node explicitly
     # (optional - otherwise it will be done automatically

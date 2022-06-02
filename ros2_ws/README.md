@@ -26,7 +26,8 @@ Possible goal poses are are defined as ROS2 parameters and can be view with:
 - `ros2 param list`
 
 Sending a request to the action server example
-- `ros2 action send_goal --feedback  /im_controller controller_interface/action/ImController "{des_pose_name: "LOOK"}"`
+- `ros2 action send_goal /desired_pose_topic controller_interface/action/DesiredPoseName "{des_pose_name: "LOOK"}"
+`
 
 ## ROS2 structure
 
@@ -34,7 +35,8 @@ impedance_controller_server_node:
 - Subscribers:
 
 - Publishers: \
-    /camera_events_topic: camera_event_data_interface/msg/CameraEvents
+    /camera_events_topic: camera_event_data_interface/msg/CameraEvents \
+    /tf: tf2_msgs/msg/TFMessage
 
 - Service Servers: \
     /impedance_controller_server_node

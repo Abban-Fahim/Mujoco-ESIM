@@ -75,7 +75,6 @@ def forwardKinJacobianSite(model, data, site_id, recompute=True):
     '''
 
     if type(site_id) is str:
-        ## site_id = sim.model.site_name2id(site_id)
         site_id = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_SITE, site_id)
 
     # Create buffers to store the result.

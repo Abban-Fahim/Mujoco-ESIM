@@ -109,16 +109,18 @@ class FullImpedanceController(BaseController):
         
         return id_torque
 
+    def fk(self):
+        pos, mat = forwardKinSite(self.sim_model, self.sim_data, self.site_name, recompute=False)
+        quat = mat2Quat(mat)
+        return pos, quat
+
 
     def pose_error(self):
         # Compute the pose difference.
-        pos, mat = forwardKinSite(self.sim_model, self.sim_data, self.site_name, recompute=False)
-        quat = mat2Quat(mat)
-        
+        pos, quat = self.fk()
         dx = self.pos_set - pos
         dr = subQuat(self.quat_set, quat) # Original
         dframe = np.concatenate((dx,dr))
-        # print(dframe)
         return dframe
 
     def Jac(self):
@@ -185,4 +187,6 @@ class FullImpedanceController(BaseController):
             self.sim_qvel_idx = range(self.sim_model.nv)
             self.sim_actuators_idx = range(self.sim_model.nu)
             self.sim_joint_idx = range(self.sim_model.nu)
+
+
 
