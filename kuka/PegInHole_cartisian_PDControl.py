@@ -3,13 +3,13 @@ import mujoco_viewer
 import os
 import time
 import numpy as np
-from kuka.controllers.inverse_dynamics_controller import InverseDynamicsController
+from controllers.cartisian_pd_controller import CartisianPDController
 from utils.read_cfg import get_mjc_xml, get_jposes, get_jerr_lim
 
 model = mujoco.MjModel.from_xml_path(get_mjc_xml())
 data = mujoco.MjData(model)
 viewer = mujoco_viewer.MujocoViewer(model, data)
-controller = InverseDynamicsController(model, data, kp=100)
+controller = CartisianPDController(model, data)
 
 print(data.qpos)
 
