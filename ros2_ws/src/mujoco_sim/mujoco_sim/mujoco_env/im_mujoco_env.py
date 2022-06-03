@@ -92,52 +92,40 @@ class EsimMujoco:
 
         return cam_pos, cam_quat
         
-    def circular_pose(self, t, current_pos, current_quat):
+    def circular_pose(self, t, current_pose):
         r = 0.02
         w = 15 + 5*t
-        # print(w*t, w, t)
-        dx = r * np.sin(w*t)
-        dy = r * np.cos(w*t)
-        dz = 0
 
-        # print("##current")
-        # print(self.current_pos, self.current_quat)
+        offset = np.zeros(3)
+        offset[0] = r * np.sin(w*t)
+        offset[1] = r * np.cos(w*t)
+        offset[2] = 0
 
-        rand_pos = np.zeros_like(current_pos)
-        rand_pos[0] = current_pos[0] + dx
-        rand_pos[1] = current_pos[1] + dy 
-        rand_pos[2] = current_pos[2] + dz
+        return self.offset_pose(current_pose, offset)
 
-        current_mat = quat2Mat(current_quat)
-        current_eul = R.from_matrix(current_mat.reshape(3,3)).as_euler('xyz')
-
-        # print("##midified")
-        # print(rand_pos, current_eul)
-
-        return np.append(rand_pos, current_eul)
-
-    def random_circular_pose(self, t, current_pos, current_quat):
-        tt = np.random.rand() * 2 * np.pi 
+    def random_circular_pose(self, t, current_pose):
+        rng = np.random.default_rng(int(time.time()))
+        print(rng.random())
+        tt = rng.random() * 2 * np.pi 
         r = 0.02
         w = 15
-        # print(w*tt, w, t)
-        dx = r * np.sin(w*tt)
-        dy = r * np.cos(w*tt)
-        dz = 0
 
-        # print("##current")
-        # print(self.current_pos, self.current_quat)
+        offset = np.zeros(3)
+        offset[0] = r * np.sin(w*tt)
+        offset[1] = r * np.cos(w*tt)
+        offset[2] = 0
+
+        return self.offset_pose(current_pose, offset)
+
+    def offset_pose(self, current_pose, offset):
+        current_pos, current_quat = current_pose
+
 
         rand_pos = np.zeros_like(current_pos)
-        rand_pos[0] = current_pos[0] + dx
-        rand_pos[1] = current_pos[1] + dy 
-        rand_pos[2] = current_pos[2] + dz
+        for i in range(3):
+            rand_pos[i] = current_pos[i] + offset[i]
 
         current_mat = quat2Mat(current_quat)
         current_eul = R.from_matrix(current_mat.reshape(3,3)).as_euler('xyz')
 
-        # print("##midified")
-        # print(rand_pos, current_eul)
-
         return np.append(rand_pos, current_eul)
-

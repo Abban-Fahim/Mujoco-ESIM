@@ -1,3 +1,4 @@
+from matplotlib import table
 import rclpy
 from rclpy.action import ActionServer
 from rclpy.node import Node
@@ -83,9 +84,6 @@ class ImControllerActionServer(Node):
         des_pose = np.array(self.get_parameter(des_pose_name).get_parameter_value().double_array_value)
         self.mj.set_des_pose(des_pose)
 
-        # run one mj loop and publish
-        self.composed_callback()
-
         # create action messages
         feedback_msg = DesiredPoseName.Feedback()
         result_msg = DesiredPoseName.Result()
@@ -108,42 +106,19 @@ class ImControllerActionServer(Node):
         return result_msg
 
     def saccades_callback(self, goal_handle):
-        self.get_logger().info('Executing goal...')
-
-        duration = goal_handle.request.duration
-
-        # create action messages
-        feedback_msg = Saccades.Feedback()
-        result_msg = Saccades.Result()
-
-        # save current pose
-        self.current_pos, self.current_quat = self.mj.controller.fk()
-
-        t_0 = self.mj.data.time
-        t = 0
-        # run mj loop until the robot reaches the goal pose
-        while t < duration:
-            # set goal pose
-            self.mj.set_des_pose(self.mj.circular_pose(t, self.current_pos, self.current_quat))
-
-            # run one mj loop and publish
-            self.composed_callback()
-
-            # publish feedback
-            feedback_msg.time_left = t_0 + duration - self.mj.data.time
-            goal_handle.publish_feedback(feedback_msg)
-
-            t = self.mj.data.time - t_0
-
-        # robot reached the goal pose 
-        goal_handle.succeed()
-        result_msg.time_spent = duration
-
-        self.get_logger().info('Action finished!')
-
-        return result_msg
+        return self.saccades_callback_body(goal_handle, self.circular_saccades)
 
     def random_saccades_callback(self, goal_handle):
+        return self.saccades_callback_body(goal_handle, self.random_circular_saccades)
+
+    def circular_saccades(self, t):
+        self.mj.set_des_pose(self.mj.circular_pose(t, self.current_pose))
+    
+    def random_circular_saccades(self, t):
+        if t % 0.05 < 0.005:
+            self.mj.set_des_pose(self.mj.random_circular_pose(t, self.current_pose))
+
+    def saccades_callback_body(self, goal_handle, saccade_func):
         self.get_logger().info('Executing goal...')
 
         duration = goal_handle.request.duration
@@ -153,17 +128,14 @@ class ImControllerActionServer(Node):
         result_msg = Saccades.Result()
 
         # save current pose
-        self.current_pos, self.current_quat = self.mj.controller.fk()
+        self.current_pose = self.mj.controller.fk()
 
         t_0 = self.mj.data.time
         t = 0
         # run mj loop until the robot reaches the goal pose
         while t < duration:
             # set goal pose
-            print(t % 0.05)
-            if t % 0.05 < 0.005:
-                print("##")
-                self.mj.set_des_pose(self.mj.random_circular_pose(t, self.current_pos, self.current_quat))
+            saccade_func(t)
 
             # run one mj loop and publish
             self.composed_callback()
@@ -179,7 +151,6 @@ class ImControllerActionServer(Node):
         result_msg.time_spent = duration
 
         self.get_logger().info('Action finished!')
-
         return result_msg
 
     def composed_callback(self):
@@ -216,7 +187,7 @@ class ImControllerActionServer(Node):
         if events is not None:
             # if there are some events
             log_input = f'{events["x"].shape[0]}'
-            # self.get_logger().info(log_start + log_amount + log_input) 
+            self.get_logger().info(log_start + log_amount + log_input) 
             msg.x = events["x"].tolist()
             msg.y = events["y"].tolist()
             msg.t = events["t"].tolist()
@@ -225,7 +196,7 @@ class ImControllerActionServer(Node):
         else:
             # if no events
             log_input = f'{0}'
-            # self.get_logger().info(log_start + log_amount + log_input)
+            self.get_logger().info(log_start + log_amount + log_input)
             return False
 
 def main(args=None):
