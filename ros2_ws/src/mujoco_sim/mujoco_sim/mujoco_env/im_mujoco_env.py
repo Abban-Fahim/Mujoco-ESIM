@@ -48,9 +48,9 @@ class EsimMujoco:
         timestamp = self.data.time        
         out = self.viewer.capture_event(self.camera_id, timestamp, save_it=False)
         if out is not None:
-            _, events = out
+            events_img, events = out
         else:
-            events = None
+            events_img, events = None, None
 
         # set goal pose
         self.controller.set_action(self.des_pose)
@@ -61,7 +61,7 @@ class EsimMujoco:
         
         mujoco.mj_step(self.model, self.data)
 
-        return events
+        return events_img, events
 
     def set_des_pose(self, des_pose):
         self.des_pose = des_pose

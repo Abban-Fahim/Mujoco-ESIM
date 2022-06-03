@@ -6,7 +6,9 @@ from rclpy.node import Node
 from controller_interface.action import DesiredPoseName, Saccades
 from camera_event_data_interface.msg import CameraEvents
 from geometry_msgs.msg import TransformStamped
+from sensor_msgs.msg import Image
 from tf2_ros import TransformBroadcaster
+from cv_bridge import CvBridge, CvBridgeError
 
 from .mujoco_env.im_mujoco_env import EsimMujoco
 from .utils.read_cfg import get_cposes, get_jposes, get_cerr_lim
@@ -48,6 +50,9 @@ class ImControllerActionServer(Node):
         
         # Camera events Publisher is created
         self.transform_publisher = TransformBroadcaster(self)
+
+        # Camera event image Publisher is created
+        self.event_img_publisher = self.create_publisher(Image, 'camera_event_img_topic', 10)
 
         # Publish parameters to ROS2
         self.init_params()
@@ -159,12 +164,35 @@ class ImControllerActionServer(Node):
 
     def timer_callback(self):
         # publishes events to ROS2 topic
-        msg = CameraEvents()
-        events = self.mj.loop()
-        if self.fill_msg_with_events(msg, events):
-            self.events_publisher.publish(msg)
+        events_img, events = self.mj.loop()
+
+        events_msg = CameraEvents()
+        if self.fill_msg_with_events(events_msg, events):
+            self.events_publisher.publish(events_msg)
+
+        event_img_msg = Image()
+        if self.fill_msg_with_event_im(event_img_msg, events_img):
+            self.event_img_publisher.publish(event_img_msg)
+
+    def fill_msg_with_event_im(self, msg, event_img):
+        if event_img is not None:
+            H, W, _ = event_img.shape
+            msg.header.stamp = self.get_clock().now().to_msg()
+            msg.header.frame_id = 'mounted_camera'
+            msg.height = H
+            msg.width = W
+            msg.encoding = "rgb8"
+            msg.step = 3 * W
+            event_img = np.where(event_img == 0, 255, event_img)
+            msg.data = event_img.tobytes()
+            
+            return True
+        else:
+            return False
+        
 
     def transform_callback(self):
+        
         pos, quat = self.mj.get_camera_pose()
 
         t = TransformStamped()
