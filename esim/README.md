@@ -54,7 +54,7 @@
 
 ## run mujoco
 
-- `./../mujoco-2.1.5/bin/simulate `
+- `./../mujoco-2.1.5/bin/simulate`
 
 ## plot events
 

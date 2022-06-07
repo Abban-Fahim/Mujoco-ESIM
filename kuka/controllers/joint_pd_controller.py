@@ -11,7 +11,7 @@ from utils.quaternion import identity_quat, subQuat, quatAdd, mat2Quat
 from utils.kinematics import forwardKinSite, forwardKinJacobianSite
 
 
-class CartisianPDController(BaseController):
+class JointPDController(BaseController):
     '''
     A base for all joint based controllers
     '''
@@ -27,7 +27,7 @@ class CartisianPDController(BaseController):
                     set_velocity=False,
                     keep_finite=False):
 
-        super(CartisianPDController, self).__init__(sim_model, sim_data)
+        super(JointPDController, self).__init__(sim_model, sim_data)
 
         self.set_velocity = set_velocity
         self.site_name = site_name
@@ -93,35 +93,27 @@ class CartisianPDController(BaseController):
         '''
         Set the setpoint.
         '''
-        self.scale = 1
-        action = action * self.scale
+        # self.scale = 1
+        # action = action * self.scale
 
-        dx = action[0:3].astype(np.float64)
-        dr = action[3:6].astype(np.float64)
+        # dx = action[0:3].astype(np.float64)
+        # dr = action[3:6].astype(np.float64)
 
-        self.pos_set = dx
-        self.quat_set = quatAdd(np.array([1., 0., 0., 0.]), dr)
-        # self.sim_qpos_set = action
+        # self.pos_set = dx
+        # self.quat_set = quatAdd(np.array([1., 0., 0., 0.]), dr)
+        self.sim_qpos_set = action
 
     def get_torque(self):
         '''
         Update the PD setpoint and compute the torque.
         '''
 
-        # jerr = self.joint_error()
-        # djerr = self.joint_vel_error()
-        # torque = self.kp * jerr + self.kd * djerr
+        # calculate errors
+        jerr = self.joint_error()
+        djerr = self.joint_vel_error()
 
-
-        J = self.Jac()
-        perr = self.pose_error()
-        qvel = self.sim_data.qvel
-        dX = self.kp * perr + self.kd * (J @ qvel)
-
-        torque = self.right_pseudo_Jac(eps=1e-6) @ dX
-
-        # projection_matrix = self.null_space_proj_m()
-        # self.sim_data.qacc = self.impedance_controller() + projection_matrix @ self.null_space_controller()
+        # PD law
+        torque = self.kp * jerr + self.kd * djerr
 
         # gravity compensation
         G = self.sim_data.qfrc_bias
@@ -144,8 +136,8 @@ class CartisianPDController(BaseController):
 
 
         print("###Errors###")
-        print(f"perr: {perr}")
-        print(f"qvel: {qvel}")
+        print(f"jerr: {jerr}")
+        # print(f"djerr: {djerr}")
         # print(f"kp: {self.kp}")
         # print(f"kd: {self.kd}")
 
@@ -153,52 +145,15 @@ class CartisianPDController(BaseController):
         # print(f"qfrc_bias: {self.sim_data.qfrc_bias}")
         
 
-        print("###Output###")
+        # print("###Output###")
         # print(f"G: {G}")
-        print(f"torque: {torque}")
+        # print(f"torque: {torque}")
         # print(f"out_torque: {out_torque}")
 
         
         return torque
 
-    def Jac(self):
-        jpos, jrot = forwardKinJacobianSite(self.sim_model, self.sim_data, self.site_name, recompute=False)
-        J = np.vstack((jpos, jrot)) # full jacobian
-        return J
-
-    def right_pseudo_Jac(self, eps=0):
-        J = self.Jac()
         
-        pJ = J.T @ np.linalg.inv(J @ J.T + eps*np.eye(6)) 
-        return pJ
-
-    def left_pseudo_Jac(self, eps=0):
-        J = self.Jac()
-        
-        pJ = np.linalg.inv(J.T @ J + eps*np.eye(7)) @ J.T
-        return pJ
-
-    def null_space_proj_m(self):
-        J = self.Jac()
-
-        # p = 1 - J^T * (J^+)^T
-        projection_matrix = np.eye(7) - J.T @ self.left_pseudo_Jac(eps=1e-6).T
-
-        return projection_matrix
-
-    def impedance_controller(self):
-        # desired behaviour 
-        J = self.Jac()
-        cartesian_acc_des = self.stiffness*self.pose_error() - self.damping * (J @ self.sim_data.qvel[self.sim_qvel_idx])
-
-        # impedance control
-        impedance_control = self.right_pseudo_Jac(eps=1e-6) @ cartesian_acc_des
-        return impedance_control
-
-    def null_space_controller(self):
-        # ns = kn * (qn - q) -  dn * dq
-        null_space_control = self.null_space_stiffness * (self.nominal_qpos - self.sim_data.qpos[self.sim_qpos_idx]) - self.null_space_damping*self.sim_data.qvel[self.sim_qvel_idx]
-        return null_space_control
 
     def joint_error(self):
         return self.sim_qpos_set - self.sim_data.qpos[self.sim_qpos_idx]

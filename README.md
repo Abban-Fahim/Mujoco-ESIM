@@ -42,3 +42,9 @@ python /kuka/PegInHole_CIC.py
 (The folder examples has additional examples for guidance on implementing new functions).
 
 You are ready to create and adapt new experiments, components and controllers :) 
+
+## References
+
+Inspired by:
+- https://github.com/PaulDanielML/MuJoCo_RL_UR5 
+- https://github.com/HarvardAgileRoboticsLab/gym-kuka-mujoco

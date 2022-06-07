@@ -36,6 +36,7 @@
     <body name="floor" pos="0 0 -1">
       <geom class="collision" type="plane" size="10 10 1" rgba="0.6 0.6 0.6 1.0"/> 
     </body>
+    <site name="des_pose" pos="0 0 0.0" euler="0 0 0" size="0.005, 0.005, 0.005"/>
   </worldbody>
 
   <actuator>
