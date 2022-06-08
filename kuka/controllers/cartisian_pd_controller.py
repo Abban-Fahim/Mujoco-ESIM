@@ -29,6 +29,8 @@ class CartisianPDController(BaseController):
 
         super(CartisianPDController, self).__init__(sim_model, sim_data)
 
+        mujoco.mj_forward(sim_model, sim_data)
+
         self.set_velocity = set_velocity
         self.site_name = site_name
 
@@ -107,21 +109,18 @@ class CartisianPDController(BaseController):
         '''
         Update the PD setpoint and compute the torque.
         '''
-
-        # jerr = self.joint_error()
-        # djerr = self.joint_vel_error()
-        # torque = self.kp * jerr + self.kd * djerr
-
-
+        
         J = self.Jac()
         perr = self.pose_error()
         qvel = self.sim_data.qvel
-        dX = self.kp * perr + self.kd * (J @ qvel)
 
-        torque = self.right_pseudo_Jac(eps=1e-6) @ dX
-
-        # projection_matrix = self.null_space_proj_m()
-        # self.sim_data.qacc = self.impedance_controller() + projection_matrix @ self.null_space_controller()
+        # http://www.diag.uniroma1.it/deluca/rob2_en/13_CartesianControl.pdf
+        # slide 3 elastic
+        # torque = J.T @ (self.kp * perr) + self.kd *qvel
+        # slide 6 visco-elactic
+        # visco-elastic with null space projections
+        dperr = J @ qvel
+        torque = self.right_pseudo_Jac(eps=0) @ (self.kp * perr + self.kd *dperr) - self.null_space_proj_m(eps=0) @ qvel
 
         # gravity compensation
         G = self.sim_data.qfrc_bias
@@ -133,6 +132,7 @@ class CartisianPDController(BaseController):
         pos, mat = forwardKinSite(self.sim_model, self.sim_data, self.site_name, recompute=False)
         quat = mat2Quat(mat)
         # eul = R.from_matrix(mat.reshape(3,3)).as_euler('xyz')
+
         
         # print("###Position###")
         # print(f"sim_qpos_set: {self.sim_qpos_set}")
@@ -142,10 +142,15 @@ class CartisianPDController(BaseController):
         # print(f"sim_qvel_set: {self.sim_qvel_set}")
         # print(f"qvel: {self.sim_data.qvel[self.sim_qvel_idx]}")
 
+        # print("###Parameter###")
+        # print(f"J: {J.shape}")
+        # print(f"pseudo_J: {pseudo_J.shape}")
+        # print(f"dX: {dX}")
+
 
         print("###Errors###")
-        print(f"perr: {perr}")
-        print(f"qvel: {qvel}")
+        print(f"perr: {perr} {perr.shape}")
+        # print(f"qvel: {qvel} {perr.shape}")
         # print(f"kp: {self.kp}")
         # print(f"kd: {self.kd}")
 
@@ -153,9 +158,9 @@ class CartisianPDController(BaseController):
         # print(f"qfrc_bias: {self.sim_data.qfrc_bias}")
         
 
-        print("###Output###")
+        # print("###Output###")
         # print(f"G: {G}")
-        print(f"torque: {torque}")
+        # print(f"torque: {torque}")
         # print(f"out_torque: {out_torque}")
 
         
@@ -178,27 +183,13 @@ class CartisianPDController(BaseController):
         pJ = np.linalg.inv(J.T @ J + eps*np.eye(7)) @ J.T
         return pJ
 
-    def null_space_proj_m(self):
+    def null_space_proj_m(self, eps=1e-6):
         J = self.Jac()
 
-        # p = 1 - J^T * (J^+)^T
-        projection_matrix = np.eye(7) - J.T @ self.left_pseudo_Jac(eps=1e-6).T
-
+        # p = 1 - (J^+) * J
+        # projection_matrix = np.eye(7) - J.T @ self.left_pseudo_Jac(eps=eps).T
+        projection_matrix = np.eye(7) - self.right_pseudo_Jac(eps=eps) @ J
         return projection_matrix
-
-    def impedance_controller(self):
-        # desired behaviour 
-        J = self.Jac()
-        cartesian_acc_des = self.stiffness*self.pose_error() - self.damping * (J @ self.sim_data.qvel[self.sim_qvel_idx])
-
-        # impedance control
-        impedance_control = self.right_pseudo_Jac(eps=1e-6) @ cartesian_acc_des
-        return impedance_control
-
-    def null_space_controller(self):
-        # ns = kn * (qn - q) -  dn * dq
-        null_space_control = self.null_space_stiffness * (self.nominal_qpos - self.sim_data.qpos[self.sim_qpos_idx]) - self.null_space_damping*self.sim_data.qvel[self.sim_qvel_idx]
-        return null_space_control
 
     def joint_error(self):
         return self.sim_qpos_set - self.sim_data.qpos[self.sim_qpos_idx]

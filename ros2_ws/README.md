@@ -18,7 +18,7 @@ Only specific packages:
 
 - `source /opt/ros/galactic/setup.bash`
 - `. install/setup.bash `
-- `ros2 run mujoco_sim im_mujoco `
+- `ros2 run mujoco_sim impedance_controller_server`
 
 ## Sending goal poses to the action server
 
