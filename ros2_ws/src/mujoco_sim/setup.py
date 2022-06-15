@@ -24,6 +24,7 @@ setup(
         'console_scripts': [
             'camera_events_publisher = mujoco_sim.camera_events_publisher:main',
             'impedance_controller_server = mujoco_sim.impedance_controller_server:main',
+            'test = mujoco_sim.impedance_controller_server_test:main',
         ],
     },
 )

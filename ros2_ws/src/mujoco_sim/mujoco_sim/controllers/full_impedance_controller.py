@@ -71,13 +71,14 @@ class FullImpedanceController(BaseController):
             # self.stiffness = np.array([300.0, 300.0, 300.0, 200.0, 200.0, 200.0])
             # self.stiffness = np.array([10.0, 10.0, 10.0, 10.0, 10.0, 10.0])
         else:
-            self.stiffness = np.ones(6)*stiffness
+            self.stiffness = stiffness
 
         if damping=='auto':
             self.damping = 2 * np.sqrt(self.stiffness)
 
         else:
-            self.damping = 2*np.sqrt(self.stiffness)*damping
+            # self.damping = 2*np.sqrt(self.stiffness)*damping
+            self.damping = damping
 
         self.null_space_damping = null_space_damping
         self.null_space_stiffness = null_space_stiffness
@@ -85,7 +86,7 @@ class FullImpedanceController(BaseController):
 
         self.init_indices(controlled_joints)
 
-    def set_action(self, action):
+    def set_action(self, action, vel_set=np.array([0,0,0,0,0,0])):
         '''
         Set the setpoint.
         '''
@@ -97,11 +98,14 @@ class FullImpedanceController(BaseController):
         self.pos_set = dx
         self.quat_set = quatAdd(np.array([1., 0., 0., 0.]), dr)
 
+        self.vel_set = vel_set
+        print("setting state - ", self.vel_set)
+
     def get_torque(self):
         '''
         Update the impedance control setpoint and compute the torque.
         '''
-        projection_matrix = self.null_space_proj_m()
+        projection_matrix = self.null_space_proj_m(eps=0)
         self.sim_data.qacc = self.impedance_controller() + projection_matrix @ self.null_space_controller()
 
         mujoco.mj_inverse(self.sim_model, self.sim_data)
@@ -140,21 +144,24 @@ class FullImpedanceController(BaseController):
         pJ = np.linalg.inv(J.T @ J + eps*np.eye(7)) @ J.T
         return pJ
 
-    def null_space_proj_m(self):
+    def null_space_proj_m(self, eps=1e-6):
         J = self.Jac()
 
         # p = 1 - J^T * (J^+)^T
-        projection_matrix = np.eye(7) - J.T @ self.left_pseudo_Jac(eps=1e-6).T
+        # projection_matrix = np.eye(7) - J.T @ self.left_pseudo_Jac(eps=eps).T
+        projection_matrix = np.eye(7) - self.right_pseudo_Jac(eps=eps) @ J
 
         return projection_matrix
 
     def impedance_controller(self):
         # desired behaviour 
         J = self.Jac()
-        cartesian_acc_des = self.stiffness*self.pose_error() - self.damping * (J @ self.sim_data.qvel[self.sim_qvel_idx])
+        cartesian_acc_des = self.stiffness*self.pose_error() + self.damping * (self.vel_set - J @ self.sim_data.qvel[self.sim_qvel_idx])
+
+        print("state - ", self.vel_set)
 
         # impedance control
-        impedance_control = self.right_pseudo_Jac(eps=1e-6) @ cartesian_acc_des
+        impedance_control = self.right_pseudo_Jac(eps=0) @ cartesian_acc_des
         return impedance_control
 
     def null_space_controller(self):
