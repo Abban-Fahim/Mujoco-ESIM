@@ -11,10 +11,14 @@ poses:
   cartesian:
     # Cartisian space (orientation in deg)
     HOME: [0.0,0.4,0.65, 180, 0, 0]
-    APPROACH: [-0.2,0.65,0.3, 180, 45, 0]
+    #APPROACH: [-0.2,0.65,0.3, 180, 45, 0]
+    APPROACH: [0,0.45,0.65, 180, 45, 0]
     INSERTION: [-0.20,0.65,0.2, 180, 45, 0]
 
 jerr_limit: 0.1 # accuracy of reaching a position before changing viapoint
 cerr_limit: 0.0005 # accuracy of reaching a position before changing viapoint
 
-mujoco_model_xml: "kuka/envs/assets/full_kuka_INRC3.xml"
+# mujoco_model_xml: "kuka/envs/assets/full_kuka_INRC3_mounted_camera_ethernet.xml"
+mujoco_model_xml: "kuka/envs/assets/full_kuka_INRC3_mounted_camera_usb.xml"
+# mujoco_model_xml: "kuka/envs/assets/full_kuka_INRC3_mounted.xml"
+
