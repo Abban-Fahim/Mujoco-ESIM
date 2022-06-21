@@ -13,8 +13,12 @@ poses:
     APPROACH: [-0.2,0.65,0.3, 180, 0, 0]
     INSERTION: [-0.20,0.65,0.2, 180, 0, 0]
     LOOK: [0.15,0.55,0.18, 180, 0, 0]
+    USB: [0.0,0.55,0.18, 180, 0, 0]
 
 jerr_limit: 0.1 # accuracy of reaching a position before changing viapoint
 cerr_limit: 0.0005 # accuracy of reaching a position before changing viapoint
 
-mujoco_model_xml: "kuka/envs/assets/full_kuka_INRC3.xml"
+# mujoco_model_xml: "kuka/envs/assets/full_kuka_INRC3.xml"
+# mujoco_model_xml: "kuka/envs/assets/full_kuka_INRC3_mounted_camera_ethernet.xml"
+mujoco_model_xml: "kuka/envs/assets/full_kuka_INRC3_mounted_camera_usb.xml"
+# mujoco_model_xml: "kuka/envs/assets/full_kuka_INRC3_mounted.xml"

@@ -4,7 +4,7 @@ import numpy as np
 from gym import spaces
 import mujoco
 
-from ..utils.quaternion import identity_quat, subQuat, quatAdd, mat2Quat
+from ..utils.quaternion import identity_quat, subQuat, quatAdd, mat2Quat, quat2eul
 from ..utils.kinematics import forwardKinSite, forwardKinJacobianSite
 from .base_controller import BaseController
 from ..utils.mujoco_utils import get_qpos_indices, get_qvel_indices, get_actuator_indices, get_joint_indices
@@ -99,7 +99,7 @@ class FullImpedanceController(BaseController):
         self.quat_set = quatAdd(np.array([1., 0., 0., 0.]), dr)
 
         self.vel_set = vel_set
-        print("setting state - ", self.vel_set)
+        # print("setting state - ", self.vel_set)
 
     def get_torque(self):
         '''
@@ -113,15 +113,20 @@ class FullImpedanceController(BaseController):
         
         return id_torque
 
-    def fk(self):
+    def _fk(self):
         pos, mat = forwardKinSite(self.sim_model, self.sim_data, self.site_name, recompute=False)
         quat = mat2Quat(mat)
         return pos, quat
 
+    def fk(self):
+        pos, mat = forwardKinSite(self.sim_model, self.sim_data, self.site_name, recompute=False)
+        quat = mat2Quat(mat)
+        pose = np.append(pos, quat2eul(quat))
+        return pose
 
     def pose_error(self):
         # Compute the pose difference.
-        pos, quat = self.fk()
+        pos, quat = self._fk()
         dx = self.pos_set - pos
         dr = subQuat(self.quat_set, quat) # Original
         dframe = np.concatenate((dx,dr))
@@ -158,7 +163,7 @@ class FullImpedanceController(BaseController):
         J = self.Jac()
         cartesian_acc_des = self.stiffness*self.pose_error() + self.damping * (self.vel_set - J @ self.sim_data.qvel[self.sim_qvel_idx])
 
-        print("state - ", self.vel_set)
+        # print("state - ", self.vel_set)
 
         # impedance control
         impedance_control = self.right_pseudo_Jac(eps=0) @ cartesian_acc_des

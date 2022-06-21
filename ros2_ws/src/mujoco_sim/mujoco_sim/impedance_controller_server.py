@@ -65,6 +65,8 @@ class ImControllerActionServer(Node):
         # Create MuJoCo environment
         self.mj = EsimMujoco(init_pose, err_limit, des_pose)
 
+        self.get_logger().info('Initialized')
+
     def init_params(self):
         # publish cartesian space poses to ROS2
         self.poses_dic = get_cposes()
@@ -116,12 +118,14 @@ class ImControllerActionServer(Node):
     def random_saccades_callback(self, goal_handle):
         return self.saccades_callback_body(goal_handle, self.random_circular_saccades)
 
-    def circular_saccades(self, t):
-        self.mj.set_des_pose(self.mj.circular_pose(t, self.current_pose))
+    def circular_saccades(self, t, start_pose):
+        des_pos, des_vel = self.mj.circular_pose(t, start_pose)
+        print("des_pos", des_pos)
+        self.mj.set_des_pose(des_pos, des_vel)
     
-    def random_circular_saccades(self, t):
+    def random_circular_saccades(self, t, start_pose):
         if t % 0.05 < 0.005:
-            self.mj.set_des_pose(self.mj.random_circular_pose(t, self.current_pose))
+            self.mj.set_des_pose(self.mj.random_circular_pose(t, start_pose))
 
     def saccades_callback_body(self, goal_handle, saccade_func):
         self.get_logger().info('Executing goal...')
@@ -132,15 +136,16 @@ class ImControllerActionServer(Node):
         feedback_msg = Saccades.Feedback()
         result_msg = Saccades.Result()
 
-        # save current pose
-        self.current_pose = self.mj.controller.fk()
+        start_pose = self.mj.controller.fk()
 
         t_0 = self.mj.data.time
         t = 0
         # run mj loop until the robot reaches the goal pose
         while t < duration:
+        # while t < 0.000000001:
+
             # set goal pose
-            saccade_func(t)
+            saccade_func(t, start_pose)
 
             # run one mj loop and publish
             self.composed_callback()
@@ -151,9 +156,15 @@ class ImControllerActionServer(Node):
 
             t = self.mj.data.time - t_0
 
+        # back to the start pose
+        self.mj.set_des_pose(start_pose)
+        while not self.mj.is_position_reached():
+            # run one mj loop and publish
+            self.composed_callback()
+
         # robot reached the goal pose 
         goal_handle.succeed()
-        result_msg.time_spent = duration
+        result_msg.time_spent = self.mj.data.time - t_0
 
         self.get_logger().info('Action finished!')
         return result_msg
@@ -164,7 +175,7 @@ class ImControllerActionServer(Node):
 
     def timer_callback(self):
         # publishes events to ROS2 topic
-        events_img, events = self.mj.loop()
+        raw_img, events_img, events = self.mj.loop(capture_events_enable=False, capture_frames_enable=False)
 
         events_msg = CameraEvents()
         if self.fill_msg_with_events(events_msg, events):
@@ -192,7 +203,6 @@ class ImControllerActionServer(Node):
         
 
     def transform_callback(self):
-        
         pos, quat = self.mj.get_camera_pose()
 
         t = TransformStamped()
@@ -215,7 +225,7 @@ class ImControllerActionServer(Node):
         if events is not None:
             # if there are some events
             log_input = f'{events["x"].shape[0]}'
-            self.get_logger().info(log_start + log_amount + log_input) 
+            # self.get_logger().info(log_start + log_amount + log_input) 
             msg.x = events["x"].tolist()
             msg.y = events["y"].tolist()
             msg.t = events["t"].tolist()
@@ -224,7 +234,7 @@ class ImControllerActionServer(Node):
         else:
             # if no events
             log_input = f'{0}'
-            self.get_logger().info(log_start + log_amount + log_input)
+            # self.get_logger().info(log_start + log_amount + log_input)
             return False
 
 def main(args=None):

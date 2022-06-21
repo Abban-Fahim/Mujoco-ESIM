@@ -19,7 +19,7 @@
   </default>  
 
   <asset>
-    <include file="kuka/kuka_assets.xml"/>
+    <include file="kuka_assets.xml"/>
   </asset>
 
   <worldbody>
@@ -28,7 +28,7 @@
 
     <light pos="0 0 1000" castshadow="false"/>
     <body name="robot" pos="0 0 0">
-      <include file="kuka/kuka_mesh_collision_peg_ee_camera.xml"/>
+      <include file="kuka_mesh_collision_peg_ee_camera.xml"/>
     </body>
     <body name="table" pos="0 0 0">
       <geom class="collision" type="box" size=".41 .63 .5" pos="0 0.37 -0.5" rgba="0.6 0.6 0.6 0"/>
@@ -42,7 +42,7 @@
   </worldbody>
 
   <actuator>
-    <include file="kuka/kuka_actuators.xml"/>
+    <include file="kuka_actuators.xml"/>
   </actuator>
 
 </mujoco>
