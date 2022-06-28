@@ -11,7 +11,7 @@ from tf2_ros import TransformBroadcaster
 from cv_bridge import CvBridge, CvBridgeError
 
 from .mujoco_env.im_mujoco_env import EsimMujoco
-from .utils.read_cfg import get_cposes, get_jposes, get_cerr_lim
+from .utils.read_cfg import get_cposes, get_jposes, get_cerr_lim, get_operations
 
 import numpy as np
 import time
@@ -69,17 +69,22 @@ class ImControllerActionServer(Node):
 
     def init_params(self):
         # publish cartesian space poses to ROS2
-        self.poses_dic = get_cposes()
-        for k, v in self.poses_dic.items():
+        poses_dic = get_cposes()
+        for k, v in poses_dic.items():
             self.declare_parameter(k, v.tolist())
 
         # publish joint space poses to ROS2
-        self.poses_dic = get_jposes()
-        for k, v in self.poses_dic.items():
+        poses_dic = get_jposes()
+        for k, v in poses_dic.items():
             self.declare_parameter(k, v.tolist())
         
         # publish cartesian error limit
         self.declare_parameter("cerr_limit", get_cerr_lim())
+
+        # publish operation parameter
+        operations = get_operations()
+        for k, v in operations.items():
+            self.declare_parameter(k, v)
 
     def desired_pose_callback(self, goal_handle):
         self.get_logger().info('Executing goal...')
@@ -175,7 +180,19 @@ class ImControllerActionServer(Node):
 
     def timer_callback(self):
         # publishes events to ROS2 topic
-        raw_img, events_img, events = self.mj.loop(capture_events_enable=False, capture_frames_enable=False)
+        capture_events_enable = self.get_parameter('capture_events_enable').get_parameter_value().bool_value
+        save_events = self.get_parameter('save_events').get_parameter_value().bool_value
+        capture_frames_enable = self.get_parameter('capture_frames_enable').get_parameter_value().bool_value
+        save_frames = self.get_parameter('save_frames').get_parameter_value().bool_value
+        save_path = self.get_parameter('save_path').get_parameter_value().string_value
+
+        raw_img, events_img, events = self.mj.loop(             
+                capture_events_enable=capture_events_enable,    
+                save_events=save_events,                        
+                capture_frames_enable=capture_frames_enable,    
+                save_frames=save_frames,                         
+                save_path=save_path                             
+                )
 
         events_msg = CameraEvents()
         if self.fill_msg_with_events(events_msg, events):

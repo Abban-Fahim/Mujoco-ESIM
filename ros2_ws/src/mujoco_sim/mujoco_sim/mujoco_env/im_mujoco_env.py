@@ -40,23 +40,23 @@ class EsimMujoco:
         self.viewer = mujoco_viewer.MujocoViewer(self.model, self.data)
         self.viewer.init_esim(contrast_threshold_negative=1.7, contrast_threshold_positive=1.7, refractory_period_ns=100)
 
-    def loop(self, capture_events_enable=False, capture_frames_enable=False):
+    def loop(self, capture_events_enable=False, save_events=False, capture_frames_enable=False, save_frames=False, save_path="/temp"):
         self.viewer.render(overlay_on=False)
 
         # mounted view
-        self.viewer.change_camera(self.camera_id)
+        # self.viewer.change_camera(self.camera_id)
 
         # first output
         raw_img = None
         if capture_frames_enable:
-            raw_img = self.viewer.capture_frame(self.camera_id, save_it=False)
+            raw_img = self.viewer.capture_frame(self.camera_id, save_it=save_frames, path=save_path)
 
         # second output
         # generate events
         out = None
         if capture_events_enable:
             timestamp = self.data.time         
-            out = self.viewer.capture_event(self.camera_id, timestamp, save_it=False)
+            out = self.viewer.capture_event(self.camera_id, timestamp, save_it=save_events, path=save_path)
             
         if out is not None:
             events_img, events = out

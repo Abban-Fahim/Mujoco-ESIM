@@ -41,3 +41,7 @@ def get_cerr_lim():
 def get_mjc_xml():
     cfg = read_cfg()
     return cfg["mujoco_model_xml"]
+
+def get_operations():
+    cfg = read_cfg()
+    return cfg["operations"]
