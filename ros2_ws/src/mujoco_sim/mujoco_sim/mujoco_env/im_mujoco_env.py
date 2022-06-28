@@ -6,6 +6,7 @@ import numpy as np
 import itertools
 
 from ..utils.quaternion import identity_quat, subQuat, quatAdd, mat2Quat, quat2Vel, quat2Mat, quat2eul
+from ..utils.read_cfg import get_mjc_xml
 from ..controllers.full_impedance_controller import FullImpedanceController
 import rclpy
 
@@ -23,11 +24,9 @@ class EsimMujoco:
         self.test_camera_on = False
         self.camera_id = 1 # 1 - for mounted camera, 0 - for floating camera
         self.overlay_on = True
-        self.xml_path = '/home/palinauskas/Documents/mujoco-eleanor/ros2_ws/src/mujoco_sim/mujoco_sim/kuka/full_kuka_INRC3_mounted_camera_usb.xml'
-        # self.xml_path = '../kuka/full_kuka_INRC3_mounted_camera.xml'
 
-
-        self.model = mujoco.MjModel.from_xml_path(self.xml_path)
+        # self.model = mujoco.MjModel.from_xml_path(self.xml_path)
+        self.model = mujoco.MjModel.from_xml_path(get_mjc_xml())
         self.data = mujoco.MjData(self.model)
         self.controller = FullImpedanceController(self.model, self.data, stiffness=np.array([1000.0, 1000.0, 1000.0, 1000.3, 1000.3, 1000.3]), damping = np.array([50.0, 50.0, 50.0, 50.3, 50.3, 50.3]))
 

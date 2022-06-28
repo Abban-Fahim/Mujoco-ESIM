@@ -34,7 +34,7 @@
       <geom class="collision" type="box" size=".41 .63 .5" pos="0 0.37 -0.5" rgba="0.6 0.6 0.6 0"/>
       <geom class="visual" pos="0 0 -1" euler="-1.570796326794897 0 0" type="mesh" mesh="table_mesh" material="kuka_grey"/>
       <!-- <geom pos="-0.15 0.6 0" euler="0 0 0" type="mesh" mesh="simple_shapes_mesh"/> -->
-      <geom pos="0.0 0.6 0" euler="0 0 0" type="mesh" mesh="ethernet_mesh"/>
+      <geom pos="0.0 0.6 0" euler="0 0 0" type="mesh" mesh="vga_mesh"/>
     </body>
     <body name="floor" pos="0 0 -1">
       <geom class="collision" type="plane" size="10 10 1" rgba="0.6 0.6 0.6 1.0"/> 
