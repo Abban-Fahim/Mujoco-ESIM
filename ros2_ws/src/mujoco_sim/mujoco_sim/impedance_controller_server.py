@@ -87,7 +87,7 @@ class ImControllerActionServer(Node):
             self.declare_parameter(k, v)
 
     def desired_pose_callback(self, goal_handle):
-        self.get_logger().info('Executing goal...')
+        self.get_logger().info('Executing goal: set_desired_pose...')
 
         # get goal pose name
         des_pose_name = goal_handle.request.des_pose_name
@@ -113,7 +113,7 @@ class ImControllerActionServer(Node):
         goal_handle.succeed()
         result_msg.error = feedback_msg.feedback_error
 
-        self.get_logger().info('Action finished!')
+        self.get_logger().info('Action finished! (set_desired_pose)')
 
         return result_msg
 
@@ -133,7 +133,7 @@ class ImControllerActionServer(Node):
             self.mj.set_des_pose(self.mj.random_circular_pose(t, start_pose))
 
     def saccades_callback_body(self, goal_handle, saccade_func):
-        self.get_logger().info('Executing goal...')
+        self.get_logger().info('Executing goal: saccades...')
 
         duration = goal_handle.request.duration
 
@@ -171,7 +171,7 @@ class ImControllerActionServer(Node):
         goal_handle.succeed()
         result_msg.time_spent = self.mj.data.time - t_0
 
-        self.get_logger().info('Action finished!')
+        self.get_logger().info('Action finished! (saccades)')
         return result_msg
 
     def composed_callback(self):
