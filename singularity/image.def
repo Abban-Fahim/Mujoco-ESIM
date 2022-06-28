@@ -15,8 +15,14 @@ Stage: build
     # export LISTEN_PORT=12345
     # export LC_ALL=C
     # export DEBIAN_FRONTEND=noninteractive
+    # export DEBIAN_FRONTEND=teletype
 
 %post
+    export DEBIAN_FRONTEND=noninteractive 
+    export TZ=TZ=Europe/Minsk
+    ln -snf /usr/share/zoneinfo/$TZ /etc/localtime
+    echo $TZ > /etc/timezone
+
     apt-get update 
 
     apt-get install -y build-essential \
@@ -36,13 +42,15 @@ Stage: build
     ##########################
     # CUDA
     ##########################
+    # apt-get install -y dialog
+
     wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/cuda-ubuntu2004.pin
     mv cuda-ubuntu2004.pin /etc/apt/preferences.d/cuda-repository-pin-600
     wget https://developer.download.nvidia.com/compute/cuda/11.3.0/local_installers/cuda-repo-ubuntu2004-11-3-local_11.3.0-465.19.01-1_amd64.deb
     DEBIAN_FRONTEND=noninteractive dpkg -i cuda-repo-ubuntu2004-11-3-local_11.3.0-465.19.01-1_amd64.deb
     apt-key add /var/cuda-repo-ubuntu2004-11-3-local/7fa2af80.pub
     DEBIAN_FRONTEND=noninteractive apt-get -y update 
-    apt-get -y -q install cuda
+    apt-get -y install cuda
 
     ##########################
     # Cmake
@@ -76,7 +84,7 @@ Stage: build
     ##########################
     # Display
     ##########################
-    apt-get install xorg
+    apt-get install -y xorg
 
     ##########################
     # eSim
