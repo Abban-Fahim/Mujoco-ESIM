@@ -26,9 +26,10 @@ def generate_launch_description():
             namespace,
             '/desired_pose_name_topic ',
             'controller_interface/action/DesiredPoseName ',
-            '"{des_pose_name: "USB"}"',
-            # new_desired_pose_name,
-            # '}"'
+            # '"{des_pose_name: "USB"}"',
+            '"{des_pose_name: "',
+            new_desired_pose_name,
+            '"}"'
         ]],
         shell=True
     )
