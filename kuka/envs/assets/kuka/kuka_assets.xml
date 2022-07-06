@@ -15,6 +15,7 @@
   <mesh name="usb_mesh" file="usb.stl"/> 
   <mesh name="vga_mesh" file="vga.stl"/> 
   <mesh name="hdmi_mesh" file="hdmi.stl"/> 
+  <mesh name="hole_mesh" file="hole.stl"/> 
   <material name="kuka_orange" rgba="1.0 0.423529411765 0.0392156862745 1.0"/>
   <material name="kuka_grey" rgba="0.4 0.4 0.4 1.0"/>
 </mujoco>

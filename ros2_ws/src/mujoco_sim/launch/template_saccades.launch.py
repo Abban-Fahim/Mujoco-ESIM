@@ -125,7 +125,7 @@ def generate_launch_description():
         enable_frames,
         enable_events,
         TimerAction(
-            period=2.0,
+            period=5.0,
             actions=[start_saccading],
         )
         
