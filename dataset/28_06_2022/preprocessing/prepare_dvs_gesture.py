@@ -179,7 +179,7 @@ if __name__ == '__main__':
                 #print(sample)
                 x, y, p, t = extractnpySample(events_file + sample, x, y, p, t)
                 cumul += 1
-                if (t[-1] - t[0]) > 500 or cumul == 25 :
+                if (t[-1] - t[0]) > 500 :
                     print(t[-1] - t[0])
                     saveSample(count, action, x, y, p, t)
                     x = []
