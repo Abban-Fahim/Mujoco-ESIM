@@ -31,24 +31,27 @@ def timeShift(t, start = 0) :
     if t != None :
         if len(t) :
             offset = t[0] - start
-            t_shift = [(ts - offset)/10**5 for ts in t]
+            t_shift = [ts-offset for ts in t]
+            if (t_shift[-1]-t_shift[0]) > 20 :
+                print("sample duration : ",t_shift[-1]-t_shift[0])
             return t_shift
 
 def mergeTimeStamps(t, t_new) :
     #append a new sequence of timestamp to an existing one
     #with a typical shift in between, and an offset on the added part
     if t_new != None and len(t_new) :
-        shift_t_new = t_new[-1] / len(t_new)
+        t_ms = [ts/(10**5) for ts in t_new] #convertion to miliseconds
+        shift_t_new = (t_ms[-1] - t_ms[0]) / len(t_ms)
     else :
         return t
 
     if t!= None and len(t):
-        shift_t = t[-1] / len(t)
+        shift_t = (t[-1] - t[0]) / len(t)
         typical_shift = (shift_t_new + shift_t) / 2
-        t = t + timeShift(t_new, start = t[-1] + typical_shift)
-    else :
+        t = t + timeShift(t_ms, start = t[-1] + typical_shift)
+    else : #if the timestamp list is empty, we initialize it starting from 0.
         typical_shift = shift_t_new
-        t = t_new
+        t = timeShift(t_ms, start = 0)
     return t
 
 def rescaleEvents(x,factor = 128) :
@@ -57,8 +60,11 @@ def rescaleEvents(x,factor = 128) :
     max_x = np.max(x)
 
     range_x = max_x - min_x
-    x_rescale = [int((value - min_x) / range_x * (factor -1)) for value in x]
-
+    if range_x > 0 :
+        x_rescale = [int((value - min_x) / range_x * (factor -1)) for value in x]
+    else :
+        print("all the same")
+        x_rescale = [factor // 2 for value in x] #if all values are identical, they are centered
     return x_rescale
 
 def convertPolarities(p) :
@@ -128,12 +134,6 @@ def saveSample(numb, action, x, y, p, t):
     if not os.path.isdir(data_folder):
         os.mkdir(data_folder)
 
-    if min(rescaleEvents(x)) - max(rescaleEvents(x)) > -127 :
-        print(min(rescaleEvents(x)) - max(rescaleEvents(x)))
-        print("AAAAAAAAAAA")
-    if min(rescaleEvents(y)) - max(rescaleEvents(y)) > -127 :
-        print(min(rescaleEvents(y)) - max(rescaleEvents(y)))
-        print("AAAAAAAAAAA for Y")
     # TD event for current action
     TD = slayer.io.Event(rescaleEvents(x), rescaleEvents(y), convertPolarities(p), t)
 
@@ -160,7 +160,6 @@ def saveSample(numb, action, x, y, p, t):
 
 
 if __name__ == '__main__':
-
     count = 0
     action = 0
     #loop to convert events for different ports
@@ -171,21 +170,22 @@ if __name__ == '__main__':
         print(events_file)
         print(os.path.isfile(events_file))
         if True : 
-            cumul = 0
             x = []
             y = []
             p = []
             t = []
+            cumul = 0
             for sample in sorted(os.listdir(events_file)) :
-                cumul +=1
                 #print(sample)
                 x, y, p, t = extractnpySample(events_file + sample, x, y, p, t)
-                if cumul == 25 :
+                cumul += 1
+                if (t[-1] - t[0]) > 500 or cumul == 25 :
+                    print(t[-1] - t[0])
                     saveSample(count, action, x, y, p, t)
                     x = []
                     y = []
                     p = []
                     t = []
+                    count += 1
                     cumul = 0
-                count += 1
         action += 1
