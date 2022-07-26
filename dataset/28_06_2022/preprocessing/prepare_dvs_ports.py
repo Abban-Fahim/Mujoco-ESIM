@@ -7,7 +7,8 @@ from matplotlib import animation
 import glob
 
 # path to downloaded raw dvs gesture dataset
-path = '/home/lecomte/Documents/datasets/gin_dataset/'
+#path = '/home/neumeier/Documents/eleanor/mujoco-eleanor/dataset/28_06_2022/original_event_imgs/'
+path = '/home/neumeier/Documents/eleanor/dataset/gin_dataset/'
 
 ### command line to extract all .npz files into directory with the same name
 ### for i in *.npz; do mkdir ${i%.npz}; unzip "$i" -d "${i%.npz}";done
@@ -16,7 +17,8 @@ path = '/home/lecomte/Documents/datasets/gin_dataset/'
 data_type = 'bs2' #'npy'
 
 # folder to store prepared dataset
-data_folder = '/home/lecomte/Documents/ELEANOR/dvs_port_' + data_type +'/'
+data_folder = '/home/neumeier/Documents/eleanor/dataset/dvs_port_' + data_type +'/'
+gif_folder = '/home/neumeier/Documents/eleanor/dataset/'
 
 actionName = [
     'ethernet',
@@ -24,6 +26,9 @@ actionName = [
     'usb',
     'vga'
 ]
+
+
+#actionName = ['ethernet']
 
 def timeShift(t, start = 0) :
     # shift everyvalue of the array
@@ -52,7 +57,26 @@ def mergeTimeStamps(t, t_new) :
     else : #if the timestamp list is empty, we initialize it starting from 0.
         typical_shift = shift_t_new
         t = timeShift(t_ms, start = 0)
+    #print(t_new)
+    #print(t)
     return t
+
+def appendTimeStamps(t, t_new):
+
+    if t_new != None and len(t_new) :
+        t_ms = [ts//(10**5) for ts in t_new]
+
+    t = t + t_ms
+
+    return t
+
+def t_shift(x, y, p, t):
+    # shift time
+    t_0 = t[0]
+    t_new = [i - t_0 for i in t]
+
+    return x, y, p, t_new
+
 
 def rescaleEvents(x,factor = 128) :
 
@@ -67,6 +91,26 @@ def rescaleEvents(x,factor = 128) :
         x_rescale = [factor // 2 for value in x] #if all values are identical, they are centered
     return x_rescale
 
+def cropEvents(x, y, p, t, size = 128) :
+
+    mean_x = np.mean(x)
+    mean_y = np.mean(y)
+
+    # focus on centre x
+    x_min = mean_x - size/2
+    x_max = mean_x + size/2 - 1
+    y_min = mean_y - size/2
+    y_max = mean_y + size/2 - 1
+    ind = np.where((np.array(x) > x_min) & (np.array(x) < x_max) & (np.array(y) > y_min) & (np.array(y) < y_max))
+    ind = ind[0].tolist()
+    # downsample by 2
+    x_new = [(x[i] - x_min) for i in ind]
+    y_new = [(y[i] - y_min) for i in ind]
+    p_new = [p[i] for i in ind]
+    t_new = [t[i] for i in ind]
+
+    return x_new, y_new, p_new, t_new
+
 def convertPolarities(p) :
     #from -1/1 to 0/1 polarity values to match Aedat representation
     return [int((pol+1)/2) for pol in p]
@@ -76,54 +120,9 @@ def extractnpySample(filepath, x, y, p, t) :
     x = x + np.load(filedir + 'x.npy').tolist()
     y = y + np.load(filedir + 'y.npy').tolist()
     p = p + np.load(filedir + 'p.npy').tolist()
-    t = mergeTimeStamps(t,np.load(filedir + 't.npy').tolist())
+    #t = mergeTimeStamps(t,np.load(filedir + 't.npy').tolist())
+    t = appendTimeStamps(t, np.load(filedir + 't.npy').tolist())
     return x, y, p, t
-
-def splitData(filename, path, numb_gest):
-    """
-       Split DVS Gesture Recordings into separate gesture sequences
-    """
-    # read raw event data
-    x, y, p, t = extractnpySample(path + filename)
-    # read labels
-    labels = np.loadtxt(path + filename + '_labels.csv', delimiter=',', skiprows=1)
-    labels[:,0]  -= 1
-
-    # make folder to store data
-    if not os.path.isdir(data_folder):
-        os.mkdir(data_folder)
-
-    lastAction = 100
-    for action, tst, ten in labels:
-        if action == lastAction:    continue # This is to ignore second arm_roll samples
-        print(actionName[int(action)])
-        # find events for current action
-        ind = np.where((np.array(t) >= tst) & (np.array(t) < ten))
-        ind = ind[0]
-        ind = list(ind)
-        # TD event for current action
-        TD = slayer.io.Event(x[ind[0]:ind[-1]], y[ind[0]:ind[-1]], p[ind[0]:ind[-1]], (t[ind[0]:ind[-1]] - tst) / 1000)
-
-        # option to save TD animation as GIF
-        #anim = snn.io.animTD(TD)
-        #anim.fig = plt.figure(figsize=(10, 10))
-        #anim.save('gifs/' + filename + '{:g}.gif'.format(action), animation.PillowWriter(fps=24), dpi=300)
-        lastAction = action
-
-        # save events to npy-/bs2-file
-        if data_type == 'npy':
-            #snn.io.encodeNpSpikes(data_folder + '{:g}.npy'.format(numb_gest + action), TD)
-            slayer.io.encode_np_spikes(data_folder + '{:g}.npy'.format(numb_gest + action), TD)
-        elif data_type == 'bs2':
-            slayer.io.encode_2d_spikes(data_folder + '{:g}.bs2'.format(numb_gest + action), TD)
-        else:
-            print('Wrong datatype. Choose bs2 or npy!')
-
-        # write train/test file
-        actions = [0, 2, 4, 6, 8, 10]
-        with open('data_npy/train_6.txt', 'a') as f:
-            if action in actions:
-                f.write(str(int(numb_gest + action)) + ' ' + str(int(action+1)) + '\n')
 
 
 def saveSample(numb, action, x, y, p, t):
@@ -133,14 +132,19 @@ def saveSample(numb, action, x, y, p, t):
     # make folder to store data
     if not os.path.isdir(data_folder):
         os.mkdir(data_folder)
-
+    # preprocess events
+    p = convertPolarities(p)
+    x, y, p, t = cropEvents(x, y, p, t)
+    x, y, p, t = t_shift(x, y, p, t)
     # TD event for current action
-    TD = slayer.io.Event(rescaleEvents(x), rescaleEvents(y), convertPolarities(p), t)
+    #TD = slayer.io.Event(rescaleEvents(x), rescaleEvents(y), convertPolarities(p), t)
+    TD = slayer.io.Event(x, y, p, t)
 
     # option to save TD animation as GIF
-    #anim = snn.io.animTD(TD)
-    #anim.fig = plt.figure(figsize=(10, 10))
-    #anim.save('gifs/' + filename + '{:g}.gif'.format(action), animation.PillowWriter(fps=24), dpi=300)
+    #if numb < 100:
+    anim = TD.anim(frame_rate=24)
+    anim.fig = plt.figure(figsize=(10, 10))
+    anim.save(gif_folder + 'gifs/' + '{:g}.gif'.format(numb), animation.PillowWriter(fps=24), dpi=300)
 
     # save events to npy-/bs2-file
     if data_type == 'npy':
@@ -152,10 +156,10 @@ def saveSample(numb, action, x, y, p, t):
         print('Wrong datatype. Choose bs2 or npy!')
 
     # write train/test file
-    actions = [0, 1, 2, 3]
+    #actions = [0, 1, 2, 3]
     with open(data_folder + 'train.txt', 'a') as f:
-        if action in actions:
-            f.write(str(int(numb + action)) + ' ' + str(int(action+1)) + '\n')
+        #if action in actions:
+        f.write(str(int(numb)) + ' ' + str(int(action)) + '\n')
 
 
 
