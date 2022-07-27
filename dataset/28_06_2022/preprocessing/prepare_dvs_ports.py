@@ -8,7 +8,7 @@ import glob
 
 # path to downloaded raw dvs gesture dataset
 #path = '/home/neumeier/Documents/eleanor/mujoco-eleanor/dataset/28_06_2022/original_event_imgs/'
-path = '/home/neumeier/Documents/eleanor/dataset/gin_dataset/'
+path = '/home/lecomte/Documents/datasets/gin_dataset/'
 
 ### command line to extract all .npz files into directory with the same name
 ### for i in *.npz; do mkdir ${i%.npz}; unzip "$i" -d "${i%.npz}";done
@@ -17,8 +17,8 @@ path = '/home/neumeier/Documents/eleanor/dataset/gin_dataset/'
 data_type = 'bs2' #'npy'
 
 # folder to store prepared dataset
-data_folder = '/home/neumeier/Documents/eleanor/dataset/dvs_port_' + data_type +'/'
-gif_folder = '/home/neumeier/Documents/eleanor/dataset/'
+gif_folder = '/home/lecomte/Documents/ELEANOR/comp/'
+data_folder = gif_folder + 'dvs_port_' + data_type +'/'
 
 actionName = [
     'ethernet',
@@ -117,11 +117,18 @@ def convertPolarities(p) :
 
 def extractnpySample(filepath, x, y, p, t) :
     filedir = filepath + "/"
-    x = x + np.load(filedir + 'x.npy').tolist()
-    y = y + np.load(filedir + 'y.npy').tolist()
-    p = p + np.load(filedir + 'p.npy').tolist()
+    x_new = np.load(filedir + 'x.npy').tolist()
+    y_new = np.load(filedir + 'y.npy').tolist()
+    p_new = np.load(filedir + 'p.npy').tolist()
     #t = mergeTimeStamps(t,np.load(filedir + 't.npy').tolist())
-    t = appendTimeStamps(t, np.load(filedir + 't.npy').tolist())
+    t_new = np.load(filedir + 't.npy').tolist()
+
+    x_new, y_new, p_new, t_new = cropEvents(x_new, y_new, p_new, t_new)
+
+    x = x + x_new
+    y = y +y_new
+    p = p + p_new
+    t = appendTimeStamps(t, t_new)
     return x, y, p, t
 
 
@@ -134,7 +141,7 @@ def saveSample(numb, action, x, y, p, t):
         os.mkdir(data_folder)
     # preprocess events
     p = convertPolarities(p)
-    x, y, p, t = cropEvents(x, y, p, t)
+    #x, y, p, t = cropEvents(x, y, p, t)
     x, y, p, t = t_shift(x, y, p, t)
     # TD event for current action
     #TD = slayer.io.Event(rescaleEvents(x), rescaleEvents(y), convertPolarities(p), t)
@@ -145,7 +152,7 @@ def saveSample(numb, action, x, y, p, t):
     anim = TD.anim(frame_rate=24)
     anim.fig = plt.figure(figsize=(10, 10))
     anim.save(gif_folder + 'gifs/' + '{:g}.gif'.format(numb), animation.PillowWriter(fps=24), dpi=300)
-
+    plt.close(anim.fig)
     # save events to npy-/bs2-file
     if data_type == 'npy':
         #snn.io.encodeNpSpikes(data_folder + '{:g}.npy'.format(numb + action), TD)
