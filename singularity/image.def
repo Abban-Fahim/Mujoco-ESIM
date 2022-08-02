@@ -50,7 +50,7 @@ Stage: build
     DEBIAN_FRONTEND=noninteractive dpkg -i cuda-repo-ubuntu2004-11-3-local_11.3.0-465.19.01-1_amd64.deb
     apt-key add /var/cuda-repo-ubuntu2004-11-3-local/7fa2af80.pub
     DEBIAN_FRONTEND=noninteractive apt-get -y update 
-    apt-get -y install cuda
+    apt-get -y install cuda-11-3
 
     ##########################
     # Cmake
@@ -72,6 +72,7 @@ Stage: build
     ##########################
     # Project
     ##########################
+    # change absolute paths from user/palinauskas to your own
     git clone --branch dev_mujoco_update https://git.fortiss.org/neuromorphic-computing/inrc3/mujoco-eleanor.git
     pip install -r mujoco-eleanor/requirements.txt
 
@@ -94,6 +95,7 @@ Stage: build
     pip install pybind11
     pip install pybind11-global
     git clone https://github.com/uzh-rpg/rpg_vid2e.git
+    git checkout upsampler_packager
     wget https://rpg.ifi.uzh.ch/data/VID2E/pretrained_models.zip -O /tmp/temp.zip
     unzip /tmp/temp.zip -d rpg_vid2e/
     rm -rf /tmp/temp.zip
@@ -107,6 +109,14 @@ Stage: build
 
     # esim_torch part
     pip install rpg_vid2e/esim_torch/
+
+    # upsampler
+
+    # bug fix
+    echo "from .upsampler import Upsampler" >> rpg_vid2e/upsampling/src/upsampler/__init__.py
+
+    pip install rpg_vid2e/upsampling
+
 
     # NOW=`date`
     # echo "export NOW=\"${NOW}\"" >> $SINGULARITY_ENVIRONMENT

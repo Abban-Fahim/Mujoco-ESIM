@@ -13,7 +13,33 @@ poses:
     APPROACH: [-0.2,0.65,0.3, 180, 0, 0]
     INSERTION: [-0.20,0.65,0.2, 180, 0, 0]
     LOOK: [0.15,0.55,0.18, 180, 0, 0]
-    USB: [0.0,0.55,0.13, 180, 0, 0]
+    USB: [0.0,0.55,0.13, 180, 0, 0] # Recording position. Running for all except vga
+    VGA: [0.0,0.55,0.20, 180, 0, 0] 
+    HOLE: [0.0,0.60,0.20, 180, 0, 0] 
+    IN_HOLE: [0.0,0.60,0.11, 180, 0, 0]
+
+    HOLE_TRAIN0: [0.0,0.60,0.20, 180, 0, 0] 
+    HOLE_TRAIN1: [0.05,0.60,0.20, 180, 0, 0] 
+    HOLE_TRAIN2: [0.10,0.60,0.20, 180, 0, 0] 
+
+    HOLE_TRAIN01: [0.0,0.65,0.20, 180, 0, 0] 
+    HOLE_TRAIN11: [0.05,0.65,0.20, 180, 0, 0] 
+    HOLE_TRAIN21: [0.10,0.65,0.20, 180, 0, 0] 
+
+    HOLE_TRAIN02: [0.0,0.55,0.20, 180, 0, 0] 
+    HOLE_TRAIN12: [0.05,0.55,0.20, 180, 0, 0] 
+    HOLE_TRAIN22: [0.10,0.55,0.20, 180, 0, 0] 
+
+    HOLE_TRAIN03: [0.0,0.50,0.20, 180, 0, 0]  # center square
+    HOLE_TRAIN13: [0.05,0.50,0.20, 180, 0, 0] 
+    HOLE_TRAIN23: [0.10,0.50,0.20, 180, 0, 0] 
+
+    HOLE_TRAIN04: [0.02,0.50,0.20, 180, 0, 0] 
+    HOLE_TRAIN14: [0.02,0.52,0.20, 180, 0, 0] 
+    HOLE_TRAIN24: [0.02,0.55,0.20, 180, 0, 0] 
+
+
+
 
 jerr_limit: 0.1 # accuracy of reaching a position before changing viapoint
 cerr_limit: 0.0005 # accuracy of reaching a position before changing viapoint
@@ -21,7 +47,9 @@ cerr_limit: 0.0005 # accuracy of reaching a position before changing viapoint
 # mujoco_model_xml: "/home/palinauskas/Documents/mujoco-eleanor/ros2_ws/src/mujoco_sim/mujoco_sim/kuka/full_kuka_INRC3_mounted_camera_usb.xml" # absolute path
 # mujoco_model_xml: "/home/palinauskas/Documents/mujoco-eleanor/ros2_ws/src/mujoco_sim/mujoco_sim/kuka/full_kuka_INRC3_mounted_camera_vga.xml" # absolute path
 # mujoco_model_xml: "/home/palinauskas/Documents/mujoco-eleanor/ros2_ws/src/mujoco_sim/mujoco_sim/kuka/full_kuka_INRC3_mounted_camera_ethernet.xml" # absolute path
-mujoco_model_xml: "/home/palinauskas/Documents/mujoco-eleanor/ros2_ws/src/mujoco_sim/mujoco_sim/kuka/full_kuka_INRC3_mounted_camera_hdmi.xml" # absolute path
+# mujoco_model_xml: "/home/palinauskas/Documents/mujoco-eleanor/ros2_ws/src/mujoco_sim/mujoco_sim/kuka/full_kuka_INRC3_mounted_camera_hdmi.xml" # absolute path
+mujoco_model_xml: "/home/palinauskas/Documents/mujoco-eleanor/ros2_ws/src/mujoco_sim/mujoco_sim/kuka/full_kuka_INRC3_mounted_camera_hole.xml" # absolute path
+
 
 operations:
   capture_events_enable: False
@@ -29,3 +57,8 @@ operations:
   capture_frames_enable: False
   save_frames: False
   save_path: "/home/palinauskas/Documents/mujoco-eleanor/dataset" # absolute path
+
+  # ros2 launch mujoco_sim run_saccades.launch.py 
+  # ros2 launch mujoco_sim run_turn_off_camera.launch.py
+
+

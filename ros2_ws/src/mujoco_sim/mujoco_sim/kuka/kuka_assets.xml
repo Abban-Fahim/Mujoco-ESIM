@@ -9,13 +9,21 @@
   <mesh name="kuka_link_7_mesh" file="kuka_link_7.stl"/>
   <mesh name="table_mesh" file="table.stl"/>
   <mesh name="tool_cylinder_mesh" file="tool_cylinder.stl"/>
+  <mesh name="tool_cylinder_mesh0" file="tool_cylinder0.stl"/>
+  <mesh name="tool_cylinder_mesh1" file="tool_cylinder1.stl"/>
   <mesh name="simple_shapes_mesh" file="simple_shapes.stl"/>
   <mesh name="industrial_sockets_mesh" file="industrial_sockets.stl"/>
   <mesh name="ethernet_mesh" file="ethernet2.stl"/> 
   <mesh name="usb_mesh" file="usb2.stl"/> 
   <mesh name="vga_mesh" file="vga2.stl"/> 
   <mesh name="hdmi_mesh" file="hdmi2.stl"/> 
-  <mesh name="hole_mesh" file="hole.stl"/> 
+  <mesh name="hole_mesh" file="hole2.stl"/> 
+  <mesh name="hole_mesh0" file="hole20.stl"/> 
+  <mesh name="hole_mesh1" file="hole21.stl"/> 
+  <mesh name="hole_mesh2" file="hole22.stl"/> 
+  <mesh name="hole_mesh3" file="hole23.stl"/> 
+  <mesh name="hole_mesh4" file="hole24.stl"/> 
+
   <material name="kuka_orange" rgba="1.0 0.423529411765 0.0392156862745 1.0"/>
   <material name="kuka_grey" rgba="0.4 0.4 0.4 1.0"/>
 </mujoco>
