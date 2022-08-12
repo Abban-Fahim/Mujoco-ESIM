@@ -5,10 +5,27 @@
 
   <option>
     <flag gravity="enable"/>
+    
   </option>
 
+  <!-- <option>
+    <flag multiccd="enable"/>
+  </option>
+
+  <option>
+    <flag frictionloss="disable"/>
+  </option>
+
+  <option>
+    <flag equality="disable"/>
+  </option> -->
+
+  <!-- <option>
+    <flag fwdinv="enable"/>
+  </option> -->
+
   <default> 
-    <joint damping="0.5"/>   
+    <joint damping="5"/>   
     <default class="visual">
       <geom contype="0" conaffinity="0"/>
     </default>
@@ -48,16 +65,16 @@
     </body> -->
 
     <body name="test_box0" pos="0.0 0.6 0" euler="0 0 0">
-      <geom class="collision" type="mesh" mesh="hole_mesh0" />
+      <geom class="collision" type="mesh" mesh="hole_mesh0"  />
     </body>
     <body name="test_box1" pos="0.0 0.6 0" euler="0 0 0">
-      <geom class="collision" type="mesh" mesh="hole_mesh1"/>
+      <geom class="collision" type="mesh" mesh="hole_mesh1" />
     </body>
     <body name="test_box2" pos="0.0 0.6 0" euler="0 0 0">
-      <geom class="collision" type="mesh" mesh="hole_mesh2"/>
+      <geom class="collision" type="mesh" mesh="hole_mesh2" />
     </body>
     <body name="test_box3" pos="0.0 0.6 0" euler="0 0 0">
-      <geom class="collision" type="mesh" mesh="hole_mesh3"/>
+      <geom class="collision" type="mesh" mesh="hole_mesh3" />
     </body>
     <body name="test_box4" pos="0.0 0.6 0" euler="0 0 0">
       <geom class="collision" type="mesh" mesh="hole_mesh4" rgba="0 0 0 1"/>

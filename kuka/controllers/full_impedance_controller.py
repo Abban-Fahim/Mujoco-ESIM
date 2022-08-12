@@ -30,8 +30,8 @@ class FullImpedanceController(BaseController):
                  site_name='ee_site',
                  stiffness=None,
                  damping='auto',
-                 null_space_damping=10,
-                 null_space_stiffness=1.0,
+                 null_space_damping=90,
+                 null_space_stiffness=2000.0,
                  controlled_joints=None,
                  nominal_pos=None,
                  nominal_quat=None,
@@ -59,7 +59,7 @@ class FullImpedanceController(BaseController):
         else:
             self.nominal_qpos = nominal_qpos.copy()
 
-        self.gym_action_space(pos_limit, rot_limit)
+        # self.gym_action_space(pos_limit, rot_limit)
 
         # Controller parameters.
         self.scale = np.ones(6)
@@ -72,8 +72,9 @@ class FullImpedanceController(BaseController):
 
         # Default stiffness and damping in cartesian space
         if stiffness is None:
-            # self.stiffness = np.array([10000.0, 10000.0, 10000.0, 10000.3, 10000.3, 10000.3])
-            self.stiffness = np.array([300.0, 300.0, 300.0, 200.0, 200.0, 200.0])
+            # self.stiffness = np.array([1000.0, 1000.0, 1000.0, 1000.3, 1000.3, 1000.3])
+            # self.stiffness = np.array([300.0, 300.0, 300.0, 200.0, 200.0, 200.0])
+            self.stiffness = np.array([700.0, 700.0, 700.0, 700.0, 700.0, 700])
             # self.stiffness = np.array([10.0, 10.0, 10.0, 10.0, 10.0, 10.0])
         else:
             self.stiffness = np.ones(6)*stiffness
@@ -99,6 +100,10 @@ class FullImpedanceController(BaseController):
         dx = action[0:3].astype(np.float64)
         dr = action[3:6].astype(np.float64)
 
+        # f = self.force_feedback()
+        # print(f)
+        # dx += f[:3] * 0.00001
+
         self.pos_set = dx
         self.quat_set = quatAdd(np.array([1., 0., 0., 0.]), dr)
 
@@ -111,7 +116,9 @@ class FullImpedanceController(BaseController):
 
         mujoco.mj_inverse(self.sim_model, self.sim_data)
         id_torque = self.sim_data.qfrc_inverse[self.sim_actuators_idx].copy()
-        
+
+
+        # id_torque = self.sim_data.qacc
         return id_torque
 
 
@@ -190,3 +197,8 @@ class FullImpedanceController(BaseController):
             self.sim_actuators_idx = range(self.sim_model.nu)
             self.sim_joint_idx = range(self.sim_model.nu)
 
+    def force_feedback(self):
+        r_pseudo_J = self.right_pseudo_Jac()
+
+        # solve: tau = (Jac)^T * F
+        return r_pseudo_J.T @ self.sim_data.qfrc_constraint

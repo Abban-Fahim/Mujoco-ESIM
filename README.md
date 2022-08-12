@@ -34,3 +34,4 @@ You are ready to create and adapt new experiments, components and controllers :)
 Inspired by:
 - https://github.com/PaulDanielML/MuJoCo_RL_UR5 
 - https://github.com/HarvardAgileRoboticsLab/gym-kuka-mujoco
+- https://github.com/rohanpsingh/mujoco-python-viewer
