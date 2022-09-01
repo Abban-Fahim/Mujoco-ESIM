@@ -185,12 +185,14 @@ class ImControllerActionServer(Node):
         capture_frames_enable = self.get_parameter('capture_frames_enable').get_parameter_value().bool_value
         save_frames = self.get_parameter('save_frames').get_parameter_value().bool_value
         save_path = self.get_parameter('save_path').get_parameter_value().string_value
+        save_pose = self.get_parameter('save_pose').get_parameter_value().bool_value
 
         raw_img, events_img, events = self.mj.loop(             
                 capture_events_enable=capture_events_enable,    
                 save_events=save_events,                        
                 capture_frames_enable=capture_frames_enable,    
-                save_frames=save_frames,                         
+                save_frames=save_frames,   
+                save_pose=save_pose,                      
                 save_path=save_path                             
                 )
 

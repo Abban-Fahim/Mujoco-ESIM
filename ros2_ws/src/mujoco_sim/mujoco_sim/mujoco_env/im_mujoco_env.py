@@ -36,10 +36,10 @@ class EsimMujoco:
         self.err_limit = err_limit # error before accepting the pose
         self.des_pose = des_pose # goal pose
 
-        self.viewer = mujoco_viewer.MujocoViewer(self.model, self.data)
-        self.viewer.init_esim(contrast_threshold_negative=1.7, contrast_threshold_positive=1.7, refractory_period_ns=100)
+        self.viewer = mujoco_viewer.MujocoViewer(self.model, self.data, headless=False, render_every_frame=True, running_events=True)
+        self.viewer.init_esim(contrast_threshold_negative=0.9, contrast_threshold_positive=0.9, refractory_period_ns=100)
 
-    def loop(self, capture_events_enable=False, save_events=False, capture_frames_enable=False, save_frames=False, save_path="/temp"):
+    def loop(self, capture_events_enable=False, save_events=False, capture_frames_enable=False, save_frames=False, save_pose=False, save_path="/temp"):
         self.viewer.render(overlay_on=False)
 
         # mounted view
@@ -56,11 +56,19 @@ class EsimMujoco:
         if capture_events_enable:
             timestamp = self.data.time         
             out = self.viewer.capture_event(self.camera_id, timestamp, save_it=save_events, path=save_path)
+
+            
             
         if out is not None:
             events_img, events = out
+            # save current camera pose
+            if save_pose:
+                image_idx = self.viewer._image_idx
+                self.write_camera_pose(image_idx, save_path=save_path)
         else:
             events_img, events = None, None
+
+        
 
         # set goal pose
         self.controller.set_action(self.des_pose)
@@ -103,6 +111,13 @@ class EsimMujoco:
         cam_quat = quatAdd(quat, quat2Vel(quat_offset))
 
         return cam_pos, cam_quat
+
+    def write_camera_pose(self, image_idx, save_path="/temp"):
+        pose = self.get_camera_pose()
+        
+        with open(save_path + "/positions.txt", "a") as f:
+            f.write(str(image_idx) +  "   " + np.array2string(pose[0]) + np.array2string(pose[1]) + "\n")
+
         
     def circular_pose(self, t, start_pose):
         r = 0.02
@@ -123,7 +138,7 @@ class EsimMujoco:
     def random_circular_pose(self, t, start_pose):
         rng = np.random.default_rng(int(time.time()))
         tt = rng.random() * 2 * np.pi 
-        r = 0.02
+        r = 0.1
         w = 10
 
         offset = np.zeros(3)

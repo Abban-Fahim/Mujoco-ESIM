@@ -17,7 +17,7 @@ data.qpos = poses["HOME_Q"]
 print(data.qpos)
 
 # viapoints = ["INSERTION_Q", "APPROACH_Q", "ROBOT_HOME_Q",  "HOME_Q", "TEST_Q", "INIT_Q"]
-viapoints = ["APPROACH_Q", "HOME_Q"]
+viapoints = ["TEST_Q", "APPROACH_Q", "HOME_Q"]
 viapoint = viapoints.pop()
 
 t = data.time
@@ -40,7 +40,7 @@ while (True):
     mujoco.mj_step(model, data)
     t = data.time
 
-    data.site("des_pose").xpos = [0.06823274, 0.62719928, 0.36782649]
+    # data.site("des_pose").xpos = [0.06823274, 0.62719928, 0.36782649]
     # data.site("des_pose").xmat = [2.42251520e-05,  7.07545557e-01, -7.06667732e-01,  4.17127271e-05]
     # print("des_pose", data.site("des_pose").xpos)
 

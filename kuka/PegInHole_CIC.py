@@ -24,7 +24,7 @@ data.qpos = jposes["HOME_Q"]
 
 poses = get_cposes()
 
-viapoints = ["INSERTION", "APPROACH",  "HOME"]
+viapoints = ["TEST", "APPROACH",  "HOME"]
 viapoint = viapoints.pop()
 
 
@@ -44,16 +44,17 @@ while (True):
 
     controller.set_action(poses[viapoint])
     torque = controller.get_torque()
-    data.ctrl[:] = np.clip(torque, -300, 300)
+    # data.ctrl[:] = np.clip(torque, -100, 100)
+    data.ctrl[:] = torque
     #self.sim.data.qfrc_applied[:] = self._get_random_applied_force()
     
     mujoco.mj_step(model, data)
     t = data.time
 
-    print("timestamp:", t, viapoints)
-    print("error", err)
-    print("Current viapoint", viapoint)
-    print("Joint Values:", data.qpos)
-    print("Torques:", torque)
-    print("Actions:", data.ctrl)
+    # print("timestamp:", t, viapoints)
+    # print("error", err)
+    # print("Current viapoint", viapoint)
+    # print("Joint Values:", data.qpos)
+    # print("Torques:", torque)
+    # print("Actions:", data.ctrl)
     

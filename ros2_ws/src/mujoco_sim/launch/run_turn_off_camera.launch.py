@@ -73,12 +73,26 @@ def generate_launch_description():
         shell=True
     )
 
+    disenable_save_camera_pose = ExecuteProcess(
+        cmd=[[
+            'ros2 param set ',
+            '/',
+            namespace,
+            '/',
+            name,
+            ' save_pose ',
+            'False'
+        ]],
+        shell=True
+    )
+
 
     return LaunchDescription([
         name_launch_arg,
         namespace_launch_arg,
         disenable_save_frames,
         disenable_save_events,
+        disenable_save_camera_pose,
         disenable_frames,
         disenable_events,
 

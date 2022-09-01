@@ -78,6 +78,19 @@ def generate_launch_description():
         shell=True
     )
 
+    enable_save_camera_pose = ExecuteProcess(
+        cmd=[[
+            'ros2 param set ',
+            '/',
+            namespace,
+            '/',
+            name,
+            ' save_pose ',
+            'True'
+        ]],
+        shell=True
+    )
+
     start_saccading = ExecuteProcess(
         cmd=[[
             'ros2 action send_goal ',
@@ -91,29 +104,6 @@ def generate_launch_description():
         shell=True
     )
 
-    # start_saccading_conditioned = ExecuteProcess(
-    #     condition=IfCondition(
-    #         PythonExpression([
-    #             enable_frames,
-    #             ' and ',
-    #             enable_events,
-    #             ' and ',
-    #             enable_save_frames,
-    #             ' and ',
-    #             enable_save_events,
-    #         ])
-    #     ),
-    #     cmd=[[
-    #         'ros2 action send_goal ',
-    #         namespace,
-    #         '/random_saccades_topic ',
-    #         'controller_interface/action/Saccades ',
-    #         '"{duration: ',
-    #         new_saccade_duration,
-    #         '}"'
-    #     ]],
-    #     shell=True
-    # )
 
 
     return LaunchDescription([
@@ -122,10 +112,11 @@ def generate_launch_description():
         new_saccade_duration_launch_arg,
         enable_save_frames,
         enable_save_events,
+        enable_save_camera_pose,
         enable_frames,
         enable_events,
         TimerAction(
-            period=5.0,
+            period=10.0,
             actions=[start_saccading],
         )
         
