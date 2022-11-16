@@ -1,3 +1,57 @@
+#
+#BSD 3-Clause License
+#
+#
+#
+#Copyright 2022 fortiss, Neuromorphic Computing group
+#
+#
+#All rights reserved.
+#
+#
+#
+#Redistribution and use in source and binary forms, with or without
+#
+#modification, are permitted provided that the following conditions are met:
+#
+#
+#
+#* Redistributions of source code must retain the above copyright notice, this
+#
+#  list of conditions and the following disclaimer.
+#
+#
+#
+#* Redistributions in binary form must reproduce the above copyright notice,
+#
+#  this list of conditions and the following disclaimer in the documentation
+#
+#  and/or other materials provided with the distribution.
+#
+#
+#
+#* Neither the name of the copyright holder nor the names of its
+#
+#  contributors may be used to endorse or promote products derived from
+#
+#  this software without specific prior written permission.
+#
+#
+#
+#THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+#
+#AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+#
+#IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+#
+#DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+#
+#FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+#
+#DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+#
+
+
 import argparse
 from operator import sub
 import os
@@ -107,9 +161,9 @@ def process_dir(outdir, indir, args):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser("""Generate events from a high frequency video stream""")
-    parser.add_argument("--contrast_threshold_negative", "-cn", type=float, default=0.2)
-    parser.add_argument("--contrast_threshold_positive", "-cp", type=float, default=0.2)
-    parser.add_argument("--refractory_period_ns", "-rp", type=int, default=0)
+    parser.add_argument("--contrast_threshold_negative", "-cn", type=float, default=0.9)
+    parser.add_argument("--contrast_threshold_positive", "-cp", type=float, default=0.9)
+    parser.add_argument("--refractory_period_ns", "-rp", type=int, default=100)
     parser.add_argument("--input_dir", "-i", default="", required=True)
     parser.add_argument("--output_dir", "-o", default="", required=True)
     args = parser.parse_args()
@@ -117,7 +171,9 @@ if __name__ == "__main__":
 
     print(f"Generating events with cn={args.contrast_threshold_negative}, cp={args.contrast_threshold_positive} and rp={args.refractory_period_ns}")
 
+    print("###########")
     for path, subdirs, files in os.walk(args.input_dir):
+        print("###########ßßßßßßßßßß")
         if is_valid_dir(subdirs, files):
             output_folder = os.path.join(args.output_dir, os.path.relpath(path, args.input_dir))
 

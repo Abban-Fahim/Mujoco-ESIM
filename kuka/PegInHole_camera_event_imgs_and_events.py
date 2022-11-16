@@ -28,7 +28,7 @@ data = mujoco.MjData(model)
 print(data.qpos)
 
 viewer = mujoco_viewer.MujocoViewer(model, data)
-viewer.init_esim(contrast_threshold_negative=1.7, contrast_threshold_positive=1.7, refractory_period_ns=100)
+viewer.init_esim(contrast_threshold_negative=0.9, contrast_threshold_positive=0.9, refractory_period_ns=100)
 
 t_0 = time.time()
 t = 0
@@ -41,7 +41,7 @@ while (step < sim_steps) or test_camera_on:
         timestamp = data.time        
         print(timestamp)
         
-        viewer.capture_event(camera_id, timestamp, save_it=False)
+        viewer.capture_event(camera_id, timestamp, save_it=True, path="gen_events")
     else:
         viewer.render(overlay_on=overlay_on)
     

@@ -95,7 +95,9 @@ Stage: build
     pip install pybind11
     pip install pybind11-global
     git clone https://github.com/uzh-rpg/rpg_vid2e.git
+    cd rpg_vid2e
     git checkout upsampler_packager
+    cd ..
     wget https://rpg.ifi.uzh.ch/data/VID2E/pretrained_models.zip -O /tmp/temp.zip
     unzip /tmp/temp.zip -d rpg_vid2e/
     rm -rf /tmp/temp.zip
