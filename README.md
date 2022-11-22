@@ -12,7 +12,7 @@ And then checkout the desired branch.
 
 - git checkout *desired-branch*
 
-For installation just follow the singularity definition file.
+For installation just follow the install_guide.txt.
 
 ## Run the code
 
