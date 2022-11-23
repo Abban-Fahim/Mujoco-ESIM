@@ -2,9 +2,17 @@
 
 Uses Galactic Geochelone version with Ubuntu 20.04
 
-## Install
+## Install ROS2
 
-folow the steps in https://docs.ros.org/en/galactic/Installation.html
+follow the steps in https://docs.ros.org/en/galactic/Installation.html
+
+## Install colcon (a build tool)
+
+- `sudo apt-get install python3-empy`
+- `sudo apt install python3-colcon-common-extensions`
+- `pip install catkin_pkg`
+- `pip install lark`
+
 
 ## Build packages
 
@@ -13,6 +21,18 @@ All packages:
 
 Only specific packages:
 - `colcon build --packages-select mujoco_sim`
+
+## Install local esim_torch before running 
+
+- `pip install torch==1.12.0+cu113 torchvision==0.13.0+cu113 torchaudio==0.12.0 --extra-index-url https://download.pytorch.org/whl/cu113`
+
+- `pip install rpg_vid2e/esim_torch/`
+
+- `pip install rpg_vid2e/upsampling`
+
+ pip install sk-video
+ 
+ pip install tqdm
 
 ## Run mujoco_sim node
 
