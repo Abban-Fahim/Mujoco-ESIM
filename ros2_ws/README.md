@@ -30,9 +30,9 @@ Only specific packages:
 
 - `pip install rpg_vid2e/upsampling`
 
- pip install sk-video
- 
- pip install tqdm
+- `pip install -r rpg_vid2e/`
+
+- `pip install mujoco==2.1.5`
 
 ## Run mujoco_sim node
 
