@@ -46,6 +46,12 @@ We have provided the `requirements.txt` for the python environment without NxSDK
 
 **New**: We have created `requirements-new.txt` for Ubuntu 20.04 with Python 3.8.10 and [MuJoCo 2.1.0 - The new open-source version of Mujoco](https://mujoco.org/).
 
+Install pytorch:
+
+```
+pip install torch==1.12.0+cu113 torchvision==0.13.0+cu113 torchaudio==0.12.0 --extra-index-url https://download.pytorch.org/whl/cu113
+```
+
 ## Example Usage ##
 
 #### 1. Training PopSAN ####
@@ -84,3 +90,10 @@ This will test the 10 trained models on Loihi. To run the code correctly, `data_
 ### Acknowledgment ###
 
 This work is supported by Intel's Neuromorphic Research Community Grant Award. Part of our code, including DRL training and PPO multiprocessing environments, were built upon [OpenAI Spinning Up](https://github.com/openai/spinningup), [OpenAI Baselines](https://github.com/openai/baselines), and [Stable Baselines](https://github.com/hill-a/stable-baselines). We would like to thank their contribution to the community.
+
+### Install custom gym environments ###
+
+```
+pip install -e  gym-env
+```
+
