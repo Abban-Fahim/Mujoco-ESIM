@@ -57,7 +57,7 @@ from yaml.loader import SafeLoader
 import numpy as np
 
 # yaml_path = "../cfg/cfg.yaml"
-yaml_path = "/home/palinauskas/Documents/mujoco-eleanor/ros2_ws/src/mujoco_sim/mujoco_sim/cfg/cfg.yaml"
+yaml_path = "/home/palinauskas/Documents/fortiss_repo/mujoco-eleanor/ros2_ws/src/mujoco_sim/mujoco_sim/cfg/cfg.yaml"
 
 def read_cfg():
     cfg = None

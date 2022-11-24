@@ -78,7 +78,7 @@ class PegInHoleRandomEventsVisualServoingGuiding2NCRand(PegInHoleRandomEventsVis
         
         index = np.random.randint(0,4)
         img_file = img_files[index]
-        goal_img_path = "/home/palinauskas/Documents/pop-spiking-deep-rl/gym-env/gym_env/envs/goal_image/" + img_file
+        goal_img_path = "/home/palinauskas/Documents/fortiss_repo/mujoco-eleanor/gym-env/gym_env/envs/goal_image/" + img_file
 
         min, max = 7, 55
         self.goal_coord = (np.random.randint(min,max), np.random.randint(min,max))
