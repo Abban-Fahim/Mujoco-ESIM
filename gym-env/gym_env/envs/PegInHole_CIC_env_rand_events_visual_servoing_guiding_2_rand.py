@@ -74,11 +74,7 @@ from .PegInHole_CIC_env_rand_events_visual_servoing_guiding_2 import PegInHoleRa
 class PegInHoleRandomEventsVisualServoingGuiding2Rand(PegInHoleRandomEventsVisualServoingGuiding2):
     
     def random_img_goal(self):
-        img_files = ["00000437.png", "00001262.png", "00000531.png", "00002562.png"]
-        
-        index = np.random.randint(0,4)
-        img_file = img_files[index]
-        goal_img_path = "/home/palinauskas/Documents/fortiss_repo/mujoco-eleanor/gym-env/gym_env/envs/goal_image/" + img_file
+        goal_img_path = self.random_img_goal_path()
 
         min, max = 7, 55
         self.goal_coord = (np.random.randint(min,max), np.random.randint(min,max))

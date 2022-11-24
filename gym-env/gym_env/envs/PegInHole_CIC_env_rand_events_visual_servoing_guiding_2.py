@@ -88,11 +88,7 @@ class PegInHoleRandomEventsVisualServoingGuiding2(PegInHoleRandomEventsVisualSer
 
 
     def random_img_goal(self):
-        img_files = ["00000437.png", "00001262.png", "00000531.png", "00002562.png"]
-        
-        index = np.random.randint(0,4)
-        img_file = img_files[index]
-        goal_img_path = "/home/palinauskas/Documents/fortiss_repo/mujoco-eleanor/gym-env/gym_env/envs/goal_image/" + img_file
+        goal_img_path = self.random_img_goal_path()
 
         min, max = 7, 55
         self.goal_coord = (np.random.randint(min,max), np.random.randint(min,max))
@@ -101,6 +97,18 @@ class PegInHoleRandomEventsVisualServoingGuiding2(PegInHoleRandomEventsVisualSer
         goal_img = self.relocate_img(cv2.imread(goal_img_path), self.goal_coord, 64)
 
         return goal_img
+
+    def random_img_goal_path(self):
+        img_files = ["00000437.png", "00001262.png", "00000531.png", "00002562.png"]
+        
+        index = np.random.randint(0,4)
+        img_file = img_files[index]
+
+        cwd = os.getcwd()
+        goal_img_path = os.path.join(cwd, "gym-env", "gym_env", "envs", "goal_image",  img_file)
+
+        return goal_img_path
+
 
     def get_pose(self, action):
 
