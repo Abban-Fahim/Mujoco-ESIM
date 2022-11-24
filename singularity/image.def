@@ -72,15 +72,14 @@ Stage: build
     ##########################
     # Project
     ##########################
-    # change absolute paths from user/palinauskas to your own
-    git clone --branch dev_mujoco_update https://git.fortiss.org/neuromorphic-computing/inrc3/mujoco-eleanor.git
+    git clone https://git.fortiss.org/neuromorphic-computing/inrc3/mujoco-eleanor.git
     pip install -r mujoco-eleanor/requirements.txt
 
     ##########################
     # Viewer
     ##########################
-    git clone https://github.com/gintautas12358/mujoco-python-viewer.git
-    pip install -e mujoco-python-viewer
+    git clone https://git.fortiss.org/neuromorphic-computing/inrc3/mujoco_viewer.git
+    pip install -e mujoco_viewer
 
     ##########################
     # Display
