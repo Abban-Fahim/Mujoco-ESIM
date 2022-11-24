@@ -78,8 +78,7 @@ Stage: build
     ##########################
     # Viewer
     ##########################
-    git clone https://git.fortiss.org/neuromorphic-computing/inrc3/mujoco_viewer.git
-    pip install -e mujoco_viewer
+    pip install -e mujoco-eleanor/mujoco_viewer
 
     ##########################
     # Display
