@@ -1,3 +1,57 @@
+#
+#BSD 3-Clause License
+#
+#
+#
+#Copyright 2022 fortiss, Neuromorphic Computing group
+#
+#
+#All rights reserved.
+#
+#
+#
+#Redistribution and use in source and binary forms, with or without
+#
+#modification, are permitted provided that the following conditions are met:
+#
+#
+#
+#* Redistributions of source code must retain the above copyright notice, this
+#
+#  list of conditions and the following disclaimer.
+#
+#
+#
+#* Redistributions in binary form must reproduce the above copyright notice,
+#
+#  this list of conditions and the following disclaimer in the documentation
+#
+#  and/or other materials provided with the distribution.
+#
+#
+#
+#* Neither the name of the copyright holder nor the names of its
+#
+#  contributors may be used to endorse or promote products derived from
+#
+#  this software without specific prior written permission.
+#
+#
+#
+#THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+#
+#AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+#
+#IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+#
+#DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+#
+#FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+#
+#DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+#
+
+
 import mujoco
 import mujoco_viewer
 import os
@@ -42,14 +96,18 @@ class PegInHoleRandomEventsVisualServoingGuidingActivity(gym.Env):
                                     0,
                                     1.85,
                                     0.0,
-                                    -0.80,
+                                    -0.6,
                                     -1.57])
 
         self.data.qpos = self.init_pose
+        self.init_qvel = self.data.qvel.copy()
+        
 
         # init hole position
         self.init_hole_pos = self.get_hole_pose()
-        offset_pos = (np.random.rand(3) - 0.5) * 0.05
+        self.max_rand_offset = 0.01
+        np.random.seed(int(time.time()))
+        offset_pos = (np.random.rand(3) - 0.5) * self.max_rand_offset
         offset_pos[2] = 0.0                     # no offset in z
         self.set_hole_pose(offset_pos)
 
@@ -59,10 +117,19 @@ class PegInHoleRandomEventsVisualServoingGuidingActivity(gym.Env):
         # self.goal_pose = np.array([0.0, 0.6, 0.02, 3.14, 0, 0])
 
         self.img = np.ones((32, 32)) * 127
-        self.activity_coord = 16, 16
+        self.activity_coord = 32, 32
 
-        goal_img_path = "/home/palinauskas/Documents/pop-spiking-deep-rl/gym-env/gym_env/envs/goal_image/00001654.png"
-        self.goal_img = self.preprocessing(cv2.flip(cv2.imread(goal_img_path), 0))
+        # goal as an image
+        # img_files = ["00001654.png", "00001262.png", "00001886.png", "00002562.png"]
+        # index = np.random.randint(0,4)
+        # img_file = img_files[index]
+        # goal_img_path = "/home/palinauskas/Documents/pop-spiking-deep-rl/gym-env/gym_env/envs/goal_image/" + img_file
+        # self.goal_img = self.preprocessing(cv2.flip(cv2.imread(goal_img_path), 0))
+
+        # just coordinate goal
+        min_c = 4
+        max_c = 29
+        self.goal_coord = np.random.randint(min_c, max_c), np.random.randint(min_c, max_c)
 
         
         self.err_limit = 0.0005
@@ -72,8 +139,8 @@ class PegInHoleRandomEventsVisualServoingGuidingActivity(gym.Env):
         self.old_a = 0
 
         # gym spaces
-        position_ac = 3
-        orientation__ac = 3
+        position_ac = 2
+        orientation__ac = 0
         acs = position_ac + orientation__ac
         self.action_space = gym.spaces.Box(low=-1, high=1, shape=(acs,), dtype=np.float32)
 
@@ -87,15 +154,16 @@ class PegInHoleRandomEventsVisualServoingGuidingActivity(gym.Env):
         img_shape = 32 , 32
         img_pixels = 32*32
         img_activity_coords = 2
+        img_err = 1
         # self.image_observation_space = gym.spaces.Box(low=0, high=255, shape=img_shape, dtype=np.uint8)
 
-        self.observation_space = gym.spaces.Box(low=-1, high=1, shape=(img_activity_coords,), dtype=np.float32)
+        self.observation_space = gym.spaces.Box(low=-1, high=1, shape=(position_ob + img_err,), dtype=np.float32)
 
         # self.observation_space = gym.spaces.Tuple([self.state_observation_space, 
         #                                         self.image_observation_space])
 
 
-        self.ac_position_scale = 0.1
+        self.ac_position_scale = 0.3
         self.ac_orientation_scale = 0.1
 
         self.ob_position_scale = 10
@@ -128,11 +196,11 @@ class PegInHoleRandomEventsVisualServoingGuidingActivity(gym.Env):
         # print(action)
         pose = self.current_pose.copy()
         # print(pose)
-        ac_position = action[:3]
-        pose[:3] +=  ac_position * self.ac_position_scale 
+        ac_position = action[:2]
+        pose[:2] +=  ac_position * self.ac_position_scale 
         # print(pose)
-        ac_orientation = action[3:]
-        pose[3:] += ac_orientation * self.ac_orientation_scale
+        # ac_orientation = action[3:]
+        # pose[3:] += ac_orientation * self.ac_orientation_scale
         # print(pose)
         self.controller.set_action(pose)
         torque = self.controller.get_torque()
@@ -150,7 +218,7 @@ class PegInHoleRandomEventsVisualServoingGuidingActivity(gym.Env):
 
         if out is not None:
             # print("events created")
-            e_img, e = out
+            e_img, e, num_e = out
             self.img  = self.preprocessing(e_img)
 
         observation = self.observe(self.img)
@@ -159,34 +227,68 @@ class PegInHoleRandomEventsVisualServoingGuidingActivity(gym.Env):
 
         dx = np.linalg.norm(action - self.old_a)
         self.old_a = action.copy()
-        err = self.dist_metric(self.goal_img, self.img)
-        reward = 1/(2*err+0.001)-5*(err+0.001)-5 - 5* dx
+        err = self.dist_metric(self.img)
+        # reward = 1/(2*err+0.001)-5*(err+0.001)-5 - 1* dx
+
+        reward = 1/(0.01*err+0.01) - 1*dx
         # print(reward)
 
         # ======== done condition ==========
 
-        boundary_offset = 0.4
-        condition = self.controller.fk()[0] < 0-boundary_offset or \
-                    self.controller.fk()[0] > 0+boundary_offset or \
-                    self.controller.fk()[1] < 0.6-boundary_offset or \
-                    self.controller.fk()[1] > 0.6+boundary_offset or \
-                    self.controller.fk()[2] > 0.20+boundary_offset
+        condition = self.controller.fk()[0] < self.current_pose[0]-0.15 or \
+                    self.controller.fk()[0] > self.current_pose[0]+0.15 or \
+                    self.controller.fk()[1] < self.current_pose[1]-0.05 or \
+                    self.controller.fk()[1] > self.current_pose[1]+0.6 or \
+                    self.controller.fk()[2] > self.current_pose[2]+0.1 or \
+                    np.abs(self.controller.fk()[3]) > self.current_pose[3]+0.1 or \
+                    np.abs(self.controller.fk()[3])  < self.current_pose[3]-0.1 or \
+                    self.controller.fk()[4] > self.current_pose[4]+0.1 or \
+                    self.controller.fk()[4] < self.current_pose[4]-0.1 
         if condition:
-            # reward = -10
+            # print(self.controller.fk()[0] < self.current_pose[0]-0.15 ,
+            #         self.controller.fk()[0] > self.current_pose[0]+0.15 ,
+            #         self.controller.fk()[1] < self.current_pose[1]-0.05 ,
+            #         self.controller.fk()[1] > self.current_pose[1]+0.6 ,
+            #         self.controller.fk()[2] > self.current_pose[2]+0.1 ,
+            #         np.abs(self.controller.fk()[3])  > self.current_pose[3]+0.1 ,
+            #         np.abs(self.controller.fk()[3])  < self.current_pose[3]-0.1 ,
+            #         self.controller.fk()[4] > self.current_pose[4]+0.1 ,
+            #         self.controller.fk()[4] < self.current_pose[4]-0.1 )
             done = True
+
 
 
         info = {}
         return observation, reward, done, info
 
+    def env_reset(self):    
+
+        self.data.qpos = self.init_pose.copy()
+        self.data.qvel = self.init_qvel.copy()
+
+        self.img = np.ones((32, 32)) * 127
+        self.activity_coord = 32, 32
+
+        # goal as an image
+        # img_files = ["00001654.png", "00001262.png", "00001886.png", "00002562.png"]
+        # index = np.random.randint(0,4)
+        # img_file = img_files[index]
+        # goal_img_path = "/home/palinauskas/Documents/pop-spiking-deep-rl/gym-env/gym_env/envs/goal_image/" + img_file
+        # self.goal_img = self.preprocessing(cv2.flip(cv2.imread(goal_img_path), 0))
+
+        # just coordinate goal
+        min_c = 4
+        max_c = 29
+        self.goal_coord = np.random.randint(min_c, max_c), np.random.randint(min_c, max_c)
+
     def reset(self):
-        self.data.qpos = self.init_pose
+        self.env_reset()
 
         pose = self.current_pose
         self.controller.set_action(pose)
 
         # randomize hole position
-        offset_pos = (np.random.rand(3) - 0.5) * 0.01
+        offset_pos = (np.random.rand(3) - 0.5) * self.max_rand_offset
         offset_pos[2] = 0.0                     # no offset in z
         self.set_hole_pose(offset_pos)
 
@@ -196,16 +298,16 @@ class PegInHoleRandomEventsVisualServoingGuidingActivity(gym.Env):
 
         return observation
 
-    def observe(self, img):
+    def observe(self, img): 
 
-        out = self.get_activity_coord(img)
-        
-        x, y = self.activity_coord 
-        if out is not None:
-            x, y = out
-            self.activity_coord = out
+        err = self.dist_metric(self.img)
 
-        observation = (x / (32.0 / 2.0) - 1), (y / (32.0 / 2.0) - 1) 
+        pose = self.controller.fk()
+
+        observation = (pose[0] - self.current_pose[0]) / (self.ac_position_scale ), \
+                      (pose[1] - self.current_pose[1]) / (self.ac_position_scale ), \
+                      (pose[2] - self.current_pose[2]) / (self.ac_position_scale ), \
+                      err / 45.0
 
         return observation
 
@@ -214,13 +316,13 @@ class PegInHoleRandomEventsVisualServoingGuidingActivity(gym.Env):
 
 
     def change_to_shape(self, a):
-        if a.shape == (1, 6):
+        if a.shape == (1, 2):
             return a[0]
 
         return a
 
     def render_frame(self):
-        return self.viewer.capture_frame(0)
+        return self.viewer.capture_frame(1)
 
     def get_hole_pose(self):
         # get body offset
@@ -291,18 +393,30 @@ class PegInHoleRandomEventsVisualServoingGuidingActivity(gym.Env):
 
         return img
 
-    def dist_metric(self, goal_img, img):
+    def dist_metric(self, img):
         out = self.get_activity_coord(img)
+
+        # img = cv2.resize(img, (512, 512)) 
+        # cv2.imshow("seen image", img)
         
-        x, y = self.activity_coord 
+        x, y = self.activity_coord
         if out is not None:
             x, y = out
-            self.activity_coord = out
+            self.activity_coord = x, y 
+        else:
+            x, y = self.activity_coord
 
         v = np.array((x, y))
+        # print("v: ", v)
 
-        g_out = self.get_activity_coord(goal_img)
+        # g_out = self.get_activity_coord(self.goal_img)
+        g_out = self.goal_coord 
         g_v = np.array(g_out)
+        # print("g_v: ", g_v)
+
+        # goal_img = cv2.resize(goal_img, (512, 512)) 
+        # cv2.imshow("goal image", goal_img)
+        # cv2.waitKey(0)
 
         err = np.linalg.norm(g_v - v)
         
@@ -313,6 +427,12 @@ class PegInHoleRandomEventsVisualServoingGuidingActivity(gym.Env):
         nx, ny = np.where(img == 255)
         x = np.append(nx, px)
         y = np.append(ny, py)
+
+
+        # print("debug")
+        # print(x)
+        # print(y)
+        # print("debug end ")
 
         if x.size == 0:
             return None
