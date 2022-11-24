@@ -4,6 +4,8 @@ import os
 import time
 import numpy as np
 import itertools
+from utils.read_cfg import get_mjc_xml, get_cposes, get_jposes, get_cerr_lim
+
 
 # parameter
 cp = 0.5
@@ -19,7 +21,7 @@ overlay_on = True
 # save_path_original = save_path + "/original/seq0/imgs"
 # save_path_subtracted = save_path + "/subtracted/seq0/imgs"
 # save_path_events = save_path + "/events_mujoco/seq0"
-xml_path = 'kuka/envs/assets/full_kuka_INRC3_mounted_camera.xml'
+xml_path = get_mjc_xml()
 
 
 model = mujoco.MjModel.from_xml_path(xml_path)
