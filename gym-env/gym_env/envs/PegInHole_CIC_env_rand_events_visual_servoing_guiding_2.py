@@ -99,13 +99,16 @@ class PegInHoleRandomEventsVisualServoingGuiding2(PegInHoleRandomEventsVisualSer
         return goal_img
 
     def random_img_goal_path(self):
-        img_files = ["00000437.png", "00001262.png", "00000531.png", "00002562.png"]
-        
-        index = np.random.randint(0,4)
+        cwd = os.getcwd()
+        goal_imgs_path = os.path.join(cwd, "gym-env", "gym_env", "envs", "goal_image")
+
+        files = os.listdir(goal_imgs_path)
+        img_files = [x for x in files if os.path.splitext(x)[1] == ".png"]
+
+        index = np.random.randint(0,len(img_files))
         img_file = img_files[index]
 
-        cwd = os.getcwd()
-        goal_img_path = os.path.join(cwd, "gym-env", "gym_env", "envs", "goal_image",  img_file)
+        goal_img_path = os.path.join(goal_imgs_path,  img_file)
 
         return goal_img_path
 
