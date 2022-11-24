@@ -1,4 +1,12 @@
 import torch
+import os
+from .network_parser import parse
+
+
+# change checkpoint file if needed
+checkpoint_file = "best_hole_run_0_dilated_1e-4_4_128.pth"
+config_file_name = "hole0.yaml"
+
 
 
 dtype = None
@@ -8,7 +16,18 @@ layer_config = None
 devices = None
 params = {}
 
-def init(n_config, devs):
+def init(devs):
+    #load best trained fsvae model 
+    cwd = os.getcwd()
+    fsvae_path = os.path.join(cwd, "gym-env", "gym_env", "envs", "fsvae")
+
+    checkpoint_path = os.path.join(fsvae_path, checkpoint_file)
+    config_path = os.path.join(fsvae_path, "NetworkConfigs", config_file_name)
+
+    p = parse(config_path)
+    n_config = p['Network']
+
+
     global dtype, devices, n_steps, tau_s, network_config, layer_config, params
     dtype = torch.float32
     devices = devs
@@ -18,4 +37,4 @@ def init(n_config, devs):
     layer_config = {'threshold': 0.2}
     n_steps = network_config['n_steps']
     
-    
+    network_config['checkpoint_path'] = checkpoint_path

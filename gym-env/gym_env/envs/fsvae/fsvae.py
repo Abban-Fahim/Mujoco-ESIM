@@ -3,6 +3,7 @@ import os.path
 import numpy as np
 import logging
 import argparse
+
 # import pycuda.driver as cuda
 
 import torch
@@ -23,12 +24,14 @@ class FSVAE:
     def __init__(self) -> None:
 
         # init network
+        glv.init([0])
+
         self.net = fsvae.FSVAE()
 
         #load best trained fsvae model 
-        checkpoint_file = "best_hole_run_0_dilated_1e-4_4_128.pth"
-        cwd = os.getcwd()
-        checkpoint_path = os.path.join(cwd, "gym-env", "gym_env", "envs", "fsvae", checkpoint_file)
+        # cwd = os.getcwd()
+        # checkpoint_path = os.path.join(cwd, "gym-env", "gym_env", "envs", "fsvae", checkpoint_file)
+        checkpoint_path = glv.network_config['checkpoint_path']
         
         checkpoint = torch.load(checkpoint_path)
         self.net.load_state_dict(checkpoint)  

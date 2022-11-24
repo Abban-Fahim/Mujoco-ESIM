@@ -1,2 +1,2 @@
 
-latent_dim = 128
+# latent_dim = 128
