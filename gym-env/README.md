@@ -19,7 +19,3 @@
 - PegInHole-rand_events_visual_servoing_guiding_vae2_no_coord
 - PegInHole-rand_events_visual_servoing_guiding_vae2_rand
 - PegInHole-rand_events_visual_servoing_guiding_vae2_no_coord_rand
-
-
-
-) 
