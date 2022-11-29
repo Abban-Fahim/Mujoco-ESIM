@@ -65,7 +65,8 @@ sudo     apt-get install -y libboost-all-dev
 # after cuda is setuped
  pip install rpg_vid2e/esim_torch/
 
-
+pip install sk-video
+pip install tqdm
  pip install rpg_vid2e/upsampling
  
  

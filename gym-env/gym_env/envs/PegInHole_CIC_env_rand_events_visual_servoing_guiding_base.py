@@ -73,7 +73,11 @@ class PegInHoleRandomEventsVisualServoingGuidingBase(gym.Env):
 
     def __init__(self, sim_speed=32, headless=False, render_every_frame=True, running_events=True):
         
-        xml_path = "/home/palinauskas/Documents/fortiss_repo/mujoco-eleanor/kuka/envs/assets/full_kuka_INRC3_mounted_camera_hole.xml"
+        cwd = os.getcwd()
+        xml_file_name = "full_kuka_INRC3_mounted_camera_hole.xml"
+        xml_path = os.path.join(cwd, "kuka", "envs", "assets", xml_file_name)
+
+        # xml_path = "/home/palinauskas/Documents/fortiss_repo/mujoco-eleanor/kuka/envs/assets/full_kuka_INRC3_mounted_camera_hole.xml"
         self.model = mujoco.MjModel.from_xml_path(xml_path)
         self.data = mujoco.MjData(self.model)
 
