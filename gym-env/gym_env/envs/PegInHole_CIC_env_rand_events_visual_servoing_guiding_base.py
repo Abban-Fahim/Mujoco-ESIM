@@ -77,7 +77,6 @@ class PegInHoleRandomEventsVisualServoingGuidingBase(gym.Env):
         xml_file_name = "full_kuka_INRC3_mounted_camera_hole.xml"
         xml_path = os.path.join(cwd, "kuka", "envs", "assets", xml_file_name)
 
-        # xml_path = "/home/palinauskas/Documents/fortiss_repo/mujoco-eleanor/kuka/envs/assets/full_kuka_INRC3_mounted_camera_hole.xml"
         self.model = mujoco.MjModel.from_xml_path(xml_path)
         self.data = mujoco.MjData(self.model)
 
