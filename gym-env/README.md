@@ -2,7 +2,7 @@
 
 - PegInHole-rand_events_visual_servoing_guiding2
 - PegInHole-rand_events_visual_servoing_guiding2_no_coord
-- PegInHole-rand_events_visual_servoing_guiding2_rand'
+- PegInHole-rand_events_visual_servoing_guiding2_rand
 - PegInHole-rand_events_visual_servoing_guiding2_no_coord_rand
 
 - PegInHole-rand_events_visual_servoing_guiding_activity2

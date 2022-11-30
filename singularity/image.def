@@ -1,6 +1,5 @@
 Bootstrap: docker
-# From:  nvidia/cuda:11.3.0-runtime-ubuntu20.04
-From:  ubuntu:20.04
+From:  nvidia/cuda:11.3.1-cudnn8-devel-ubuntu20.04
 Stage: build
 
 %setup
@@ -23,6 +22,8 @@ Stage: build
     ln -snf /usr/share/zoneinfo/$TZ /etc/localtime
     echo $TZ > /etc/timezone
 
+    export TORCH_CUDA_ARCH_LIST="3.5;5.0;6.0;6.1;7.0;7.5;8.0;8.6+PTX"
+
     apt-get update 
 
     apt-get install -y build-essential \
@@ -36,21 +37,22 @@ Stage: build
     ##########################
     # pip
     ##########################
-    curl "https://bootstrap.pypa.io/get-pip.py" -o "install-pip3-ubuntu.py"
-    python3 install-pip3-ubuntu.py
+    # curl "https://bootstrap.pypa.io/get-pip.py" -o "install-pip3-ubuntu.py"
+    # python3 install-pip3-ubuntu.py
+    apt-get -y install python3-pip
 
     ##########################
     # CUDA
     ##########################
     # apt-get install -y dialog
 
-    wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/cuda-ubuntu2004.pin
-    mv cuda-ubuntu2004.pin /etc/apt/preferences.d/cuda-repository-pin-600
-    wget https://developer.download.nvidia.com/compute/cuda/11.3.0/local_installers/cuda-repo-ubuntu2004-11-3-local_11.3.0-465.19.01-1_amd64.deb
-    DEBIAN_FRONTEND=noninteractive dpkg -i cuda-repo-ubuntu2004-11-3-local_11.3.0-465.19.01-1_amd64.deb
-    apt-key add /var/cuda-repo-ubuntu2004-11-3-local/7fa2af80.pub
-    DEBIAN_FRONTEND=noninteractive apt-get -y update 
-    apt-get -y install cuda-11-3
+    # wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/cuda-ubuntu2004.pin
+    # mv cuda-ubuntu2004.pin /etc/apt/preferences.d/cuda-repository-pin-600
+    # wget https://developer.download.nvidia.com/compute/cuda/11.3.0/local_installers/cuda-repo-ubuntu2004-11-3-local_11.3.0-465.19.01-1_amd64.deb
+    # DEBIAN_FRONTEND=noninteractive dpkg -i cuda-repo-ubuntu2004-11-3-local_11.3.0-465.19.01-1_amd64.deb
+    # apt-key add /var/cuda-repo-ubuntu2004-11-3-local/7fa2af80.pub
+    # DEBIAN_FRONTEND=noninteractive apt-get -y update 
+    # apt-get -y install cuda-11-3
 
     ##########################
     # Cmake
@@ -67,18 +69,16 @@ Stage: build
     ##########################
     # Pytorch
     ##########################
-    pip install torch torchvision torchaudio --extra-index-url https://download.pytorch.org/whl/cu113
+    # pip install torch torchvision torchaudio --extra-index-url https://download.pytorch.org/whl/cu113
+    pip install torch==1.12.0+cu113 torchvision==0.13.0+cu113 torchaudio==0.12.0 --extra-index-url https://download.pytorch.org/whl/cu113
 
-    ##########################
-    # Project
-    ##########################
-    git clone https://git.fortiss.org/neuromorphic-computing/inrc3/mujoco-eleanor.git
-    pip install -r mujoco-eleanor/requirements.txt
+
+
 
     ##########################
     # Viewer
     ##########################
-    pip install -e mujoco-eleanor/mujoco_viewer
+    # pip install -e mujoco-eleanor/mujoco_viewer
 
     ##########################
     # Display
@@ -116,6 +116,26 @@ Stage: build
     echo "from .upsampler import Upsampler" >> rpg_vid2e/upsampling/src/upsampler/__init__.py
 
     pip install rpg_vid2e/upsampling
+
+
+    ##########################
+    # Project
+    ##########################
+    git clone https://git.fortiss.org/neuromorphic-computing/inrc3/mujoco-eleanor.git
+    pip install -r mujoco-eleanor/requirements.txt
+
+
+    ##########################
+    # MuJoCo viewer
+    ##########################
+    pip install -e mujoco_viewer
+
+
+    ##########################
+    # RL
+    ##########################
+    pip install -r RL/requirements-new.txt
+    pip install -e  gym-env
 
 
     # NOW=`date`
