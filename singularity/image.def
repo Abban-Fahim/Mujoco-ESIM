@@ -130,14 +130,14 @@ Stage: build
     ##########################
     # MuJoCo viewer
     ##########################
-    pip install -e mujoco_viewer
+    pip install mujoco_viewer
 
 
     ##########################
     # RL
     ##########################
     pip install -r RL/requirements-new.txt
-    pip install -e  gym-env
+    pip install  gym-env
 
 
     # NOW=`date`
