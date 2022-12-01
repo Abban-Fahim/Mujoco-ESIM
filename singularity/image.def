@@ -22,7 +22,6 @@ Stage: build
     ln -snf /usr/share/zoneinfo/$TZ /etc/localtime
     echo $TZ > /etc/timezone
 
-    export TORCH_CUDA_ARCH_LIST="3.5;5.0;6.0;6.1;7.0;7.5;8.0;8.6+PTX"
 
     apt-get update 
 
@@ -105,9 +104,12 @@ Stage: build
     apt install -y libopencv-dev python3-opencv
     apt-get install -y libeigen3-dev
     apt-get install -y libboost-all-dev
+    pip install pybind11
+    pip install pybind11-global
     pip install rpg_vid2e/esim_py/
 
     # esim_torch part
+    export TORCH_CUDA_ARCH_LIST="3.5;5.0;6.0;6.1;7.0;7.5;8.0;8.6+PTX"
     pip install rpg_vid2e/esim_torch/
 
     # upsampler
