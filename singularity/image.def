@@ -136,8 +136,8 @@ Stage: build
     ##########################
     # RL
     ##########################
-    pip install -r RL/requirements-new.txt
-    pip install  gym-env
+    pip install -r mujoco-eleanor/RL/requirements-new.txt
+    pip install  mujoco-eleanor/gym-env
 
 
     # NOW=`date`
