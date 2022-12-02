@@ -130,7 +130,7 @@ Stage: build
     ##########################
     # MuJoCo viewer
     ##########################
-    pip install mujoco_viewer
+    pip install mujoco-eleanor/mujoco_viewer
 
 
     ##########################

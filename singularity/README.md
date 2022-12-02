@@ -2,7 +2,7 @@
  
 Run command (--nv is required here):
 
-`sudo singularity build --nv elen2.sif image.def `
+`sudo singularity build eleanor.sif image.def `
 
 ## Running
 

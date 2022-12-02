@@ -14,7 +14,7 @@ cd mujoco-eleanor/singularity
 # Build on the cluster
 
 ```
-singularity build fsvae.sif fsvae.def
+sudo singularity build singularity/eleanor.sif image.def
 
 ```
 
