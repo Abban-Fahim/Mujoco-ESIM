@@ -93,7 +93,10 @@ class EsimMujoco:
         self.des_pose = [0.0,0.4,0.65, 3.14, 0, 0]
 
         self.viewer = mujoco_viewer.MujocoViewer(self.model, self.data, headless=False, render_every_frame=True, running_events=False)
-        self.viewer.init_esim(contrast_threshold_negative=0.9, contrast_threshold_positive=0.9, refractory_period_ns=100)
+        cp = read_cfg()["esim"]["Cp"]
+        cn = read_cfg()["esim"]["Cn"]
+        rp = read_cfg()["esim"]["refractory_period"]
+        self.viewer.init_esim(contrast_threshold_negative=cp, contrast_threshold_positive=cn, refractory_period_ns=rp)
 
     def loop(self, capture_events_enable=False, save_events=False, capture_frames_enable=False, save_frames=False, save_pose=False, save_path="/temp"):
         self.viewer.render(overlay_on=False)

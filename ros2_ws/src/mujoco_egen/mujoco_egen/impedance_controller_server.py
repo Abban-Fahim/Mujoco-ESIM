@@ -75,8 +75,6 @@ class ImControllerActionServer(Node):
     def __init__(self):
         super().__init__('impedance_controller_server_node')
 
-        print("############### test")
-
         # DesiredPoseName action server is created
         self._desired_pose_name_action_server = ActionServer(
             self,
