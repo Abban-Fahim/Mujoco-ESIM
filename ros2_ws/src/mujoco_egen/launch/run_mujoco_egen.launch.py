@@ -6,7 +6,7 @@ def generate_launch_description():
         Node(
             package='mujoco_egen',
             namespace='mj_egen_0',
-            executable='mujoco_node',
-            name='sim'
+            executable='impedance_controller_server',
+            name='egen'
         ),
     ])
