@@ -13,12 +13,12 @@ def generate_launch_description():
 
     name_launch_arg = DeclareLaunchArgument(
         'name',
-        default_value='sim'
+        default_value='egen'
     )
 
     namespace_launch_arg = DeclareLaunchArgument(
         'namespace',
-        default_value='mj_sim_0'
+        default_value='mj_egen_0'
     )
 
     new_saccade_duration_launch_arg = DeclareLaunchArgument(

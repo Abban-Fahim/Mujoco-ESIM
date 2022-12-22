@@ -9,19 +9,19 @@ from launch.substitutions import PathJoinSubstitution, TextSubstitution
 def generate_launch_description():
     # setting saccade duration
     saccades = {
-        'saccade_duration': 3.0
+        'saccade_duration': 0.5
     }
 
     return LaunchDescription([
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource([
                 PathJoinSubstitution([
-                    FindPackageShare('mujoco_sim'),
+                    FindPackageShare('mujoco_egen'),
                     'template_saccades.launch.py'
                 ])
             ]),
             launch_arguments={
-                'namespace': 'mj_sim_0',
+                'namespace': 'mj_egen_0',
                 'new_saccade_duration': TextSubstitution(text=str(saccades['saccade_duration']))
             }.items()
         )

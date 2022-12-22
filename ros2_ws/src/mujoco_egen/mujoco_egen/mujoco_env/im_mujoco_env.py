@@ -68,22 +68,17 @@ import rclpy
 class EsimMujoco:
 
     def __init__(self, init_pose, err_limit) -> None:
-        
 
-        # parameter
-        self.cp = 0.5
-        self.cn = 0.1
-
-        self.simulation_time = 1000
-        self.sim_steps = 10
-        self.test_camera_on = False
         self.camera_id = 1 # 1 - for mounted camera, 0 - for floating camera
         self.overlay_on = True
 
         # self.model = mujoco.MjModel.from_xml_path(self.xml_path)
         self.model = mujoco.MjModel.from_xml_path(read_cfg()["mujoco_model_xml"])
         self.data = mujoco.MjData(self.model)
-        self.controller = FullImpedanceController(self.model, self.data, stiffness=np.array([1000.0, 1000.0, 1000.0, 1000.3, 1000.3, 1000.3]), damping = np.array([50.0, 50.0, 50.0, 50.3, 50.3, 50.3]))
+
+        stiffness = read_cfg()["motion_controller"]["stiffness"]
+        damping = read_cfg()["motion_controller"]["damping"]
+        self.controller = FullImpedanceController(self.model, self.data, stiffness=np.array(stiffness), damping = np.array(damping))
 
         # init first position
         self.data.qpos = init_pose
