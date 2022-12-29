@@ -23,73 +23,73 @@ def generate_launch_description():
 
     new_saccade_duration_launch_arg = DeclareLaunchArgument(
         'new_saccade_duration',
-        default_value='3.0'
+        default_value='0.5'
     )
     
-    enable_frames = ExecuteProcess(
-        cmd=[[
-            'ros2 param set ',
-            '/',
-            namespace,
-            '/',
-            name,
-            ' capture_frames_enable ',
-            'True'
-        ]],
-        shell=True
-    )
+    # enable_frames = ExecuteProcess(
+    #     cmd=[[
+    #         'ros2 param set ',
+    #         '/',
+    #         namespace,
+    #         '/',
+    #         name,
+    #         ' capture_frames_enable ',
+    #         'True'
+    #     ]],
+    #     shell=True
+    # )
 
-    enable_events = ExecuteProcess(
-        cmd=[[
-            'ros2 param set ',
-            '/',
-            namespace,
-            '/',
-            name,
-            ' capture_events_enable ',
-            'True'
-        ]],
-        shell=True
-    )
+    # enable_events = ExecuteProcess(
+    #     cmd=[[
+    #         'ros2 param set ',
+    #         '/',
+    #         namespace,
+    #         '/',
+    #         name,
+    #         ' capture_events_enable ',
+    #         'True'
+    #     ]],
+    #     shell=True
+    # )
 
-    enable_save_frames = ExecuteProcess(
-        cmd=[[
-            'ros2 param set ',
-            '/',
-            namespace,
-            '/',
-            name,
-            ' save_frames ',
-            'True'
-        ]],
-        shell=True
-    )
+    # enable_save_frames = ExecuteProcess(
+    #     cmd=[[
+    #         'ros2 param set ',
+    #         '/',
+    #         namespace,
+    #         '/',
+    #         name,
+    #         ' save_frames ',
+    #         'True'
+    #     ]],
+    #     shell=True
+    # )
 
-    enable_save_events = ExecuteProcess(
-        cmd=[[
-            'ros2 param set ',
-            '/',
-            namespace,
-            '/',
-            name,
-            ' save_events ',
-            'True'
-        ]],
-        shell=True
-    )
+    # enable_save_events = ExecuteProcess(
+    #     cmd=[[
+    #         'ros2 param set ',
+    #         '/',
+    #         namespace,
+    #         '/',
+    #         name,
+    #         ' save_events ',
+    #         'True'
+    #     ]],
+    #     shell=True
+    # )
 
-    enable_save_camera_pose = ExecuteProcess(
-        cmd=[[
-            'ros2 param set ',
-            '/',
-            namespace,
-            '/',
-            name,
-            ' save_pose ',
-            'True'
-        ]],
-        shell=True
-    )
+    # enable_save_camera_pose = ExecuteProcess(
+    #     cmd=[[
+    #         'ros2 param set ',
+    #         '/',
+    #         namespace,
+    #         '/',
+    #         name,
+    #         ' save_pose ',
+    #         'True'
+    #     ]],
+    #     shell=True
+    # )
 
     start_saccading = ExecuteProcess(
         cmd=[[
@@ -110,13 +110,13 @@ def generate_launch_description():
         name_launch_arg,
         namespace_launch_arg,
         new_saccade_duration_launch_arg,
-        enable_save_frames,
-        enable_save_events,
-        enable_save_camera_pose,
-        enable_frames,
-        enable_events,
+        # enable_save_frames,
+        # enable_save_events,
+        # enable_save_camera_pose,
+        # enable_frames,
+        # enable_events,
         TimerAction(
-            period=10.0,
+            period=2.0,
             actions=[start_saccading],
         )
         

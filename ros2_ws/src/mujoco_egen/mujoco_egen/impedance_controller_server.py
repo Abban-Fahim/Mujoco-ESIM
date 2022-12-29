@@ -214,7 +214,6 @@ class ImControllerActionServer(Node):
     def random_circular_saccades(self, t, start_pose):
         if not self.is_saccading:
             self.is_saccading = True
-            print("##Debuging:", self.is_saccading)
         if t % 0.05 < 0.005:
             self.mj.set_des_pose(self.mj.random_circular_pose(t, start_pose))
 
@@ -258,9 +257,6 @@ class ImControllerActionServer(Node):
         result_msg.time_spent = self.mj.data.time - t_0
 
         self.is_saccading = False
-        print("##Debuging end:", self.is_saccading)
-
-
         self.get_logger().info('Action finished! (saccades)')
         return result_msg
 
