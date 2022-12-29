@@ -31,3 +31,5 @@ esim: # event simulator parameter
 motion_controller: # PD impedance controller is used
   stiffness: [1000.0, 1000.0, 1000.0, 1000.3, 1000.3, 1000.3]
   damping: [50.0, 50.0, 50.0, 50.3, 50.3, 50.3]
+  null_space_damping: 10
+  null_space_stiffness: 1.0

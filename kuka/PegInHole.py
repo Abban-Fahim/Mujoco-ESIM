@@ -76,5 +76,5 @@ while (True):
     data.ctrl[:] = np.clip(torque, -300, 300)
     mujoco.mj_step(model, data)
 
-    print(data.qpos)
+    # print(data.qpos)
     t = data.time

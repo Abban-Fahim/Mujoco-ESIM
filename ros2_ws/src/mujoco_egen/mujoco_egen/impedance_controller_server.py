@@ -56,7 +56,7 @@ import rclpy
 from rclpy.action import ActionServer
 from rclpy.node import Node
 
-from controller_interface.action import DesiredPoseName, Saccades
+from controller_interface.action import DesiredPoseName, Saccades, DesiredPose
 from camera_event_data_interface.msg import CameraEvents
 from geometry_msgs.msg import TransformStamped
 from sensor_msgs.msg import Image
@@ -75,11 +75,18 @@ class ImControllerActionServer(Node):
     def __init__(self):
         super().__init__('impedance_controller_server_node')
 
+        # # DesiredPoseName action server is created
+        # self._desired_pose_name_action_server = ActionServer(
+        #     self,
+        #     DesiredPoseName,
+        #     'desired_pose_name_topic',
+        #     self.desired_pose_callback)
+
         # DesiredPoseName action server is created
-        self._desired_pose_name_action_server = ActionServer(
+        self._desired_pose_action_server = ActionServer(
             self,
-            DesiredPoseName,
-            'desired_pose_name_topic',
+            DesiredPose,
+            'desired_pose_topic',
             self.desired_pose_callback)
 
         # Saccades action server is created
@@ -146,15 +153,20 @@ class ImControllerActionServer(Node):
         self.get_logger().info('Executing goal: set_desired_pose...')
 
         # get goal pose name
-        des_pose_name = goal_handle.request.des_pose_name
+        # des_pose_name = goal_handle.request.des_pose_name
+        des_pose = goal_handle.request.des_pose
+
 
         # set goal pose
-        des_pose = np.array(self.get_parameter(des_pose_name).get_parameter_value().double_array_value)
+        # des_pose = np.array(self.get_parameter(des_pose_name).get_parameter_value().double_array_value)
+
         self.mj.set_des_pose(des_pose)
 
         # create action messages
-        feedback_msg = DesiredPoseName.Feedback()
-        result_msg = DesiredPoseName.Result()
+        # feedback_msg = DesiredPoseName.Feedback()
+        # result_msg = DesiredPoseName.Result()
+        feedback_msg = DesiredPose.Feedback()
+        result_msg = DesiredPose.Result()
 
         # run mj loop until the robot reaches the goal pose
         while not self.mj.is_position_reached():
@@ -162,12 +174,14 @@ class ImControllerActionServer(Node):
             self.composed_callback()
 
             # publish feedback
-            feedback_msg.feedback_error = self.mj.position_err()
+            # feedback_msg.feedback_error = self.mj.position_err()
+            feedback_msg.feedback_pose_error = self.mj.pose_err().astype(np.float32)
+
             goal_handle.publish_feedback(feedback_msg)
 
         # robot reached the goal pose 
         goal_handle.succeed()
-        result_msg.error = feedback_msg.feedback_error
+        result_msg.pose_error = feedback_msg.feedback_pose_error
 
         self.get_logger().info('Action finished! (set_desired_pose)')
 

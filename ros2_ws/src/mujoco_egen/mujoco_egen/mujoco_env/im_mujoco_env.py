@@ -78,14 +78,31 @@ class EsimMujoco:
 
         stiffness = read_cfg()["motion_controller"]["stiffness"]
         damping = read_cfg()["motion_controller"]["damping"]
-        self.controller = FullImpedanceController(self.model, self.data, stiffness=np.array(stiffness), damping = np.array(damping))
+        null_space_damping = read_cfg()["motion_controller"]["null_space_damping"]
+        null_space_stiffness = read_cfg()["motion_controller"]["null_space_stiffness"]
+        self.controller = FullImpedanceController(self.model, self.data, 
+                                                    stiffness=np.array(stiffness), 
+                                                    damping = np.array(damping),
+                                                    null_space_damping=null_space_damping,
+                                                    null_space_stiffness=null_space_stiffness)
 
         # init first position
         self.data.qpos = init_pose
+        # print("## Init joint pose", init_pose)
+        mujoco.mj_forward(self.model, self.data)
 
         self.err_limit = err_limit # error before accepting the pose
         # self.des_pose = init_pose # goal pose
-        self.des_pose = [0.0,0.4,0.65, 3.14, 0, 0]
+        self.des_pose = [0.0,0.4,0.55,np.pi + np.deg2rad(0), 0, 0]
+        # pose = self.controller.fk()
+        # self.des_pose = pose + np.array([0, 0, 0, 0, 0,  np.pi/2]) # correction from the mat2eul transformation
+        # self.des_pose = pose
+
+        self.controller.set_action(self.des_pose)
+
+
+        print("## Init pose", self.des_pose)
+
 
         self.viewer = mujoco_viewer.MujocoViewer(self.model, self.data, headless=False, render_every_frame=True, running_events=False)
         cp = read_cfg()["esim"]["Cp"]
@@ -94,7 +111,7 @@ class EsimMujoco:
         self.viewer.init_esim(contrast_threshold_negative=cp, contrast_threshold_positive=cn, refractory_period_ns=rp)
 
     def loop(self, capture_events_enable=False, save_events=False, capture_frames_enable=False, save_frames=False, save_pose=False, save_path="/temp"):
-        self.viewer.render(overlay_on=False)
+        self.viewer.render(overlay_on=True)
 
         # mounted view
         # self.viewer.change_camera(self.camera_id)
@@ -121,9 +138,9 @@ class EsimMujoco:
                 self.write_camera_pose(image_idx, save_path=save_path)
         else:
             events_img, events = None, None
-
+ 
         
-
+        
         # set goal pose
         self.controller.set_action(self.des_pose)
 
@@ -134,15 +151,23 @@ class EsimMujoco:
         
         mujoco.mj_step(self.model, self.data)
 
+        # print("# current pose:", self.controller.fk())
+        # print( "dest_pose:", self.des_pose)
+        # print("pose error:", self.controller.pose_error())
+
         return raw_img, events_img, events, 
 
     def set_des_pose(self, des_pose, des_vel=np.array([0,0,0,0,0,0])):
+        # print("## set pose", des_pose)
         self.des_pose = des_pose
         self.des_vel = des_vel
         self.controller.set_action(self.des_pose, self.des_vel)
 
     def position_err(self):
         return np.linalg.norm(self.controller.pose_error()[:3])
+    
+    def pose_err(self):
+        return self.controller.pose_error() 
 
     def is_position_reached(self):
         if self.err_limit < self.position_err():
@@ -207,5 +232,3 @@ class EsimMujoco:
         pose[:3] += offset
         
         return pose
-
-        # return np.append(rand_pos, current_eul)

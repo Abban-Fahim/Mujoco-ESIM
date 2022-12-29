@@ -31,6 +31,8 @@ Stage: build
     export PATH=$PATH:$CUDA_ROOT/bin:$HOME/bin
     export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$CUDA_ROOT/lib64
 
+    export TORCH_CUDA_ARCH_LIST="3.5;5.0;6.0;6.1;7.0;7.5;8.0;8.6+PTX"
+
     apt-get update 
 
     apt-get install -y build-essential \

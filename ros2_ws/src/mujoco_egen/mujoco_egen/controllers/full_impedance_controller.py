@@ -76,7 +76,6 @@ class FullImpedanceController(BaseController):
                  rot_scale=1.0,
                  pos_limit=1.0,
                  rot_limit=1.0,
-                 model_path='full_kuka_no_collision_no_gravity.xml',
                  site_name='ee_site',
                  stiffness=None,
                  damping='auto',
@@ -216,7 +215,9 @@ class FullImpedanceController(BaseController):
     def impedance_controller(self):
         # desired behaviour 
         J = self.Jac()
+        # cartesian_acc_des = self.stiffness*self.pose_error() + self.damping * (self.vel_set - J @ self.sim_data.qvel[self.sim_qvel_idx])
         cartesian_acc_des = self.stiffness*self.pose_error() + self.damping * (self.vel_set - J @ self.sim_data.qvel[self.sim_qvel_idx])
+
 
         # print("state - ", self.vel_set)
 
