@@ -8,12 +8,12 @@ mujoco_model_xml: "src/mujoco_egen/mujoco_egen/kuka/full_kuka_INRC3_mounted_came
 
 
 operations:
-  capture_events_enable: False
-  save_events: False
-  capture_frames_enable: False
-  save_frames: False
-  save_pose: False
-  save_path: "dataset" # absolute path
+  capture_events_enable: True
+  save_events: True
+  capture_frames_enable: True
+  save_frames: True
+  save_pose: True
+  save_path: "/home/palinauskas/Documents/fortiss_repo/mujoco-eleanor/dataset" # absolute path
 
 
 saccade: 

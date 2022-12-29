@@ -111,10 +111,10 @@ class EsimMujoco:
         self.viewer.init_esim(contrast_threshold_negative=cp, contrast_threshold_positive=cn, refractory_period_ns=rp)
 
     def loop(self, capture_events_enable=False, save_events=False, capture_frames_enable=False, save_frames=False, save_pose=False, save_path="/temp"):
-        self.viewer.render(overlay_on=True)
+        self.viewer.render(overlay_on=False)
 
         # mounted view
-        # self.viewer.change_camera(self.camera_id)
+        self.viewer.change_camera(self.camera_id)
 
         # first output
         raw_img = None

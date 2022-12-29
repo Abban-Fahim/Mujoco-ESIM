@@ -128,6 +128,17 @@ class ImControllerActionServer(Node):
         err_limit = 0.1
         self.mj = EsimMujoco(init_pose_rad, err_limit)
 
+
+        self.init_pose = read_cfg()["saccade"]["start_pose"]
+        self.capture_events_enable = read_cfg()["operations"]["capture_events_enable"]
+        self.save_events = read_cfg()["operations"]["save_events"]
+        self.capture_frames_enable = read_cfg()["operations"]["capture_frames_enable"]
+        self.save_frames = read_cfg()["operations"]["save_frames"]
+        self.save_pose = read_cfg()["operations"]["save_pose"]
+        self.save_path = read_cfg()["operations"]["save_path"]
+
+        self.is_saccading = False
+
         self.get_logger().info('Initialized')
 
     # def init_params(self):
@@ -194,11 +205,16 @@ class ImControllerActionServer(Node):
         return self.saccades_callback_body(goal_handle, self.random_circular_saccades)
 
     def circular_saccades(self, t, start_pose):
+        if not self.is_saccading:
+            self.is_saccading = True
         des_pos, des_vel = self.mj.circular_pose(t, start_pose)
         print("des_pos", des_pos)
         self.mj.set_des_pose(des_pos, des_vel)
     
     def random_circular_saccades(self, t, start_pose):
+        if not self.is_saccading:
+            self.is_saccading = True
+            print("##Debuging:", self.is_saccading)
         if t % 0.05 < 0.005:
             self.mj.set_des_pose(self.mj.random_circular_pose(t, start_pose))
 
@@ -241,6 +257,10 @@ class ImControllerActionServer(Node):
         goal_handle.succeed()
         result_msg.time_spent = self.mj.data.time - t_0
 
+        self.is_saccading = False
+        print("##Debuging end:", self.is_saccading)
+
+
         self.get_logger().info('Action finished! (saccades)')
         return result_msg
 
@@ -257,22 +277,24 @@ class ImControllerActionServer(Node):
         # save_path = self.get_parameter('save_path').get_parameter_value().string_value
         # save_pose = self.get_parameter('save_pose').get_parameter_value().bool_value
 
-        init_pose = read_cfg()["saccade"]["start_pose"]
-        capture_events_enable = read_cfg()["operations"]["capture_events_enable"]
-        save_events = read_cfg()["operations"]["save_events"]
-        capture_frames_enable = read_cfg()["operations"]["capture_frames_enable"]
-        save_frames = read_cfg()["operations"]["save_frames"]
-        save_pose = read_cfg()["operations"]["save_pose"]
-        save_path = read_cfg()["operations"]["save_path"]
-
-        raw_img, events_img, events = self.mj.loop(             
-                capture_events_enable=capture_events_enable,    
-                save_events=save_events,                        
-                capture_frames_enable=capture_frames_enable,    
-                save_frames=save_frames,   
-                save_pose=save_pose,                      
-                save_path=save_path                             
-                )
+        if self.is_saccading:
+            raw_img, events_img, events = self.mj.loop(             
+                    capture_events_enable=self.capture_events_enable,    
+                    save_events=self.save_events,                        
+                    capture_frames_enable=self.capture_frames_enable,    
+                    save_frames=self.save_frames,   
+                    save_pose=self.save_pose,                      
+                    save_path=self.save_path                             
+                    )
+        else: 
+            raw_img, events_img, events = self.mj.loop(             
+                    capture_events_enable=False,    
+                    save_events=False,                        
+                    capture_frames_enable=False,    
+                    save_frames=False,   
+                    save_pose=False,                      
+                    save_path=self.save_path                             
+                    )
 
         events_msg = CameraEvents()
         if self.fill_msg_with_events(events_msg, events):
