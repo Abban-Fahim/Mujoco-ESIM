@@ -59,7 +59,7 @@ import numpy as np
 from gym import spaces
 import mujoco
 
-from ..utils.quaternion import identity_quat, subQuat, quatAdd, mat2Quat, quat2eul
+from ..utils.quaternion import identity_quat, subQuat, quatAdd, mat2Quat, quat2eul, eul2quat
 from ..utils.kinematics import forwardKinSite, forwardKinJacobianSite
 from .base_controller import BaseController
 from ..utils.mujoco_utils import get_qpos_indices, get_qvel_indices, get_actuator_indices, get_joint_indices
@@ -150,7 +150,8 @@ class FullImpedanceController(BaseController):
         dr = action[3:6].astype(np.float64)
 
         self.pos_set = dx
-        self.quat_set = quatAdd(np.array([1., 0., 0., 0.]), dr)
+        # self.quat_set = quatAdd(np.array([1., 0., 0., 0.]), dr)
+        self.quat_set = eul2quat(dr)
 
         self.vel_set = vel_set
         # print("setting state - ", self.vel_set)
@@ -182,7 +183,10 @@ class FullImpedanceController(BaseController):
         # Compute the pose difference.
         pos, quat = self._fk()
         dx = self.pos_set - pos
-        dr = subQuat(self.quat_set, quat) # Original
+        dr = subQuat(self.quat_set, quat) 
+        print("self.quat_set", self.quat_set)
+        print("quat", quat)
+        print("dr", dr)
         dframe = np.concatenate((dx,dr))
         return dframe
 

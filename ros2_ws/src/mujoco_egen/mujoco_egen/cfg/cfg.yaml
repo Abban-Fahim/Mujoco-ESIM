@@ -32,7 +32,7 @@ esim: # event simulator parameter
   refractory_period: 100 # ns
 
 motion_controller: # PD impedance controller is used
-  stiffness: [300.0, 300.0, 300.0, 300.3, 300.3, 300.3]
+  stiffness: [300.0, 300.0, 300.0, 100.3, 100.3, 100.3]
   damping: [20.0, 20.0, 20.0, 20.3, 20.3, 20.3]
   null_space_damping: 100
   null_space_stiffness: 1000

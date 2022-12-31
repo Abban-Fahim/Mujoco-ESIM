@@ -151,9 +151,9 @@ class EsimMujoco:
         
         mujoco.mj_step(self.model, self.data)
 
-        print("# current pose:", self.controller.fk())
-        print( "dest_pose:", self.des_pose)
-        print("pose error:", self.controller.pose_error())
+        # print("# current pose:", self.controller.fk())
+        # print( "dest_pose:", self.des_pose)
+        # print("pose error:", self.controller.pose_error())
 
         return raw_img, events_img, events, 
 
