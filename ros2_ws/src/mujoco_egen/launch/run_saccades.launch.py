@@ -9,7 +9,7 @@ from launch.substitutions import PathJoinSubstitution, TextSubstitution
 def generate_launch_description():
     # setting saccade duration
     saccades = {
-        'saccade_duration': 0.5
+        'saccade_duration': 3
     }
 
     return LaunchDescription([

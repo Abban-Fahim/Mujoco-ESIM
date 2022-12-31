@@ -26,76 +26,11 @@ def generate_launch_description():
         default_value='0.5'
     )
     
-    # enable_frames = ExecuteProcess(
-    #     cmd=[[
-    #         'ros2 param set ',
-    #         '/',
-    #         namespace,
-    #         '/',
-    #         name,
-    #         ' capture_frames_enable ',
-    #         'True'
-    #     ]],
-    #     shell=True
-    # )
-
-    # enable_events = ExecuteProcess(
-    #     cmd=[[
-    #         'ros2 param set ',
-    #         '/',
-    #         namespace,
-    #         '/',
-    #         name,
-    #         ' capture_events_enable ',
-    #         'True'
-    #     ]],
-    #     shell=True
-    # )
-
-    # enable_save_frames = ExecuteProcess(
-    #     cmd=[[
-    #         'ros2 param set ',
-    #         '/',
-    #         namespace,
-    #         '/',
-    #         name,
-    #         ' save_frames ',
-    #         'True'
-    #     ]],
-    #     shell=True
-    # )
-
-    # enable_save_events = ExecuteProcess(
-    #     cmd=[[
-    #         'ros2 param set ',
-    #         '/',
-    #         namespace,
-    #         '/',
-    #         name,
-    #         ' save_events ',
-    #         'True'
-    #     ]],
-    #     shell=True
-    # )
-
-    # enable_save_camera_pose = ExecuteProcess(
-    #     cmd=[[
-    #         'ros2 param set ',
-    #         '/',
-    #         namespace,
-    #         '/',
-    #         name,
-    #         ' save_pose ',
-    #         'True'
-    #     ]],
-    #     shell=True
-    # )
-
     start_saccading = ExecuteProcess(
         cmd=[[
             'ros2 action send_goal ',
             namespace,
-            '/random_saccades_topic ',
+            '/saccades_topic ',
             'controller_interface/action/Saccades ',
             '"{duration: ',
             new_saccade_duration,
@@ -104,20 +39,9 @@ def generate_launch_description():
         shell=True
     )
 
-
-
     return LaunchDescription([
         name_launch_arg,
         namespace_launch_arg,
         new_saccade_duration_launch_arg,
-        # enable_save_frames,
-        # enable_save_events,
-        # enable_save_camera_pose,
-        # enable_frames,
-        # enable_events,
-        TimerAction(
-            period=2.0,
-            actions=[start_saccading],
-        )
-        
+        start_saccading      
     ])

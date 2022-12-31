@@ -97,11 +97,11 @@ class ImControllerActionServer(Node):
             self.saccades_callback)
 
         # Random Saccades action server is created
-        self._action_server = ActionServer(
-            self,
-            Saccades,
-            'random_saccades_topic',
-            self.random_saccades_callback)
+        # self._action_server = ActionServer(
+        #     self,
+        #     Saccades,
+        #     'random_saccades_topic',
+        #     self.random_saccades_callback)
 
         # Camera events Publisher is created
         self.events_publisher = self.create_publisher(CameraEvents, 'camera_events_topic', 10)
@@ -199,10 +199,14 @@ class ImControllerActionServer(Node):
         return result_msg
 
     def saccades_callback(self, goal_handle):
-        return self.saccades_callback_body(goal_handle, self.circular_saccades)
+        saccade_type = read_cfg()["saccade"]["type"]
+        if saccade_type == "circle":
+            return self.saccades_callback_body(goal_handle, self.circular_saccades)
+        elif saccade_type == "random_circle":
+            return self.saccades_callback_body(goal_handle, self.random_circular_saccades)
 
-    def random_saccades_callback(self, goal_handle):
-        return self.saccades_callback_body(goal_handle, self.random_circular_saccades)
+    # def random_saccades_callback(self, goal_handle):
+    #     return self.saccades_callback_body(goal_handle, self.random_circular_saccades)
 
     def circular_saccades(self, t, start_pose):
         if not self.is_saccading:
@@ -215,7 +219,7 @@ class ImControllerActionServer(Node):
             self.is_saccading = True
 
         sample_frequency = read_cfg()["saccade"]["sample_frequency"]
-        if t % 1/sample_frequency < 0.005:
+        if t % (1.0/sample_frequency) < 0.005:
             self.mj.set_des_pose(self.mj.random_circular_pose(t, start_pose))
 
     def saccades_callback_body(self, goal_handle, saccade_func):
