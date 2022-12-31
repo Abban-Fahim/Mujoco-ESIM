@@ -56,7 +56,7 @@ import rclpy
 from rclpy.action import ActionServer
 from rclpy.node import Node
 
-from controller_interface.action import DesiredPoseName, Saccades, DesiredPose
+from controller_interface.action import DesiredPoseName, Saccades2, DesiredPose
 from camera_event_data_interface.msg import CameraEvents
 from geometry_msgs.msg import TransformStamped
 from sensor_msgs.msg import Image
@@ -92,7 +92,7 @@ class ImControllerActionServer(Node):
         # Saccades action server is created
         self._action_server = ActionServer(
             self,
-            Saccades,
+            Saccades2,
             'saccades_topic',
             self.saccades_callback)
 
@@ -225,11 +225,12 @@ class ImControllerActionServer(Node):
     def saccades_callback_body(self, goal_handle, saccade_func):
         self.get_logger().info('Executing goal: saccades...')
 
-        duration = goal_handle.request.duration
+        # duration = goal_handle.request.duration
+        duration = read_cfg()["saccade"]["duration"]
 
         # create action messages
-        feedback_msg = Saccades.Feedback()
-        result_msg = Saccades.Result()
+        feedback_msg = Saccades2.Feedback()
+        result_msg = Saccades2.Result()
 
         start_pose = self.mj.controller.fk()
 

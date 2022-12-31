@@ -7,10 +7,6 @@ from launch.substitutions import PathJoinSubstitution, TextSubstitution
 
 
 def generate_launch_description():
-    # setting saccade duration
-    saccades = {
-        'saccade_duration': 3
-    }
 
     return LaunchDescription([
         IncludeLaunchDescription(
@@ -21,8 +17,7 @@ def generate_launch_description():
                 ])
             ]),
             launch_arguments={
-                'namespace': 'mj_egen_0',
-                'new_saccade_duration': TextSubstitution(text=str(saccades['saccade_duration']))
+                'namespace': 'mj_egen_0'
             }.items()
         )
     ])

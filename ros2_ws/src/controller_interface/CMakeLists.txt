@@ -17,6 +17,7 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "action/DesiredPoseName.action"
   "action/DesiredPose.action"
   "action/Saccades.action"
+  "action/Saccades2.action"
 )
 
 if(BUILD_TESTING)
