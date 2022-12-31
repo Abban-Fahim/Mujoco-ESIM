@@ -142,6 +142,7 @@ class EsimMujoco:
         
         
         # set goal pose
+        print("#", self.des_pose)
         self.controller.set_action(self.des_pose)
 
         torque = self.controller.get_torque()

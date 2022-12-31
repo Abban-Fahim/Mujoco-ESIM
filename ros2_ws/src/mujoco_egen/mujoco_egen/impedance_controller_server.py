@@ -208,7 +208,7 @@ class ImControllerActionServer(Node):
         if not self.is_saccading:
             self.is_saccading = True
         des_pos, des_vel = self.mj.circular_pose(t, start_pose)
-        print("des_pos", des_pos)
+        self.get_logger().info('Debug:', "des_pos", des_pos)
         self.mj.set_des_pose(des_pos, des_vel)
     
     def random_circular_saccades(self, t, start_pose):
