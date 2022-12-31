@@ -93,10 +93,10 @@ class EsimMujoco:
 
         self.err_limit = err_limit # error before accepting the pose
         # self.des_pose = init_pose # goal pose
-        self.des_pose = [0.0,0.4,0.55,np.pi + np.deg2rad(0), 0, 0]
-        # pose = self.controller.fk()
+        # self.des_pose = [0.0,0.4,0.55,np.pi + np.deg2rad(0), 0, 0]
+        pose = self.controller.fk()
         # self.des_pose = pose + np.array([0, 0, 0, 0, 0,  np.pi/2]) # correction from the mat2eul transformation
-        # self.des_pose = pose
+        self.des_pose = pose
 
         self.controller.set_action(self.des_pose)
 
@@ -111,10 +111,10 @@ class EsimMujoco:
         self.viewer.init_esim(contrast_threshold_negative=cp, contrast_threshold_positive=cn, refractory_period_ns=rp)
 
     def loop(self, capture_events_enable=False, save_events=False, capture_frames_enable=False, save_frames=False, save_pose=False, save_path="/temp"):
-        self.viewer.render(overlay_on=False)
+        self.viewer.render(overlay_on=self.overlay_on)
 
         # mounted view
-        self.viewer.change_camera(self.camera_id)
+        # self.viewer.change_camera(self.camera_id)
 
         # first output
         raw_img = None
@@ -142,7 +142,6 @@ class EsimMujoco:
         
         
         # set goal pose
-        print("#", self.des_pose)
         self.controller.set_action(self.des_pose)
 
         torque = self.controller.get_torque()

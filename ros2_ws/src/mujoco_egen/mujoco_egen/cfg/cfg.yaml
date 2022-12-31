@@ -18,7 +18,7 @@ operations:
 
 saccade: 
   pose_is_cartesian: False # False - joint pose [deg], True - cartesian pose [m, deg]
-  start_pose: [-90,0,0,90,0,-90,0]
+  start_pose: [-90,-50,0,90,0,-38,-90] # 7th joint should be kept in -90 degrees for initialization
   type: "circle" # circle; random_circle
   duration: 0.5 # simulation seconds
 
