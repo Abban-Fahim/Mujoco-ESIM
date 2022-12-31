@@ -213,7 +213,9 @@ class ImControllerActionServer(Node):
     def random_circular_saccades(self, t, start_pose):
         if not self.is_saccading:
             self.is_saccading = True
-        if t % 0.05 < 0.005:
+
+        sample_frequency = read_cfg()["saccade"]["sample_frequency"]
+        if t % 1/sample_frequency < 0.005:
             self.mj.set_des_pose(self.mj.random_circular_pose(t, start_pose))
 
     def saccades_callback_body(self, goal_handle, saccade_func):

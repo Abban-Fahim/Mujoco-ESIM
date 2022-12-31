@@ -151,9 +151,9 @@ class EsimMujoco:
         
         mujoco.mj_step(self.model, self.data)
 
-        # print("# current pose:", self.controller.fk())
-        # print( "dest_pose:", self.des_pose)
-        # print("pose error:", self.controller.pose_error())
+        print("# current pose:", self.controller.fk())
+        print( "dest_pose:", self.des_pose)
+        print("pose error:", self.controller.pose_error())
 
         return raw_img, events_img, events, 
 
@@ -199,8 +199,12 @@ class EsimMujoco:
 
         
     def circular_pose(self, t, start_pose):
-        r = 0.02
-        w = 10
+        r = read_cfg()["saccade"]["radius"]
+        # r = 0.1
+        w = read_cfg()["saccade"]["circular_speed"]
+        # w = 10
+        # r = 0.02
+        # w = 10
 
         offset = np.zeros(3)
         offset[0] = r * np.sin(w*t)
@@ -217,8 +221,10 @@ class EsimMujoco:
     def random_circular_pose(self, t, start_pose):
         rng = np.random.default_rng(int(time.time()))
         tt = rng.random() * 2 * np.pi 
-        r = 0.1
-        w = 10
+        r = read_cfg()["saccade"]["radius"]
+        # r = 0.1
+        w = read_cfg()["saccade"]["circular_speed"]
+        # w = 10
 
         offset = np.zeros(3)
         offset[0] = r * np.sin(w*tt)
