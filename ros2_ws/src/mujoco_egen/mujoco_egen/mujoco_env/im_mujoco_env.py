@@ -70,7 +70,7 @@ class EsimMujoco:
     def __init__(self, init_pose, err_limit) -> None:
 
         self.camera_id = 1 # 1 - for mounted camera, 0 - for floating camera
-        self.overlay_on = True
+        self.overlay_on = False 
 
         # self.model = mujoco.MjModel.from_xml_path(self.xml_path)
         self.model = mujoco.MjModel.from_xml_path(read_cfg()["mujoco_model_xml"])
@@ -114,7 +114,7 @@ class EsimMujoco:
         self.viewer.render(overlay_on=self.overlay_on)
 
         # mounted view
-        # self.viewer.change_camera(self.camera_id)
+        self.viewer.change_camera(self.camera_id)
 
         # first output
         raw_img = None

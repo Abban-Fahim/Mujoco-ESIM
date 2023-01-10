@@ -184,9 +184,6 @@ class FullImpedanceController(BaseController):
         pos, quat = self._fk()
         dx = self.pos_set - pos
         dr = subQuat(self.quat_set, quat) 
-        print("self.quat_set", self.quat_set)
-        print("quat", quat)
-        print("dr", dr)
         dframe = np.concatenate((dx,dr))
         return dframe
 
