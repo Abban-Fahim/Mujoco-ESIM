@@ -19,22 +19,20 @@ class JointPDController(JointController):
     def __init__(self,
                     sim_model, sim_data,
                     site_name='ee_site',
-                    controlled_joints=None,
-                    kp=3.,
-                    kd="auto",
-                    set_velocity=False,
-                    keep_finite=False):
+                    # controlled_joints=None,
+                    kp=3,
+                    kd=None,
+                    # set_velocity=False,
+                    # keep_finite=False
+                    ):
 
-        super(JointPDController, self).__init__(sim_model, sim_data)
+        super(JointPDController, self).__init__(sim_model, sim_data, kp, kd)
 
-        self.set_velocity = set_velocity
+        # self.set_velocity = set_velocity
         self.site_name = site_name
 
         # Get the position, velocity, and actuator indices for the model.
-        self.init_indices(controlled_joints)
-        
-        # PD parameters
-        self.set_gains(kp, kd)
+        self.init_indices()
 
         # Initialize setpoint.
         self.sim_qpos_set = sim_data.qpos[self.sim_qpos_idx].copy()
