@@ -15,7 +15,7 @@ from .Controller import Controller
 from utils.mujoco_utils import get_qpos_indices, get_qvel_indices, get_actuator_indices, get_joint_indices, kuka_subtree_mass
 
 
-class FullImpedanceController(Controller):
+class NullSpaceCartesianPDController(Controller):
     '''
     An inverse dynamics controller that used PD gains to compute a desired acceleration.
     '''
@@ -36,7 +36,7 @@ class FullImpedanceController(Controller):
                  nominal_pos=None,
                  nominal_quat=None,
                  nominal_qpos=None):
-        super(FullImpedanceController, self).__init__(sim_model, sim_data)
+        super(NullSpaceCartesianPDController, self).__init__(sim_model, sim_data)
 
         mujoco.mj_forward(sim_model, sim_data)
 

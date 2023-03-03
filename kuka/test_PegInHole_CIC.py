@@ -57,7 +57,7 @@ import mujoco_viewer
 import os
 import time
 import numpy as np
-from controllers.full_impedance_controller import FullImpedanceController
+from controllers.NullSpaceCartesianPDController import NullSpaceCartesianPDController
 from utils.read_cfg import get_mjc_xml, get_jposes, get_cposes, get_cerr_lim
 
 from utils.kinematics import current_ee_position
@@ -68,7 +68,7 @@ data = mujoco.MjData(model)
 # print(data.qpos)
 
 viewer = mujoco_viewer.MujocoViewer(model, data)
-controller = FullImpedanceController(model, data, model_path="full_kuka_INRC3.xml") #TODO model_path should be reletive to root dir
+controller = NullSpaceCartesianPDController(model, data, model_path="full_kuka_INRC3.xml") #TODO model_path should be reletive to root dir
 
 
 
