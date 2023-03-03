@@ -1,11 +1,11 @@
-from .Controller import Controller
+from .MujocoController import MujocoController
 from utils.mujoco_utils import kuka_subtree_mass, get_qpos_indices, get_qvel_indices, get_actuator_indices, get_joint_indices
 import numpy as np
 from gym import spaces
 
 
 
-class JointController(Controller):
+class JointController(MujocoController):
     '''
     A base for all joint based controllers
     '''
@@ -18,9 +18,6 @@ class JointController(Controller):
 
         super(JointController, self).__init__(sim_model, sim_data)
 
-        # Get the position, velocity, and actuator indices for the model.
-        self.init_indices()
-        
         # PD parameters
         self.set_gains(kp, kd)
 
@@ -28,11 +25,7 @@ class JointController(Controller):
         self.sim_qpos_set = sim_data.qpos[self.sim_qpos_idx].copy()
         self.sim_qvel_set = np.zeros(len(self.sim_qvel_idx))
         
-    def init_indices(self): 
-        self.sim_qpos_idx = range(self.sim_model.nq)
-        self.sim_qvel_idx = range(self.sim_model.nv)
-        self.sim_actuators_idx = range(self.sim_model.nu)
-        self.sim_joint_idx = range(self.sim_model.nu)
+    
 
     def set_gains(self, kp, kd):
         self.kp = kp

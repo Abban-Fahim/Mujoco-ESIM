@@ -10,12 +10,12 @@ sys.path.append("..")
 #from gym_kuka_mujoco.envs.assets import kuka_asset_dir
 from utils.quaternion import identity_quat, subQuat, quatAdd, mat2Quat, eul2quat, quat2eul
 from utils.kinematics import forwardKinSite, forwardKinJacobianSite
-from .Controller import Controller
+from .MujocoController import MujocoController
 #from . import register_controller
 from utils.mujoco_utils import get_qpos_indices, get_qvel_indices, get_actuator_indices, get_joint_indices, kuka_subtree_mass
 
 
-class NullSpaceCartesianPDController(Controller):
+class NullSpaceCartesianPDController(MujocoController):
     '''
     An inverse dynamics controller that used PD gains to compute a desired acceleration.
     '''
@@ -57,9 +57,6 @@ class NullSpaceCartesianPDController(Controller):
 
         self.null_space_damping = null_space_damping
         self.null_space_stiffness = null_space_stiffness
-
-        self.init_indices()
-
 
     def set_action(self, action):
         '''
@@ -148,15 +145,6 @@ class NullSpaceCartesianPDController(Controller):
         high = np.concatenate((high_pos, high_rot))
         low = np.concatenate((low_pos, low_rot))
         self.action_space = spaces.Box(low, high, dtype=np.float32)
-
-
-    # def init_indices(self, controlled_joints): 
-    def init_indices(self): 
-        assert self.sim_model.nv == self.sim_model.nu, "if the number of degrees of freedom is different than the number of actuators you must specify the controlled_joints"
-        self.sim_qpos_idx = range(self.sim_model.nq)
-        self.sim_qvel_idx = range(self.sim_model.nv)
-        self.sim_actuators_idx = range(self.sim_model.nu)
-        self.sim_joint_idx = range(self.sim_model.nu)
 
     def force_feedback(self):
         r_pseudo_J = self.right_pseudo_Jac()
