@@ -56,13 +56,13 @@ import mujoco_viewer
 import os
 import time
 import numpy as np
-from controllers.pd_controller import PDController
+from controllers.JointPDController import JointPDController
 from utils.read_cfg import get_mjc_xml, get_jposes, get_jerr_lim
 
 model = mujoco.MjModel.from_xml_path(get_mjc_xml())
 data = mujoco.MjData(model)
 viewer = mujoco_viewer.MujocoViewer(model, data)
-controller = PDController(model, data, kp=300, gravity_comp_model_path="/envs/assets/full_kuka_INRC3.xml")
+controller = JointPDController(model, data, kp=600, kd = 10, gravity_comp_model_path="/envs/assets/full_kuka_INRC3.xml")
 
 print(data.qpos)
 
@@ -85,7 +85,9 @@ while (True):
 
     controller.set_action(poses[viapoint])
     torque = controller.get_torque()
-    data.ctrl[:] = np.clip(torque, -300, 300)
+    # data.ctrl[:] = np.clip(torque, -300, 300)
+    data.ctrl[:] = torque
+
     #self.sim.data.qfrc_applied[:] = self._get_random_applied_force()
     mujoco.mj_step(model, data)
     t = data.time

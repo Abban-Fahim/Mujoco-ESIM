@@ -8,10 +8,10 @@ import sys
 sys.path.append("..")
 
 from utils.mujoco_utils import kuka_subtree_mass, get_qpos_indices, get_qvel_indices, get_actuator_indices, get_joint_indices
-from .joint_controller import Joint_controller
+from .JointController import JointController
 
 
-class PDController(Joint_controller):
+class JointPDController(JointController):
 
     '''
     A Proportional Derivative Controller.
@@ -19,8 +19,8 @@ class PDController(Joint_controller):
 
     def __init__(self,
                  sim_model, sim_data,
-                 action_scale=1.,
-                 action_limit=1.,
+                #  action_scale=1.,
+                #  action_limit=1.,
                  controlled_joints=None,
                  kp=3.,
                  kd="auto",
@@ -28,14 +28,15 @@ class PDController(Joint_controller):
                  keep_finite=False,
                  gravity_comp_model_path=None):
 
-        super(PDController, self).__init__(sim_model, sim_data,
-                    action_scale,
-                    action_limit,
+        super(JointPDController, self).__init__(sim_model, sim_data,
+                    # action_scale,
+                    # action_limit,
                     controlled_joints,
                     kp,
                     kd,
                     set_velocity,
-                    keep_finite)
+                    # keep_finite
+                    )
         
         #TODO is it needed? or there is another way to reuse self.model
         if gravity_comp_model_path is not None:
@@ -58,7 +59,7 @@ class PDController(Joint_controller):
         '''
         Sets the setpoints for the PD Controller.
         '''
-        action = action * self.action_scale
+        # action = action * self.action_scale
 
         nu = len(self.sim_actuators_idx)
         self.sim_qpos_set = action[:nu]
@@ -85,9 +86,9 @@ class PDController(Joint_controller):
         return torque
 
 
-class RelativePDController(PDController):
+class RelativePDController(JointPDController):
     def set_action(self, action):
-        action = action * self.action_scale
+        # action = action * self.action_scale
 
         nu = len(self.self_actuators_idx)
         self.qpos_setpoint = action[0:nu] + \
@@ -96,5 +97,3 @@ class RelativePDController(PDController):
             self.qvel_setpoint = action[nu:2 * nu]
 
 
-#register_controller(PDController, 'PDController')
-#register_controller(RelativePDController, 'RelativePDController')

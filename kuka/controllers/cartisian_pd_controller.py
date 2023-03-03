@@ -1,5 +1,5 @@
 from typing import Generator
-from .base_controller import BaseController
+from .Controller import Controller
 from utils.mujoco_utils import kuka_subtree_mass, get_qpos_indices, get_qvel_indices, get_actuator_indices, get_joint_indices
 import numpy as np
 from gym import spaces
@@ -11,7 +11,7 @@ from utils.quaternion import identity_quat, subQuat, quatAdd, mat2Quat
 from utils.kinematics import forwardKinSite, forwardKinJacobianSite
 
 
-class CartisianPDController(BaseController):
+class CartisianPDController(Controller):
     '''
     A base for all joint based controllers
     '''

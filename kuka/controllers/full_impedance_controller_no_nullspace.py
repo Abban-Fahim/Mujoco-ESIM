@@ -10,12 +10,12 @@ sys.path.append("..")
 #from gym_kuka_mujoco.envs.assets import kuka_asset_dir
 from utils.quaternion import identity_quat, subQuat, quatAdd, mat2Quat
 from utils.kinematics import forwardKinSite, forwardKinJacobianSite
-from .base_controller import BaseController
+from .Controller import Controller
 #from . import register_controller
 from utils.mujoco_utils import get_qpos_indices, get_qvel_indices, get_actuator_indices, get_joint_indices 
 
 
-class FullImpedanceController(BaseController):
+class FullImpedanceController(Controller):
     '''
     An inverse dynamics controller that used PD gains to compute a desired acceleration.
     '''

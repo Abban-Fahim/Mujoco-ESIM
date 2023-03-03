@@ -6,11 +6,11 @@ import mujoco
 import sys
 sys.path.append("..")
 
-from .joint_controller import Joint_controller
+from .JointController import JointController
 from utils.mujoco_utils import kuka_subtree_mass, get_qpos_indices, get_qvel_indices, get_actuator_indices, get_joint_indices 
 
 
-class InverseDynamicsController(Joint_controller):
+class InverseDynamicsController(JointController):
     '''
     An inverse dynamics controller that used PD gains to compute a desired acceleration.
     '''

@@ -1,26 +1,27 @@
-from .base_controller import BaseController
+from .Controller import Controller
 from utils.mujoco_utils import kuka_subtree_mass, get_qpos_indices, get_qvel_indices, get_actuator_indices, get_joint_indices
 import numpy as np
 from gym import spaces
 
 
 
-class Joint_controller(BaseController):
+class JointController(Controller):
     '''
     A base for all joint based controllers
     '''
 
     def __init__(self,
                     sim_model, sim_data,
-                    action_scale=1.,
-                    action_limit=1.,
+                    # action_scale=1.,
+                    # action_limit=1.,
                     controlled_joints=None,
-                    kp=3.,
+                    kp=300,
                     kd="auto",
                     set_velocity=False,
-                    keep_finite=False):
+                    # keep_finite=False
+                    ):
 
-        super(Joint_controller, self).__init__(sim_model, sim_data)
+        super(JointController, self).__init__(sim_model, sim_data)
 
         self.set_velocity = set_velocity
 
@@ -28,7 +29,7 @@ class Joint_controller(BaseController):
         self.init_indices(controlled_joints)
 
         # gym
-        self.gym_action_space(action_limit, action_scale, keep_finite)
+        # self.gym_action_space(action_limit, action_scale, keep_finite)
         
         # PD parameters
         self.set_gains(kp, kd)
@@ -50,24 +51,24 @@ class Joint_controller(BaseController):
             self.sim_actuators_idx = range(self.sim_model.nu)
             self.sim_joint_idx = range(self.sim_model.nu)
 
-    def gym_action_space(self, action_limit, action_scale, keep_finite):
-        self.action_scale = action_scale
+    # def gym_action_space(self, action_limit, action_scale, keep_finite):
+    #     self.action_scale = action_scale
 
-        low = self.sim_model.jnt_range[self.sim_joint_idx, 0]
-        high = self.sim_model.jnt_range[self.sim_joint_idx, 1]
+    #     low = self.sim_model.jnt_range[self.sim_joint_idx, 0]
+    #     high = self.sim_model.jnt_range[self.sim_joint_idx, 1]
 
-        low[self.sim_model.jnt_limited[self.sim_joint_idx] == 0] = -np.inf
-        high[self.sim_model.jnt_limited[self.sim_joint_idx] == 0] = np.inf
+    #     low[self.sim_model.jnt_limited[self.sim_joint_idx] == 0] = -np.inf
+    #     high[self.sim_model.jnt_limited[self.sim_joint_idx] == 0] = np.inf
         
-        if keep_finite:
-            # Don't allow infinite bounds (necessary for SAC)
-            low[not np.isfinite(low)] = -3.
-            high[not np.isfinite(high)] = 3.
+    #     if keep_finite:
+    #         # Don't allow infinite bounds (necessary for SAC)
+    #         low[not np.isfinite(low)] = -3.
+    #         high[not np.isfinite(high)] = 3.
 
-        low = low*action_limit
-        high = high*action_limit
+    #     low = low*action_limit
+    #     high = high*action_limit
 
-        self.action_space = spaces.Box(low, high, dtype=np.float32)
+    #     self.action_space = spaces.Box(low, high, dtype=np.float32)
 
     def set_gains(self, kp, kd):
         
