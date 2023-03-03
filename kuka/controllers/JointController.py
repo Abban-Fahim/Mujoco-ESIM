@@ -12,13 +12,10 @@ class JointController(Controller):
 
     def __init__(self,
                     sim_model, sim_data,
-                    # action_scale=1.,
-                    # action_limit=1.,
                     controlled_joints=None,
                     kp=300,
-                    kd="auto",
+                    kd=None,
                     set_velocity=False,
-                    # keep_finite=False
                     ):
 
         super(JointController, self).__init__(sim_model, sim_data)
@@ -27,9 +24,6 @@ class JointController(Controller):
 
         # Get the position, velocity, and actuator indices for the model.
         self.init_indices(controlled_joints)
-
-        # gym
-        # self.gym_action_space(action_limit, action_scale, keep_finite)
         
         # PD parameters
         self.set_gains(kp, kd)
@@ -37,7 +31,6 @@ class JointController(Controller):
         # Initialize setpoint.
         self.sim_qpos_set = sim_data.qpos[self.sim_qpos_idx].copy()
         self.sim_qvel_set = np.zeros(len(self.sim_qvel_idx))
-    
         
     def init_indices(self, controlled_joints): 
         if controlled_joints is not None:
@@ -51,34 +44,13 @@ class JointController(Controller):
             self.sim_actuators_idx = range(self.sim_model.nu)
             self.sim_joint_idx = range(self.sim_model.nu)
 
-    # def gym_action_space(self, action_limit, action_scale, keep_finite):
-    #     self.action_scale = action_scale
-
-    #     low = self.sim_model.jnt_range[self.sim_joint_idx, 0]
-    #     high = self.sim_model.jnt_range[self.sim_joint_idx, 1]
-
-    #     low[self.sim_model.jnt_limited[self.sim_joint_idx] == 0] = -np.inf
-    #     high[self.sim_model.jnt_limited[self.sim_joint_idx] == 0] = np.inf
-        
-    #     if keep_finite:
-    #         # Don't allow infinite bounds (necessary for SAC)
-    #         low[not np.isfinite(low)] = -3.
-    #         high[not np.isfinite(high)] = 3.
-
-    #     low = low*action_limit
-    #     high = high*action_limit
-
-    #     self.action_space = spaces.Box(low, high, dtype=np.float32)
-
     def set_gains(self, kp, kd):
         
         self.kp = kp
-        if kd == 'auto':
+        if kd is None:
             # calc kd for critically damped 
-            # kd = 2 * sqrt(kp * m)
             mass = kuka_subtree_mass(self.sim_model)
             self.kd = 2 * np.sqrt(mass * kp)
-
         else:
             self.kd = kd
 
