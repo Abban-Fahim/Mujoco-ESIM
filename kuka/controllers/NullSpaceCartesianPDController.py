@@ -22,49 +22,19 @@ class NullSpaceCartesianPDController(Controller):
 
     def __init__(self,
                  sim_model, sim_data,
-                 pos_scale=1.0,
-                 rot_scale=1.0,
-                 pos_limit=1.0,
-                 rot_limit=1.0,
-                 model_path='full_kuka_no_collision_no_gravity.xml',
                  site_name='ee_site',
                  stiffness=None,
                  damping='auto',
                  null_space_damping=10,
                  null_space_stiffness=100,
-                 controlled_joints=None,
-                 nominal_pos=None,
-                 nominal_quat=None,
-                 nominal_qpos=None):
+                ):
         super(NullSpaceCartesianPDController, self).__init__(sim_model, sim_data)
 
         mujoco.mj_forward(sim_model, sim_data)
 
-        # self.init_indices(controlled_joints)
-
-        # Set the zero position and quaternion of the action space.
-        if nominal_pos is None:
-            self.nominal_pos = np.array([0.,0.,0.]) #TODO: use a real position
-        else:
-            self.nominal_pos = nominal_pos.copy()
-
-        if nominal_quat is None:
-            self.nominal_quat = np.array([1., 0., 0., 0.]) # TODO: use a real quaternion
-        else:
-            self.nominal_quat = nominal_quat.copy()
-
-
-        if nominal_qpos is None:
-            self.nominal_qpos = np.zeros(7) # TODO: use a real pose
-        else:
-            self.nominal_qpos = nominal_qpos.copy()
-
-        # self.gym_action_space(pos_limit, rot_limit)
-
-        # Controller parameters.
-        self.scale = np.ones(6)
-        self.scale[:3] *= pos_scale
-        self.scale[3:6] *= rot_scale
+        self.nominal_pos = np.array([0.,0.,0.])
+        self.nominal_quat = np.array([1., 0., 0., 0.])
+        self.nominal_qpos = np.zeros(7)
 
         self.site_name = site_name
         self.pos_set = None
@@ -88,24 +58,17 @@ class NullSpaceCartesianPDController(Controller):
         self.null_space_damping = null_space_damping
         self.null_space_stiffness = null_space_stiffness
 
+        self.init_indices()
 
-        self.init_indices(controlled_joints)
 
     def set_action(self, action):
         '''
         Set the setpoint.
         '''
-        action = action * self.scale
-
         dx = action[0:3].astype(np.float64)
         dr = action[3:6].astype(np.float64)
 
-        # f = self.force_feedback()
-        # print(f)
-        # dx += f[:3] * 0.00001
-
         self.pos_set = dx
-        # self.quat_set = quatAdd(np.array([1., 0., 0., 0.]), dr)
         self.quat_set = eul2quat(dr)
 
     def get_torque(self):
@@ -118,8 +81,6 @@ class NullSpaceCartesianPDController(Controller):
         mujoco.mj_inverse(self.sim_model, self.sim_data)
         id_torque = self.sim_data.qfrc_inverse[self.sim_actuators_idx].copy()
 
-
-        # id_torque = self.sim_data.qacc
         return id_torque
 
     def fk(self):
@@ -189,19 +150,13 @@ class NullSpaceCartesianPDController(Controller):
         self.action_space = spaces.Box(low, high, dtype=np.float32)
 
 
-    def init_indices(self, controlled_joints): 
-            # Get the position, velocity, and actuator indices for the model.
-        if controlled_joints is not None:
-            self.sim_qpos_idx = get_qpos_indices(self.sim_model, controlled_joints)
-            self.sim_qvel_idx = get_qvel_indices(self.sim_model, controlled_joints)
-            self.sim_actuators_idx = get_actuator_indices(self.sim_model, controlled_joints)
-            self.sim_joint_idx = get_joint_indices(self.sim_model, controlled_joints)
-        else:
-            assert self.sim_model.nv == self.sim_model.nu, "if the number of degrees of freedom is different than the number of actuators you must specify the controlled_joints"
-            self.sim_qpos_idx = range(self.sim_model.nq)
-            self.sim_qvel_idx = range(self.sim_model.nv)
-            self.sim_actuators_idx = range(self.sim_model.nu)
-            self.sim_joint_idx = range(self.sim_model.nu)
+    # def init_indices(self, controlled_joints): 
+    def init_indices(self): 
+        assert self.sim_model.nv == self.sim_model.nu, "if the number of degrees of freedom is different than the number of actuators you must specify the controlled_joints"
+        self.sim_qpos_idx = range(self.sim_model.nq)
+        self.sim_qvel_idx = range(self.sim_model.nv)
+        self.sim_actuators_idx = range(self.sim_model.nu)
+        self.sim_joint_idx = range(self.sim_model.nu)
 
     def force_feedback(self):
         r_pseudo_J = self.right_pseudo_Jac()
