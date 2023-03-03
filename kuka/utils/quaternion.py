@@ -74,6 +74,11 @@ def quatAdd(q1, v):
     res = mulQuat(qv, q1)
     return res
 
+def eul2quat(eul):
+    res = R.from_euler('xyz', eul).as_quat()
+    res = np.roll(res, 1)
+    return res
+
 def rotVecQuat(v, q):
     res = np.zeros(3)
     mujoco.mju_rotVecQuat(res, v, q)

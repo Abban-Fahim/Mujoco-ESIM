@@ -143,18 +143,7 @@ def rotVecQuat(v, q):
 
 def quat2eul(q):
     mat = quat2Mat(q)
-    # print("###", mat)
     q = R.from_matrix(mat.reshape(3,3)).as_euler('xyz')
-
-    # l = ['xyz', 'zyx', 'zyz', 'zxz']
-    # for a in l:
-    #     print(a,  R.from_matrix(mat.reshape(3,3)).as_euler(a))
-
-    # q = R.from_matrix(mat.reshape(3,3)).as_euler('xyz')
-    # q = R.from_matrix(mat.reshape(3,3)).as_euler('zyx')
-    # q = R.from_matrix(mat.reshape(3,3)).as_euler('zyz')
-    # q = R.from_matrix(mat.reshape(3,3)).as_euler('xyz')
-
     return q
 
     

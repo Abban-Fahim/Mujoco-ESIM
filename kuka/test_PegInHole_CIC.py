@@ -78,7 +78,7 @@ data.qpos = jposes["HOME_Q"]
 
 poses = get_cposes()
 
-viapoints = ["TEST1", "TEST2", "APPROACH",  "HOME"]
+viapoints = ["TEST1", "HOME", "TEST2", "HOME","TEST1", "HOME", "TEST2", "HOME","TEST1", "HOME", "TEST2", "HOME"]
 viapoint = viapoints.pop()
 
 
@@ -106,8 +106,9 @@ while (True):
     t = data.time
 
     # print("timestamp:", t, viapoints)
-    # print("error", err)
-    # print("Current viapoint", viapoint)
+    print("error", err)
+    print("current position", controller.fk())
+    print("Current viapoint", poses[viapoint])
     # print("Joint Values:", data.qpos)
     # print("Torques:", torque)
     # print("Actions:", data.ctrl)

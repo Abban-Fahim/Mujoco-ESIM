@@ -23,8 +23,8 @@ poses:
     INSERTION: [-0.20,0.65,0.1, 180, 45, 0]
     LOOK: [0,0.55,0.1, 180, 45, 0]
     TEST: [0.0, 0.60, 0.0, 180, 0, 0]
-    TEST1: [0,0.45,0.55, 90, 45, 0]
-    TEST2: [0,0.45,0.55, 270, 45, 0]
+    TEST1: [0.1,0.45,0.55, 180, -90, 0]
+    TEST2: [-0.1,0.45,0.55, 180, 90, 0]
 
 
 jerr_limit: 0.1 # accuracy of reaching a position before changing viapoint

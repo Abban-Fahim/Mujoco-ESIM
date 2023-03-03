@@ -8,7 +8,7 @@ import sys
 sys.path.append("..")
 
 #from gym_kuka_mujoco.envs.assets import kuka_asset_dir
-from utils.quaternion import identity_quat, subQuat, quatAdd, mat2Quat
+from utils.quaternion import identity_quat, subQuat, quatAdd, mat2Quat, eul2quat, quat2eul
 from utils.kinematics import forwardKinSite, forwardKinJacobianSite
 from .base_controller import BaseController
 #from . import register_controller
@@ -30,8 +30,8 @@ class FullImpedanceController(BaseController):
                  site_name='ee_site',
                  stiffness=None,
                  damping='auto',
-                 null_space_damping=90,
-                 null_space_stiffness=2000.0,
+                 null_space_damping=10,
+                 null_space_stiffness=100,
                  controlled_joints=None,
                  nominal_pos=None,
                  nominal_quat=None,
@@ -73,8 +73,8 @@ class FullImpedanceController(BaseController):
         # Default stiffness and damping in cartesian space
         if stiffness is None:
             # self.stiffness = np.array([1000.0, 1000.0, 1000.0, 1000.3, 1000.3, 1000.3])
-            # self.stiffness = np.array([300.0, 300.0, 300.0, 200.0, 200.0, 200.0])
-            self.stiffness = np.array([700.0, 700.0, 700.0, 700.0, 700.0, 700])
+            self.stiffness = np.array([300.0, 300.0, 300.0, 200.0, 200.0, 200.0])
+            # self.stiffness = np.array([700.0, 700.0, 700.0, 700.0, 700.0, 700])
             # self.stiffness = np.array([10.0, 10.0, 10.0, 10.0, 10.0, 10.0])
         else:
             self.stiffness = np.ones(6)*stiffness
@@ -105,7 +105,8 @@ class FullImpedanceController(BaseController):
         # dx += f[:3] * 0.00001
 
         self.pos_set = dx
-        self.quat_set = quatAdd(np.array([1., 0., 0., 0.]), dr)
+        # self.quat_set = quatAdd(np.array([1., 0., 0., 0.]), dr)
+        self.quat_set = eul2quat(dr)
 
     def get_torque(self):
         '''
@@ -121,6 +122,11 @@ class FullImpedanceController(BaseController):
         # id_torque = self.sim_data.qacc
         return id_torque
 
+    def fk(self):
+        pos, mat = forwardKinSite(self.sim_model, self.sim_data, self.site_name, recompute=False)
+        quat = mat2Quat(mat)
+        pose = np.append(pos, quat2eul(quat))
+        return pose
 
     def pose_error(self):
         # Compute the pose difference.
