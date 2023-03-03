@@ -1,5 +1,7 @@
 import numpy as np
 import mujoco
+from scipy.spatial.transform import Rotation as R
+
 
 identity_quat = np.array([1., 0., 0., 0.])
 
@@ -76,3 +78,8 @@ def rotVecQuat(v, q):
     res = np.zeros(3)
     mujoco.mju_rotVecQuat(res, v, q)
     return res
+
+def quat2eul(q):
+    mat = quat2Mat(q)
+    q = R.from_matrix(mat.reshape(3,3)).as_euler('xyz')
+    return q
