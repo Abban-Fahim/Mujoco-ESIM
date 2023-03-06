@@ -58,7 +58,7 @@ class CartisianPDController(CartesianController):
         Update the PD setpoint and compute the torque.
         '''
         
-        J = self.Jac()
+        # J = self.Jac()
         perr = self.pose_error()
         qvel = self.sim_data.qvel
 
@@ -67,22 +67,18 @@ class CartisianPDController(CartesianController):
         # torque = J.T @ (self.kp * perr) + self.kd *qvel
         # slide 6 visco-elactic
         # visco-elastic with null space projections
-        dperr = J @ qvel
-        print()
+        print("self.kp", self.kp, "perr", perr, "self.kd", self.kd)
         # torque = self.right_pseudo_Jac(eps=0) @ (self.kp * perr + self.kd *dperr) - self.null_space_proj_m(eps=0) @ qvel
-        torque = self.right_pseudo_Jac(eps=0) @ (self.kp * perr + self.kd *dperr)
+        torque = self.right_pseudo_Jac(eps=0) @ (self.kp * perr) + self.kd * qvel
 
 
-        # gravity compensation
-        G = self.sim_data.qfrc_bias
+        # # gravity compensation
+        # G = self.sim_data.qfrc_bias
 
-        # Sum the torques.
-        out_torque = torque + G
-        self.sim_data.ctrl = out_torque
-
-        pos, mat = forwardKinSite(self.sim_model, self.sim_data, self.site_name, recompute=False)
-        quat = mat2Quat(mat)
-        # eul = R.from_matrix(mat.reshape(3,3)).as_euler('xyz')
+        # # Sum the torques.
+        # out_torque = torque + G
+        # self.sim_data.ctrl = out_torque
+        self.sim_data.ctrl = torque
 
 
         

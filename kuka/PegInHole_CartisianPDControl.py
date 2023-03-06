@@ -69,7 +69,7 @@ viewer = mujoco_viewer.MujocoViewer(model, data)
 # controller = CartisianPDController(model, data, kp=np.array([200, 200, 200, 10, 10, 10]), kd=np.array([1, 1, 1, 0.1, 0.1, 0.1]))
 # for visco-elastic with null space projections
 # controller = CartisianPDController(model, data, kp=np.array([4, 4, 4, 4, 4, 4]), kd=np.array([0.1, 0.1, 0.1, 0.1, 0.1, 0.1]))
-controller = CartisianPDController(model, data, kp=np.array([3, 3, 3, 50, 50, 50]))
+controller = CartisianPDController(model, data, kp=np.array([100,100,100,100,100,100]), kd=np.array([10,10,10,10,10,10,10]))
 
 
 

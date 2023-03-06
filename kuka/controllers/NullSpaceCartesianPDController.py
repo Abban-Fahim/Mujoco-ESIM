@@ -74,7 +74,7 @@ class NullSpaceCartesianPDController(CartesianController):
         cartesian_acc_des = self.kp*self.pose_error() - self.kd * (J @ self.sim_data.qvel[self.sim_qvel_idx])
 
         # impedance control
-        impedance_control = self.right_pseudo_Jac(eps=1e-6) @ cartesian_acc_des
+        impedance_control = self.right_pseudo_Jac(eps=0) @ cartesian_acc_des
         return impedance_control
 
     def null_space_controller(self):
