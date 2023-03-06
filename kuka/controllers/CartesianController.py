@@ -13,9 +13,12 @@ class CartesianController(MujocoPDController):
     def __init__(self,
                  sim_model, sim_data,
                  kp = 300, kd=None,
+                 site_name='ee_site',
                 ):
         super(CartesianController, self).__init__(sim_model, sim_data, kp, kd)
 
+        self.site_name = site_name
+        
         self.nominal_qpos = np.zeros(7)
 
         self.pos_set = None

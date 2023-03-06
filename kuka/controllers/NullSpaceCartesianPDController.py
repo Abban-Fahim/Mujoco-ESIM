@@ -27,11 +27,11 @@ class NullSpaceCartesianPDController(CartesianController):
                  null_space_stiffness=100,
                  site_name='ee_site',
                 ):
-        super(NullSpaceCartesianPDController, self).__init__(sim_model, sim_data, kp, kd)
+        super(NullSpaceCartesianPDController, self).__init__(sim_model, sim_data, kp, kd, site_name)
 
         self.nominal_qpos = np.zeros(7)
 
-        self.site_name = site_name
+        # self.site_name = site_name
 
         self.null_space_damping = null_space_damping
         self.null_space_stiffness = null_space_stiffness
@@ -55,6 +55,8 @@ class NullSpaceCartesianPDController(CartesianController):
 
         mujoco.mj_inverse(self.sim_model, self.sim_data)
         id_torque = self.sim_data.qfrc_inverse[self.sim_actuators_idx].copy()
+
+        self.sim_data.ctrl = id_torque
 
         return id_torque
 

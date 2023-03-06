@@ -95,7 +95,7 @@ while (True):
     controller.set_action(poses[viapoint])
     torque = controller.get_torque()
     # data.ctrl[:] = np.clip(torque, -100, 100)
-    data.ctrl[:] = torque
+    # data.ctrl[:] = torque
     #self.sim.data.qfrc_applied[:] = self._get_random_applied_force()
 
     # viapoint change when the last viapoint is reached
