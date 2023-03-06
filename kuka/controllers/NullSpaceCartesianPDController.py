@@ -10,12 +10,12 @@ sys.path.append("..")
 #from gym_kuka_mujoco.envs.assets import kuka_asset_dir
 from utils.quaternion import identity_quat, subQuat, quatAdd, mat2Quat, eul2quat, quat2eul
 from utils.kinematics import forwardKinSite, forwardKinJacobianSite
-from .MujocoPDController import MujocoPDController
+from .CartesianController import CartesianController
 #from . import register_controller
 from utils.mujoco_utils import get_qpos_indices, get_qvel_indices, get_actuator_indices, get_joint_indices, kuka_subtree_mass
 
 
-class NullSpaceCartesianPDController(MujocoPDController):
+class NullSpaceCartesianPDController(CartesianController):
     '''
     An inverse dynamics controller that used PD gains to compute a desired acceleration.
     '''
@@ -23,21 +23,15 @@ class NullSpaceCartesianPDController(MujocoPDController):
     def __init__(self,
                  sim_model, sim_data,
                  kp = 300, kd=None,
-                 site_name='ee_site',
-                #  stiffness=None,
-                #  damping='auto',
                  null_space_damping=10,
                  null_space_stiffness=100,
+                 site_name='ee_site',
                 ):
         super(NullSpaceCartesianPDController, self).__init__(sim_model, sim_data, kp, kd)
-
-        mujoco.mj_forward(sim_model, sim_data)
 
         self.nominal_qpos = np.zeros(7)
 
         self.site_name = site_name
-        self.pos_set = None
-        self.quat_set = None
 
         self.null_space_damping = null_space_damping
         self.null_space_stiffness = null_space_stiffness
@@ -63,50 +57,6 @@ class NullSpaceCartesianPDController(MujocoPDController):
         id_torque = self.sim_data.qfrc_inverse[self.sim_actuators_idx].copy()
 
         return id_torque
-    
-    def set_gains(self, kp, kd):
-        self.kp = kp
-        if kd is None:
-            self.kd = 2 * np.sqrt(kp)
-
-        else:
-            self.kd = kd
-
-    def fk(self):
-        pos, mat = forwardKinSite(self.sim_model, self.sim_data, self.site_name, recompute=False)
-        quat = mat2Quat(mat)
-        pose = np.append(pos, quat2eul(quat))
-        return pose
-
-    def pose_error(self):
-        if self.pos_set is None or self.quat_set is None:
-            raise ValueError("Function set_action was not called first")
-
-        # Compute the pose difference.
-        pos, mat = forwardKinSite(self.sim_model, self.sim_data, self.site_name, recompute=False)
-        quat = mat2Quat(mat)
-        
-        dx = self.pos_set - pos
-        dr = subQuat(self.quat_set, quat) # Original
-        dframe = np.concatenate((dx,dr))
-        return dframe
-
-    def Jac(self):
-        jpos, jrot = forwardKinJacobianSite(self.sim_model, self.sim_data, self.site_name, recompute=False)
-        J = np.vstack((jpos, jrot)) # full jacobian
-        return J
-
-    def right_pseudo_Jac(self, eps=0):
-        J = self.Jac()
-        
-        pJ = J.T @ np.linalg.inv(J @ J.T + eps*np.eye(6)) 
-        return pJ
-
-    def left_pseudo_Jac(self, eps=0):
-        J = self.Jac()
-        
-        pJ = np.linalg.inv(J.T @ J + eps*np.eye(7)) @ J.T
-        return pJ
 
     def null_space_proj_m(self):
         J = self.Jac()
@@ -130,19 +80,10 @@ class NullSpaceCartesianPDController(MujocoPDController):
         null_space_control = self.null_space_stiffness * (self.nominal_qpos - self.sim_data.qpos[self.sim_qpos_idx]) - self.null_space_damping*self.sim_data.qvel[self.sim_qvel_idx]
         return null_space_control
 
-    def gym_action_space(self, pos_limit, rot_limit):
-        # Construct the action space.
-        high_pos = pos_limit*np.ones(3)
-        low_pos = -high_pos
-        high_rot = rot_limit*np.ones(3)
-        low_rot = -high_rot
+    def set_gains(self, kp, kd):
+        self.kp = kp
+        if kd is None:
+            self.kd = 2 * np.sqrt(kp)
 
-        high = np.concatenate((high_pos, high_rot))
-        low = np.concatenate((low_pos, low_rot))
-        self.action_space = spaces.Box(low, high, dtype=np.float32)
-
-    def force_feedback(self):
-        r_pseudo_J = self.right_pseudo_Jac()
-
-        # solve: tau = (Jac)^T * F
-        return r_pseudo_J.T @ self.sim_data.qfrc_constraint
+        else:
+            self.kd = kd

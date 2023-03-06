@@ -1,5 +1,6 @@
 import abc
 import numpy as np
+import mujoco
 from utils.mujoco_utils import kuka_subtree_mass
 from .Controller import Controller
 
@@ -19,6 +20,8 @@ class MujocoPDController(Controller, abc.ABC):
 
         # PD parameters
         self.set_gains(kp, kd)
+
+        mujoco.mj_forward(sim_model, sim_data)
 
         
     def init_indices(self): 
