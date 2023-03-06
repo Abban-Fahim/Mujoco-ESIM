@@ -33,4 +33,8 @@ class MujocoPDController(Controller, abc.ABC):
     @abc.abstractmethod
     def set_gains(self, kp, kd):
         pass
+
+    @abc.abstractmethod
+    def controlLaw(self):
+        pass
     

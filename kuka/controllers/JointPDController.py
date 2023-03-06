@@ -43,12 +43,8 @@ class JointPDController(JointController):
         Update the PD setpoint and compute the torque.
         '''
 
-        # calculate errors
-        jerr = self.joint_error()
-        djerr = self.joint_vel_error()
-
         # PD law
-        torque = self.kp * jerr + self.kd * djerr
+        torque = self.controlLaw()
 
         # gravity compensation
         G = self.sim_data.qfrc_bias
@@ -58,6 +54,9 @@ class JointPDController(JointController):
         self.sim_data.ctrl = out_torque
         
         return out_torque
+    
+    def controlLaw(self):
+        return self.kp * self.joint_error() + self.kd * self.joint_vel_error()
     
     def set_gains(self, kp, kd):
         self.kp = kp

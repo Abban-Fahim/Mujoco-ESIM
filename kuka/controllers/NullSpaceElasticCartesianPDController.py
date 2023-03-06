@@ -1,5 +1,6 @@
 from typing import Generator
-from .CartesianController import CartesianController
+from .ElasticCartesianPDController import ElasticCartesianPDController
+from .JointPDController import JointPDController
 from utils.mujoco_utils import kuka_subtree_mass, get_qpos_indices, get_qvel_indices, get_actuator_indices, get_joint_indices
 from utils.quaternion import identity_quat, subQuat, quatAdd, mat2Quat, eul2quat, quat2eul
 
@@ -13,7 +14,7 @@ from utils.quaternion import identity_quat, subQuat, quatAdd, mat2Quat
 from utils.kinematics import forwardKinSite, forwardKinJacobianSite
 
 
-class NullSpaceElasticCartesianPDController(CartesianController):
+class NullSpaceElasticCartesianPDController(ElasticCartesianPDController, JointPDController):
     '''
     A base for all joint based controllers
     '''
@@ -28,66 +29,10 @@ class NullSpaceElasticCartesianPDController(CartesianController):
                     ):
 
         super(NullSpaceElasticCartesianPDController, self).__init__(sim_model, sim_data, kp, kd, site_name)
-
-        self.nominal_qpos = np.zeros(7)
-
-        self.null_space_damping = null_space_damping
-        self.null_space_stiffness = null_space_stiffness
-
-    def set_gains(self, kp, kd):
-        self.kp = kp
-        if kd is None:
-            self.kd = 2 * np.sqrt(kp)
-        else:
-            self.kd = kd
-
-    def set_action(self, action):
-        '''
-        Set the setpoint.
-        '''
-        self.scale = 1
-        action = action * self.scale
-
-        dx = action[0:3].astype(np.float64)
-        dr = action[3:6].astype(np.float64)
-
-        self.pos_set = dx
-        self.quat_set = eul2quat(dr)
-
-    def get_torque(self):
-        '''
-        Update the PD setpoint and compute the torque.
-        '''
-        self.sim_data.qacc = self.elasticImpedance_controller() + self.null_space_proj_m() @ self.null_space_controller()
-
-
-        # # gravity compensation
-        # G = self.sim_data.qfrc_bias
-
-        # # Sum the torques.
-        # out_torque = torque + G
-        # self.sim_data.ctrl = out_torque
-        # # self.sim_data.ctrl = torque
-
-        mujoco.mj_inverse(self.sim_model, self.sim_data)
-        id_torque = self.sim_data.qfrc_inverse[self.sim_actuators_idx].copy()
-
-        self.sim_data.ctrl = id_torque
-
-        return id_torque
     
-    # http://www.diag.uniroma1.it/deluca/rob2_en/13_CartesianControl.pdf
-    # slide 3 elastic
-    def elasticImpedance_controller(self):
-        # desired behaviour 
-        impedance_control = self.right_pseudo_Jac(eps=0) @ (self.kp * self.pose_error()) - self.kd * self.sim_data.qvel
-
-        return impedance_control
+    def controlLaw(self):
+        return ElasticCartesianPDController.controlLaw(self) + self.null_space_proj_m() @ JointPDController.controlLaw(self)
     
-    def null_space_controller(self):
-        # ns = kn * (qn - q) -  dn * dq
-        null_space_control = self.null_space_stiffness * (self.nominal_qpos - self.sim_data.qpos[self.sim_qpos_idx]) - self.null_space_damping*self.sim_data.qvel[self.sim_qvel_idx]
-        return null_space_control
 
     def null_space_proj_m(self):
         J = self.Jac()
@@ -97,7 +42,3 @@ class NullSpaceElasticCartesianPDController(CartesianController):
 
         return projection_matrix
     
-    def null_space_controller(self):
-        # ns = kn * (qn - q) -  dn * dq
-        null_space_control = self.null_space_stiffness * (self.nominal_qpos - self.sim_data.qpos[self.sim_qpos_idx]) - self.null_space_damping*self.sim_data.qvel[self.sim_qvel_idx]
-        return null_space_control
