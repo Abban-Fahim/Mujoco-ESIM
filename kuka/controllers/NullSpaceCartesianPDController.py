@@ -32,8 +32,6 @@ class NullSpaceCartesianPDController(MujocoController):
 
         mujoco.mj_forward(sim_model, sim_data)
 
-        self.nominal_pos = np.array([0.,0.,0.])
-        self.nominal_quat = np.array([1., 0., 0., 0.])
         self.nominal_qpos = np.zeros(7)
 
         self.site_name = site_name
@@ -87,6 +85,9 @@ class NullSpaceCartesianPDController(MujocoController):
         return pose
 
     def pose_error(self):
+        if self.pos_set is None or self.self.quat_set is None:
+            raise ValueError("Function set_action was not called first")
+
         # Compute the pose difference.
         pos, mat = forwardKinSite(self.sim_model, self.sim_data, self.site_name, recompute=False)
         quat = mat2Quat(mat)
