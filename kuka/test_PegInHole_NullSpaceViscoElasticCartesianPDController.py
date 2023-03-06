@@ -57,7 +57,7 @@ import mujoco_viewer
 import os
 import time
 import numpy as np
-from controllers.NullSpaceCartesianPDController import NullSpaceCartesianPDController
+from controllers.NullSpaceViscoElasticCartesianPDController import NullSpaceViscoElasticCartesianPDController
 from utils.read_cfg import get_mjc_xml, get_jposes, get_cposes, get_cerr_lim
 
 from utils.kinematics import current_ee_position
@@ -68,7 +68,7 @@ data = mujoco.MjData(model)
 # print(data.qpos)
 
 viewer = mujoco_viewer.MujocoViewer(model, data)
-controller = NullSpaceCartesianPDController(model, data)
+controller = NullSpaceViscoElasticCartesianPDController(model, data)
 
 
 
@@ -78,7 +78,7 @@ data.qpos = jposes["HOME_Q"]
 
 poses = get_cposes()
 
-viapoints = ["TEST", "APPROACH",  "HOME"]
+viapoints = ["TEST1", "HOME", "TEST2", "HOME","TEST1", "HOME", "TEST2", "HOME","TEST1", "HOME", "TEST2", "HOME"]
 viapoint = viapoints.pop()
 
 
@@ -90,26 +90,22 @@ while (True):
 
     controller.set_action(poses[viapoint])
 
-    
-
-    controller.set_action(poses[viapoint])
-    torque = controller.get_torque()
-    # data.ctrl[:] = np.clip(torque, -100, 100)
-    # data.ctrl[:] = torque
-    #self.sim.data.qfrc_applied[:] = self._get_random_applied_force()
-
     # viapoint change when the last viapoint is reached
     viapoint_position = poses[viapoint][:3]
     err = np.linalg.norm(controller.pose_error()[:3])
     if err_limit > err  and viapoints:
         viapoint = viapoints.pop()
+
+    controller.set_action(poses[viapoint])
+    torque = controller.get_torque()
     
     mujoco.mj_step(model, data)
     t = data.time
 
     # print("timestamp:", t, viapoints)
-    # print("error", err)
-    # print("Current viapoint", viapoint)
+    print("error", err)
+    print("current position", controller.fk())
+    print("Current viapoint", poses[viapoint])
     # print("Joint Values:", data.qpos)
     # print("Torques:", torque)
     # print("Actions:", data.ctrl)
