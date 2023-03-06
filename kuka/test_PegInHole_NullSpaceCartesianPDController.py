@@ -68,7 +68,7 @@ data = mujoco.MjData(model)
 # print(data.qpos)
 
 viewer = mujoco_viewer.MujocoViewer(model, data)
-controller = NullSpaceCartesianPDController(model, data) #TODO model_path should be reletive to root dir
+controller = NullSpaceCartesianPDController(model, data)
 
 
 

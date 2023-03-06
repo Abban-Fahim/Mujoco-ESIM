@@ -57,7 +57,7 @@ import mujoco_viewer
 import os
 import time
 import numpy as np
-from kuka.controllers.NullSpaceCartesianPDController import NullSpaceCartesianPDController
+from controllers.NullSpaceCartesianPDController import NullSpaceCartesianPDController
 from utils.read_cfg import get_mjc_xml, get_jposes, get_cposes, get_cerr_lim
 
 from utils.kinematics import current_ee_position
@@ -68,7 +68,7 @@ data = mujoco.MjData(model)
 # print(data.qpos)
 
 viewer = mujoco_viewer.MujocoViewer(model, data)
-controller = NullSpaceCartesianPDController(model, data, model_path="full_kuka_INRC3.xml") #TODO model_path should be reletive to root dir
+controller = NullSpaceCartesianPDController(model, data)
 
 
 
@@ -90,17 +90,19 @@ while (True):
 
     controller.set_action(poses[viapoint])
 
-    # viapoint change when the last viapoint is reached
-    viapoint_position = poses[viapoint][:3]
-    err = np.linalg.norm(controller.pose_error()[:3])
-    if err_limit > err  and viapoints:
-        viapoint = viapoints.pop()
+    
 
     controller.set_action(poses[viapoint])
     torque = controller.get_torque()
     # data.ctrl[:] = np.clip(torque, -100, 100)
     data.ctrl[:] = torque
     #self.sim.data.qfrc_applied[:] = self._get_random_applied_force()
+
+    # viapoint change when the last viapoint is reached
+    viapoint_position = poses[viapoint][:3]
+    err = np.linalg.norm(controller.pose_error()[:3])
+    if err_limit > err  and viapoints:
+        viapoint = viapoints.pop()
     
     mujoco.mj_step(model, data)
     t = data.time

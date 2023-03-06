@@ -10,25 +10,26 @@ sys.path.append("..")
 #from gym_kuka_mujoco.envs.assets import kuka_asset_dir
 from utils.quaternion import identity_quat, subQuat, quatAdd, mat2Quat, eul2quat, quat2eul
 from utils.kinematics import forwardKinSite, forwardKinJacobianSite
-from .MujocoController import MujocoController
+from .MujocoPDController import MujocoPDController
 #from . import register_controller
 from utils.mujoco_utils import get_qpos_indices, get_qvel_indices, get_actuator_indices, get_joint_indices, kuka_subtree_mass
 
 
-class NullSpaceCartesianPDController(MujocoController):
+class NullSpaceCartesianPDController(MujocoPDController):
     '''
     An inverse dynamics controller that used PD gains to compute a desired acceleration.
     '''
 
     def __init__(self,
                  sim_model, sim_data,
+                 kp = 300, kd=None,
                  site_name='ee_site',
-                 stiffness=None,
-                 damping='auto',
+                #  stiffness=None,
+                #  damping='auto',
                  null_space_damping=10,
                  null_space_stiffness=100,
                 ):
-        super(NullSpaceCartesianPDController, self).__init__(sim_model, sim_data)
+        super(NullSpaceCartesianPDController, self).__init__(sim_model, sim_data, kp, kd)
 
         mujoco.mj_forward(sim_model, sim_data)
 
@@ -37,21 +38,6 @@ class NullSpaceCartesianPDController(MujocoController):
         self.site_name = site_name
         self.pos_set = None
         self.quat_set = None
-
-        # Default stiffness and damping in cartesian space
-        if stiffness is None:
-            # self.stiffness = np.array([1000.0, 1000.0, 1000.0, 1000.3, 1000.3, 1000.3])
-            self.stiffness = np.array([300.0, 300.0, 300.0, 200.0, 200.0, 200.0])
-            # self.stiffness = np.array([700.0, 700.0, 700.0, 700.0, 700.0, 700])
-            # self.stiffness = np.array([10.0, 10.0, 10.0, 10.0, 10.0, 10.0])
-        else:
-            self.stiffness = np.ones(6)*stiffness
-
-        if damping=='auto':
-            self.damping = 2 * np.sqrt(self.stiffness)
-
-        else:
-            self.damping = 2*np.sqrt(self.stiffness)*damping
 
         self.null_space_damping = null_space_damping
         self.null_space_stiffness = null_space_stiffness
@@ -77,6 +63,14 @@ class NullSpaceCartesianPDController(MujocoController):
         id_torque = self.sim_data.qfrc_inverse[self.sim_actuators_idx].copy()
 
         return id_torque
+    
+    def set_gains(self, kp, kd):
+        self.kp = kp
+        if kd is None:
+            self.kd = 2 * np.sqrt(kp)
+
+        else:
+            self.kd = kd
 
     def fk(self):
         pos, mat = forwardKinSite(self.sim_model, self.sim_data, self.site_name, recompute=False)
@@ -85,7 +79,7 @@ class NullSpaceCartesianPDController(MujocoController):
         return pose
 
     def pose_error(self):
-        if self.pos_set is None or self.self.quat_set is None:
+        if self.pos_set is None or self.quat_set is None:
             raise ValueError("Function set_action was not called first")
 
         # Compute the pose difference.
@@ -125,7 +119,7 @@ class NullSpaceCartesianPDController(MujocoController):
     def impedance_controller(self):
         # desired behaviour 
         J = self.Jac()
-        cartesian_acc_des = self.stiffness*self.pose_error() - self.damping * (J @ self.sim_data.qvel[self.sim_qvel_idx])
+        cartesian_acc_des = self.kp*self.pose_error() - self.kd * (J @ self.sim_data.qvel[self.sim_qvel_idx])
 
         # impedance control
         impedance_control = self.right_pseudo_Jac(eps=1e-6) @ cartesian_acc_des

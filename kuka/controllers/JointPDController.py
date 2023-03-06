@@ -18,9 +18,9 @@ class JointPDController(JointController):
 
     def __init__(self,
                     sim_model, sim_data,
-                    site_name='ee_site',
                     kp=3,
                     kd=None,
+                    site_name='ee_site'
                     ):
 
         super(JointPDController, self).__init__(sim_model, sim_data, kp, kd)
@@ -58,3 +58,13 @@ class JointPDController(JointController):
         self.sim_data.ctrl = out_torque
         
         return out_torque
+    
+    def set_gains(self, kp, kd):
+        self.kp = kp
+        if kd is None:
+            # calc kd for critically damped 
+            mass = kuka_subtree_mass(self.sim_model)
+            print(kd, kp, mass)
+            self.kd = 2 * np.sqrt(mass * kp)
+        else:
+            self.kd = kd
