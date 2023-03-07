@@ -39,14 +39,14 @@
                   <inertial euler="0 0 0" pos="0 0 0.02" mass="1.2" diaginertia="0.001 0.001 0.001"/>
                   <geom class="collision" type="mesh" mesh="kuka_link_7_mesh"/>
                   <geom class="visual" type="mesh" mesh="kuka_link_7_mesh" material="kuka_grey"/>
-                  <!-- <site name="ee_site" pos="0 0 0.05" euler="0 0 0" size="0.005, 0.005, 0.005"/> -->
                   <site name="ee_site" pos="0 0 0.15" euler="0 0 0" size="0.005, 0.005, 0.005"/>
-                  <!-- <geom pos="0 0 0.05" type="mesh" mesh="tool_cylinder_mesh"/> -->
                   <geom pos="0 0 0.05" type="mesh" mesh="tool_cylinder_mesh0"/>
                   <geom pos="0 0 0.05" type="mesh" mesh="tool_cylinder_mesh1"/>
-                  <!--include file="peg/peg_collision.xml"/-->
+                  <!-- camera -->
+                  <geom type="box" pos="0 -0.05 0.05" size="0.01 0.04 0.01" rgba=".8 .2 .1 1"/>
+                  <geom type="box" pos="0 -0.10 0.05" size="0.02 0.02 0.02" rgba=".8 .2 .1 1"/>
+                  <geom type="box" pos="0 -0.10 0.07" size="0.008 0.008 0.008" rgba=".8 .2 .1 1"/>
                   <camera name="mounted_camera" mode="fixed" fovy="103" pos="0 -0.1 0.07" euler="3.14 0 0"/>
-                  <!-- <camera name="mounted_camera" mode="fixed" fovy="103" pos="0 -0.1 0.07" euler="3 0 0"/> -->
 
                 </body>
               </body>
