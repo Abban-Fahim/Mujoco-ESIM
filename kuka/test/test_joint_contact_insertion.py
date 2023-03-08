@@ -51,9 +51,53 @@
 #DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
 #
 
-from test.test_joint_contact_insertion import test_joint_run
-from controllers.JointPDController import JointPDController
+
+import mujoco
+import mujoco_viewer
+import os
+import time
+import numpy as np
+from utils.read_cfg import get_mjc_xml, get_jposes, get_jerr_lim
+
 
 viapoints = ["TEST_Q", "APPROACH_Q", "HOME_Q"]
-test_joint_run(viapoints, JointPDController)
 
+
+def test_joint_run(viapoints, controllerClass):
+
+    model = mujoco.MjModel.from_xml_path(get_mjc_xml())
+    data = mujoco.MjData(model)
+    viewer = mujoco_viewer.MujocoViewer(model, data)
+    controller = controllerClass(model, data, kp=np.array([200, 600, 200, 500, 50, 50, 0.5]), kd=np.array([40, 60, 5, 35, 5, 5, 0.01]))
+
+    poses = get_jposes()
+
+    data.qpos = poses["HOME_Q"]
+
+    viapoint = viapoints.pop()
+
+    t = data.time
+    err_limit = get_jerr_lim()
+
+    while (True):
+        viewer.render()
+
+        # viapoint change when the last viapoint is reached
+        err = np.linalg.norm(controller.joint_error())
+        if err_limit > err  and viapoints:
+            viapoint = viapoints.pop()
+
+        controller.set_action(poses[viapoint])
+
+        torque = controller.get_torque()
+
+        mujoco.mj_step(model, data)
+        t = data.time
+
+        print("timestamp:", t, viapoints)
+        print("error", err)
+        print("Current viapoint", viapoint)
+        print("Joint Values:", data.qpos)
+        print("Torques:", torque)
+        print("Actions:", data.ctrl)
+    
