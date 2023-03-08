@@ -92,8 +92,9 @@ def test_run(viapoints, controllerClass):
         controller.set_action(poses[viapoint])
 
         # viapoint change when the last viapoint is reached
-        err = np.linalg.norm(controller.error())
-        if err_limit > err  and viapoints:
+        error = controller.error()
+        err_norm = np.linalg.norm(error)
+        if err_limit > err_norm  and viapoints:
             viapoint = viapoints.pop()
 
         controller.set_action(poses[viapoint])
@@ -102,7 +103,8 @@ def test_run(viapoints, controllerClass):
         mujoco.mj_step(model, data)
         t = data.time
 
-        print("error", err)
+        print("norm error", err_norm)
+        print("error", error)
         print("Current viapoint", viapoint)
         print("Joint Values:", data.qpos)
 

@@ -18,8 +18,8 @@ class JointPDController(JointController):
 
     def __init__(self,
                     sim_model, sim_data,
-                    kp=np.array([200, 600, 200, 500, 50, 50, 0.5]),
-                    kd=np.array([40, 60, 5, 35, 5, 5, 0.01]),
+                    kp=np.array([200, 600, 200, 500, 50, 50, 10])*4,
+                    kd=np.array([40, 60, 5, 35, 5, 5, 0.01])*3,
                     site_name='ee_site'
                     ):
 
@@ -51,6 +51,7 @@ class JointPDController(JointController):
 
         # Sum the torques.
         out_torque = torque + G
+
         self.sim_data.ctrl = out_torque
         
         return out_torque
