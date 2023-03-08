@@ -2,9 +2,11 @@
 
 <mujoco>
   <compiler angle="radian" coordinate="local" meshdir="meshes/"/>
+
   <option>
     <flag gravity="enable"/>
   </option>
+
   <default> 
     <joint damping="0.5"/>   
     <default class="visual">
@@ -15,14 +17,17 @@
     </default>
     <site rgba="1 0 0 .5"/>
   </default>  
+
   <asset>
     <include file="kuka/kuka_assets.xml"/>
   </asset>
+
   <worldbody>
-    <geom class="collision" type="plane" size="10 10 1"/>
-    <include file="kuka/kuka_mesh_collision.xml"/>
+    <include file="station.xml"/>
   </worldbody>
+
   <actuator>
     <include file="kuka/kuka_actuators.xml"/>
   </actuator>
+
 </mujoco>
