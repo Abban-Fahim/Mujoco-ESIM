@@ -31,8 +31,6 @@ class NullSpaceViscoElasticCartesianPDController(ViscoElasticCartesianPDControll
         super(NullSpaceViscoElasticCartesianPDController, self).__init__(sim_model, sim_data, kp, kd, site_name)
     
     def controlLaw(self):
-        # return self.viscoElasticImpedance_controller() + self.null_space_proj_m() @ self.null_space_controller()
-        print(JointPDController.kp, JointPDController.kd)
         return ViscoElasticCartesianPDController.controlLaw(self) + self.null_space_proj_m() @ JointPDController.controlLaw(self)
     
 
