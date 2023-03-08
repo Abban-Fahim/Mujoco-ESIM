@@ -27,3 +27,6 @@ class JointController(MujocoPDController):
 
     def joint_vel_error(self):
         return self.sim_qvel_set - self.sim_data.qvel[self.sim_qvel_idx]
+    
+    def error(self):
+        return self.joint_error()

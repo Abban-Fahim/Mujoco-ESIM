@@ -23,4 +23,9 @@ class Controller(abc.ABC):
         '''
         pass
 
-    
+    @abc.abstractmethod
+    def error(self):
+        '''
+        Computes the raw motor torques/
+        '''
+        pass

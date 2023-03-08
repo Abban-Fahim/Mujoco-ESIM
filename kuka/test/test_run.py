@@ -58,7 +58,7 @@ import os
 import time
 import numpy as np
 # from controllers.NullSpaceViscoElasticCartesianPDController import NullSpaceViscoElasticCartesianPDController
-from utils.read_cfg import get_mjc_xml, get_jposes, get_cposes, get_cerr_lim
+from utils.read_cfg import get_mjc_xml, get_jposes, get_cposes, get_cerr_lim, get_jerr_lim
 from utils.kinematics import current_ee_position
 
 
@@ -71,16 +71,17 @@ def test_run(viapoints, controllerClass):
     viewer = mujoco_viewer.MujocoViewer(model, data)
     controller = controllerClass(model, data)
 
-
-
     # init first position
     jposes = get_jposes()
+    cposes = get_cposes()
+
     data.qpos = jposes["HOME_Q"]
 
-    poses = get_cposes()
 
     viapoint = viapoints.pop()
-
+    poses = {}
+    poses.update(jposes)
+    poses.update(cposes)
 
     t = data.time
     err_limit = get_cerr_lim()
@@ -91,8 +92,7 @@ def test_run(viapoints, controllerClass):
         controller.set_action(poses[viapoint])
 
         # viapoint change when the last viapoint is reached
-        viapoint_position = poses[viapoint][:3]
-        err = np.linalg.norm(controller.pose_error()[:3])
+        err = np.linalg.norm(controller.error())
         if err_limit > err  and viapoints:
             viapoint = viapoints.pop()
 
@@ -102,11 +102,57 @@ def test_run(viapoints, controllerClass):
         mujoco.mj_step(model, data)
         t = data.time
 
-        # print("timestamp:", t, viapoints)
         print("error", err)
-        print("current position", controller.fk())
         print("Current viapoint", viapoint)
-        # print("Joint Values:", data.qpos)
-        # print("Torques:", torque)
-        # print("Actions:", data.ctrl)
+        print("Joint Values:", data.qpos)
+
+
+# def test_joint_run(viapoints, controllerClass):
+
+#     model = mujoco.MjModel.from_xml_path(get_mjc_xml())
+#     data = mujoco.MjData(model)
+#     viewer = mujoco_viewer.MujocoViewer(model, data)
+#     # controller = controllerClass(model, data, kp=np.array([200, 600, 200, 500, 50, 50, 0.5]), kd=np.array([40, 60, 5, 35, 5, 5, 0.01]))
+#     controller = controllerClass(model, data)
+
+
+#     poses = get_jposes()
+
+#     data.qpos = poses["HOME_Q"]
+
+#     viapoint = viapoints.pop()
+
+#     t = data.time
+#     err_limit = get_jerr_lim()
+
+#     while (True):
+#         viewer.render()
+
+#         # viapoint change when the last viapoint is reached
+#         err = np.linalg.norm(controller.error())
+#         if err_limit > err  and viapoints:
+#             viapoint = viapoints.pop()
+
+#         controller.set_action(poses[viapoint])
+
+#         torque = controller.get_torque()
+
+#         mujoco.mj_step(model, data)
+#         t = data.time
+
+#         print("timestamp:", t, viapoints)
+#         print("error", err)
+#         print("Current viapoint", viapoint)
+#         print("Joint Values:", data.qpos)
+#         print("Torques:", torque)
+#         print("Actions:", data.ctrl)
     
+# def run(controllerClass):
+#     model = mujoco.MjModel.from_xml_path(get_mjc_xml())
+#     data = mujoco.MjData(model)
+#     viewer = mujoco_viewer.MujocoViewer(model, data)
+#     controller = controllerClass(model, data)
+
+#     poses = get_jposes()
+
+#     data.qpos = poses["HOME_Q"]

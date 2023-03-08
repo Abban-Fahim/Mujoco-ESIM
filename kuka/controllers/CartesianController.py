@@ -24,6 +24,9 @@ class CartesianController(MujocoPDController):
         self.pos_set = None
         self.quat_set = None
 
+    def error(self):
+        return self.pose_error()
+
     def force_feedback(self):
         r_pseudo_J = self.right_pseudo_Jac()
 

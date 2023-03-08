@@ -18,8 +18,8 @@ class JointPDController(JointController):
 
     def __init__(self,
                     sim_model, sim_data,
-                    kp=3,
-                    kd=None,
+                    kp=np.array([200, 600, 200, 500, 50, 50, 0.5]),
+                    kd=np.array([40, 60, 5, 35, 5, 5, 0.01]),
                     site_name='ee_site'
                     ):
 

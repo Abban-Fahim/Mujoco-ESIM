@@ -51,9 +51,9 @@
 #DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
 #
 
-from test.test_joint_contact_insertion import test_joint_run
+from test.test_run import test_run
 from controllers.JointPDController import JointPDController
 
 viapoints = ["TEST_Q", "APPROACH_Q", "HOME_Q"]
-test_joint_run(viapoints, JointPDController)
+test_run(viapoints, JointPDController)
 
