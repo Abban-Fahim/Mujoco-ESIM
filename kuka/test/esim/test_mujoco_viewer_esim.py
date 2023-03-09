@@ -54,45 +54,42 @@
 
 import mujoco
 import mujoco_viewer
-import os
 import time
 import numpy as np
-import itertools
 
-# parameter
-cp = 0.5
-cn = 0.1
+import sys
+import os
+sys.path.append(os.getcwd())
+
+from kuka.utils.read_cfg import get_mjc_xml
 
 
-simulation_time = 1000
 sim_steps = 10
-test_camera_on = False
 camera_id = 0
-overlay_on = True
-save_path = "/home/palinauskas/Documents/mujoco-eleanor/img"
-save_path_original = save_path + "/original/seq0/imgs"
-save_path_subtracted = save_path + "/subtracted/seq0/imgs"
-save_path_events = save_path + "/events2/seq0/imgs"
-xml_path = 'kuka/envs/assets/full_kuka_INRC3_mounted_camera.xml'
+save_path = "./test_esim_output"
 
 
+xml_path = get_mjc_xml()
 model = mujoco.MjModel.from_xml_path(xml_path)
 data = mujoco.MjData(model)
 
 print(data.qpos)
 
 viewer = mujoco_viewer.MujocoViewer(model, data)
+viewer.init_esim(contrast_threshold_negative=0.9, contrast_threshold_positive=0.9, refractory_period_ns=100)
+
 
 t_0 = time.time()
 t = 0
 
 step = 0
-while (step < sim_steps) or test_camera_on:
-    if not test_camera_on:
-        viewer.render(overlay_on=False)
-        viewer.capture_event_prototype(camera_id, path=save_path_subtracted)
-    else:
-        viewer.render(overlay_on=overlay_on)
+while (step < sim_steps):
+    viewer.render(overlay_on=False)
+    timestamp = data.time        
+    print(data.time )
+    viewer.capture_event_prototype(camera_id, save_it=True, path=save_path+"/subtracted_imgs")
+    viewer.capture_frame(camera_id, save_it=True, path=save_path+"/raw_images")
+    viewer.capture_event(camera_id, timestamp, save_it=True, path=save_path+"/event_frames_and_events")
     
     x=100*np.sin(t)
     torque=np.ones(7)*x

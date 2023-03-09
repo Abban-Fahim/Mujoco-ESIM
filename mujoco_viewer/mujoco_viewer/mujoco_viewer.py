@@ -608,8 +608,9 @@ class MujocoViewer:
 
 
     # capture camera event of a specified camera id and return img array and write in /tmp (Prototype)
-    def capture_event_prototype(self, fixedcamid, path="/tmp"):
+    def capture_event_prototype(self, fixedcamid, save_it=False, path="/tmp"):
         img_original = self.get_frame(fixedcamid)
+
         if img_original is None:
             return None
 
@@ -622,7 +623,10 @@ class MujocoViewer:
             img = np.where(np.abs(img_sub) < 10, 0, 255)
             self._last_img = gray_img
 
-        self.save_img(img, path)
+        if save_it:
+            raw_imgs_path = path + "/sub_imgs"
+            Path(raw_imgs_path).mkdir(parents=True, exist_ok=True)
+            self.save_img(img, raw_imgs_path)
 
         return img
 
