@@ -1,19 +1,12 @@
-import os
-
 import numpy as np
-from gym import spaces
 import mujoco
 
 import sys
-sys.path.append("..")
+import os
+sys.path.append(os.getcwd())
 
-#from gym_kuka_mujoco.envs.assets import kuka_asset_dir
-from utils.quaternion import identity_quat, subQuat, quatAdd, mat2Quat, eul2quat, quat2eul
-from utils.kinematics import forwardKinSite, forwardKinJacobianSite
+from kuka.utils.quaternion import eul2quat
 from .CartesianController import CartesianController
-from .JointPDController import JointPDController
-#from . import register_controller
-from utils.mujoco_utils import get_qpos_indices, get_qvel_indices, get_actuator_indices, get_joint_indices, kuka_subtree_mass
 
 
 class ViscoElasticCartesianPDController(CartesianController):
@@ -61,7 +54,6 @@ class ViscoElasticCartesianPDController(CartesianController):
     # http://www.diag.uniroma1.it/deluca/rob2_en/13_CartesianControl.pdf
     # slide 6 visco-elactic
     def controlLaw(self):
-        # return self.viscoElasticImpedance_controller() + self.null_space_proj_m() @ self.null_space_controller()
         return self.right_pseudo_Jac(eps=1e-6) @ (self.kp*self.pose_error() - self.kd * (self.Jac() @ self.sim_data.qvel))
 
     def set_gains(self, kp, kd):

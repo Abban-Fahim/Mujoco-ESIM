@@ -1,8 +1,10 @@
-from .MujocoPDController import MujocoPDController
-from utils.mujoco_utils import kuka_subtree_mass, get_qpos_indices, get_qvel_indices, get_actuator_indices, get_joint_indices
 import numpy as np
-from gym import spaces
 
+import sys
+import os
+sys.path.append(os.getcwd())
+
+from .MujocoPDController import MujocoPDController
 
 
 class JointController(MujocoPDController):

@@ -1,9 +1,14 @@
 import numpy as np
 
-from utils.quaternion import identity_quat, subQuat, quatAdd, mat2Quat, eul2quat, quat2eul
-from utils.kinematics import forwardKinSite, forwardKinJacobianSite
+import sys
+import os
+sys.path.append(os.getcwd())
+
+from kuka.utils.quaternion import subQuat, mat2Quat, quat2eul
+from kuka.utils.kinematics import forwardKinSite, forwardKinJacobianSite
 
 from .MujocoPDController import MujocoPDController
+
 
 class CartesianController(MujocoPDController):
     '''

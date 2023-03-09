@@ -1,8 +1,12 @@
 import abc
-import numpy as np
 import mujoco
-from utils.mujoco_utils import kuka_subtree_mass
+
+import sys
+import os
+sys.path.append(os.getcwd())
+
 from .Controller import Controller
+
 
 class MujocoPDController(Controller, abc.ABC):
     '''

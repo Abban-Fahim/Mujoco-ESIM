@@ -1,17 +1,13 @@
-from typing import Generator
-from .CartesianController import CartesianController
-from .JointPDController import JointPDController
-from utils.mujoco_utils import kuka_subtree_mass, get_qpos_indices, get_qvel_indices, get_actuator_indices, get_joint_indices
-from utils.quaternion import identity_quat, subQuat, quatAdd, mat2Quat, eul2quat, quat2eul
-
 import numpy as np
-from gym import spaces
 import mujoco
-from scipy.spatial.transform import Rotation as R
 
+import sys
+import os
+sys.path.append(os.getcwd())
 
-from utils.quaternion import identity_quat, subQuat, quatAdd, mat2Quat
-from utils.kinematics import forwardKinSite, forwardKinJacobianSite
+from kuka.utils.quaternion import eul2quat
+
+from .CartesianController import CartesianController
 
 
 class ElasticCartesianPDController(CartesianController):

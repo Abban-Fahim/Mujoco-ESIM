@@ -51,9 +51,12 @@
 #DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
 #
 
-from test.test_run import test_run
-from controllers.JointPDController import JointPDController
+import sys
+import os
+sys.path.append(os.getcwd())
 
-viapoints = ["TEST_Q", "APPROACH_Q", "HOME_Q"]
-test_run(viapoints, JointPDController)
+from kuka.test.test_scripts.test_orientation import test_orientation
+from kuka.controllers.NullSpaceElasticCartesianPDController import NullSpaceElasticCartesianPDController
 
+test_orientation(NullSpaceElasticCartesianPDController)
+    

@@ -51,6 +51,9 @@
 #DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
 #
 
+import sys
+import os
+sys.path.append(os.getcwd())
 
 import mujoco
 import mujoco_viewer
@@ -58,8 +61,8 @@ import os
 import time
 import numpy as np
 # from controllers.NullSpaceViscoElasticCartesianPDController import NullSpaceViscoElasticCartesianPDController
-from utils.read_cfg import get_mjc_xml, get_jposes, get_cposes, get_cerr_lim, get_jerr_lim
-from utils.kinematics import current_ee_position
+from kuka.utils.read_cfg import get_mjc_xml, get_jposes, get_cposes, get_cerr_lim, get_jerr_lim
+from kuka.utils.kinematics import current_ee_position
 
 
 def test_run(viapoints, controllerClass):

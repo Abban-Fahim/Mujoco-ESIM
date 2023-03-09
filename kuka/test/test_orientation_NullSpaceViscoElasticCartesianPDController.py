@@ -51,8 +51,12 @@
 #DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
 #
 
-from test.test_orientation import test_orientation
-from controllers.NullSpaceViscoElasticCartesianPDController import NullSpaceViscoElasticCartesianPDController
+import sys
+import os
+sys.path.append(os.getcwd())
+
+from kuka.test.test_scripts.test_orientation import test_orientation
+from kuka.controllers.NullSpaceViscoElasticCartesianPDController import NullSpaceViscoElasticCartesianPDController
 
 test_orientation(NullSpaceViscoElasticCartesianPDController)
     

@@ -3,9 +3,10 @@ import numpy as np
 import scipy.optimize
 
 import sys
-sys.path.append("..")
+import os
+sys.path.append(os.getcwd())
 
-from utils.quaternion import identity_quat, mat2Quat, subQuat
+from kuka.utils.quaternion import identity_quat, mat2Quat, subQuat
 
 identity_quat = np.array([1., 0., 0., 0.])
 

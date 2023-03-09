@@ -51,7 +51,11 @@
 #DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
 #
 
-from test.test_contact_insertion import test_contact_insertion
-from controllers.NullSpaceViscoElasticCartesianPDController import NullSpaceViscoElasticCartesianPDController
+import sys
+import os
+sys.path.append(os.getcwd())
+
+from kuka.test.test_scripts.test_contact_insertion import test_contact_insertion
+from kuka.controllers.NullSpaceViscoElasticCartesianPDController import NullSpaceViscoElasticCartesianPDController
 
 test_contact_insertion(NullSpaceViscoElasticCartesianPDController)
