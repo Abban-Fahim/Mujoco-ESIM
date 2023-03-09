@@ -60,7 +60,6 @@ import matplotlib.pyplot as plt
 import os
 
 
-# path = "/home/palinauskas/Documents/mujoco-eleanor/img/events/seq0"
 path = "/home/palinauskas/Documents/mujoco-eleanor/img/events_mujoco/seq0"
 
 keys = ["x", "y", "t", "p"]
@@ -83,12 +82,6 @@ for f in files[-6:]:
     if count > 5:
         break
 
-# total_data = {key:total_data[key][np.where(total_data['x'] < 700)[0]] for key in total_data}
-# total_data = {key:total_data[key][np.where(total_data['x'] > 500)[0]] for key in total_data}
-
-# total_data = {key:total_data[key][np.where(total_data['y'] < 400)[0]] for key in total_data}
-
-# total_data['y'] = 570 - total_data['y']
 
 min_time, max_time = min(total_data["t"]), max(total_data["t"])
 min_x, max_x = min(total_data["x"]), max(total_data["x"])
@@ -105,12 +98,10 @@ ax = plt.axes(projection ="3d")
 ax.set_box_aspect((ts, xs, ys))
 
 
-
 e_pos = {key:total_data[key][np.where(total_data['p'] == 1)[0]] for key in total_data}
 e_neg = {key:total_data[key][np.where(total_data['p'] == -1)[0]] for key in total_data}
 
 
- 
 # Creating plot
 marker_size = 0.01
 scatter1 = ax.scatter3D(e_pos["t"], e_pos["x"], e_pos["y"], s=marker_size, color = "red")
