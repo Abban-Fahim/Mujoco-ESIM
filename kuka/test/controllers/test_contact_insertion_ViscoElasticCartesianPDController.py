@@ -55,8 +55,7 @@ import sys
 import os
 sys.path.append(os.getcwd())
 
-from kuka.test.test_scripts.test_orientation import test_orientation
+from test_scripts.test_contact_insertion import test_contact_insertion
 from kuka.controllers.ViscoElasticCartesianPDController import ViscoElasticCartesianPDController
 
-test_orientation(ViscoElasticCartesianPDController)
-    
+test_contact_insertion(ViscoElasticCartesianPDController)
