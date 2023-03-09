@@ -620,7 +620,7 @@ class MujocoViewer:
             return None
         else:
             img_sub = gray_img - self._last_img
-            img = np.where(np.abs(img_sub) < 10, 0, 255)
+            img = np.where(np.abs(img_sub) < 10, 0, 255).astype(np.uint8)
             self._last_img = gray_img
 
         if save_it:
