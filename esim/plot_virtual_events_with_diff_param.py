@@ -52,23 +52,10 @@
 #
 
 
-import os
-# try:
-import esim_py
-# except ImportError:
-#     print("esim_py not found, importing binaries. These do not correspond to source files in this repo")
-#     import sys
-#     binaries_folder = os.path.join(os.path.dirname(__file__), "..", "bin")
-#     sys.path.append(binaries_folder)
 import esim_py
 
 import matplotlib.pyplot as plt
 import numpy as np
-import os
-import glob
-from os.path import join
-
-
 
 
 def viz_events(events, resolution):
@@ -87,7 +74,7 @@ def viz_events(events, resolution):
             image_neg.reshape(resolution), 
             np.zeros(resolution, dtype="uint8") 
         ], -1
-    ) * 50
+    ) * 255
 
     return image_rgb    
 
@@ -98,11 +85,9 @@ log_eps = 1e-3
 use_log = True
 H, W = 704, 1280
 
-# image_folder = "/home/palinauskas/Documents/mujoco-eleanor/img/upsampled/seq0/imgs/"
-# timestamps_file = "/home/palinauskas/Documents/mujoco-eleanor/img/upsampled/seq0/timestamps.txt"
+image_folder = "test_esim_output/raw_images/raw_imgs"
+timestamps_file = "test_esim_output/raw_images/timestamps.txt"
 
-image_folder = "/home/palinauskas/Documents/mujoco-eleanor/img/original/seq0/imgs/"
-timestamps_file = "/home/palinauskas/Documents/mujoco-eleanor/img/original/seq0/timestamps.txt"
 
 esim = esim_py.EventSimulator(Cp, 
                               Cn, 

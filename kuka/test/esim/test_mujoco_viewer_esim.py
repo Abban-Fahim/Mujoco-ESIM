@@ -88,7 +88,7 @@ while (step < sim_steps):
     timestamp = data.time        
     print(data.time )
     viewer.capture_event_prototype(camera_id, save_it=True, path=save_path+"/subtracted_imgs")
-    viewer.capture_frame(camera_id, save_it=True, path=save_path+"/raw_images")
+    viewer.capture_frame(camera_id, timestamp, save_it=True, path=save_path+"/raw_images")
     viewer.capture_event(camera_id, timestamp, save_it=True, path=save_path+"/event_frames_and_events")
     
     x=100*np.sin(t)

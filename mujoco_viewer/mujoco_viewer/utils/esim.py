@@ -88,7 +88,7 @@ class Esim_interface:
                 image_neg.reshape(resolution), 
                 np.zeros(resolution, dtype="uint8") 
             ], -1
-        ) * 50
+        ) * 255
 
         return image_rgb   
 
@@ -124,11 +124,6 @@ class Esim_interface:
     def img2e(self, img, t):
 
         self.image_count += 1
-
-        # if self.image_count < 10:
-        #     img = np.ones_like(img) * 255 * (self.image_count % 2)
-        #     self.first_image = False
-        #     print("@@@@@@@@@@@@@only ones")
 
         log_image = np.log(img.astype("float32") / 255 + 1e-5)
         log_image = torch.from_numpy(log_image).cuda()

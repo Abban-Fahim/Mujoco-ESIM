@@ -594,7 +594,7 @@ class MujocoViewer:
         np.savez(path, **e)
 
     # capture camera frame of a specified camera id and return img array and write in /tmp
-    def capture_frame(self, fixedcamid, save_it=False, path="/tmp"):
+    def capture_frame(self, fixedcamid, timestamp, save_it=False, path="/tmp"):
         img = self.get_frame(fixedcamid)
         if img is None:
             return None
@@ -603,6 +603,9 @@ class MujocoViewer:
             raw_imgs_path = path + "/raw_imgs"
             Path(raw_imgs_path).mkdir(parents=True, exist_ok=True)
             self.save_img(img, raw_imgs_path)
+
+            with open(path + "/timestamps.txt", "a") as f:
+                f.write(str(timestamp)+"\n")
 
         return img
 
