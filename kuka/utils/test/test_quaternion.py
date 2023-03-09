@@ -1,6 +1,6 @@
 import numpy as np
-import mujoco_py
-from gym_kuka_mujoco.utils.quaternion import *
+import mujoco
+from kuka.utils.quaternion import *
 
 def test_random_quat():
     q = random_quat()

@@ -1,8 +1,8 @@
-from gym_kuka_mujoco.utils.kinematics import *
-from gym_kuka_mujoco.utils.quaternion import subQuat, mat2Quat
+from kuka.utils.kinematics import *
+from kuka.utils.quaternion import subQuat, mat2Quat
 
 import os
-import mujoco_py
+import mujoco
 
 
 def test_forwardKinPosJacobian():
@@ -11,8 +11,8 @@ def test_forwardKinPosJacobian():
     model_path = os.path.join('..', '..', 'envs', 'assets', model_filename)
 
     # Construct the model and simulation objects.
-    model = mujoco_py.load_model_from_path(model_path)
-    sim = mujoco_py.MjSim(model)
+    model = mujoco.load_model_from_path(model_path)
+    sim = mujoco.MjSim(model)
 
     # Set an arbitrary state.
     q_nom = np.array([.1, .2, .3, .4, .5, .6, .7])
@@ -44,8 +44,8 @@ def test_forwardKinRotJacobian():
     model_path = os.path.join('..', '..', 'envs', 'assets', model_filename)
 
     # Construct the model and simulation objects.
-    model = mujoco_py.load_model_from_path(model_path)
-    sim = mujoco_py.MjSim(model)
+    model = mujoco.load_model_from_path(model_path)
+    sim = mujoco.MjSim(model)
 
     # Set an arbitrary state.
     q_nom = np.array([.1, .2, .3, .4, .5, .6, .7])
@@ -79,8 +79,8 @@ def test_forwardKinSite():
     model_path = os.path.join('..', '..', 'envs', 'assets', model_filename)
 
     # Construct the model and simulation objects.
-    model = mujoco_py.load_model_from_path(model_path)
-    sim = mujoco_py.MjSim(model)
+    model = mujoco.load_model_from_path(model_path)
+    sim = mujoco.MjSim(model)
 
     # Set an arbitrary state.
     q_nom = np.array([.1, .2, .3, .4, .5, .6, .7])
@@ -106,8 +106,8 @@ def test_forwardKinJacobianSite():
     model_path = os.path.join('..', '..', 'envs', 'assets', model_filename)
 
     # Construct the model and simulation objects.
-    model = mujoco_py.load_model_from_path(model_path)
-    sim = mujoco_py.MjSim(model)
+    model = mujoco.load_model_from_path(model_path)
+    sim = mujoco.MjSim(model)
 
     # Set an arbitrary state.
     q_nom = np.array([.1, .2, .3, .4, .5, .6, .7])
