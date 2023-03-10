@@ -34,17 +34,25 @@ class SingleCubicPolyPathGenerator(Polynomial):
         x = np.array([[x0], [x1], [dx0], [dx1], [ddx0], [ddx1]])
 
         param = np.linalg.inv(self.T(t0, t1)) @ x
-        return Path(param)
+        return Path(param, t0, t1)
 
 
 class Path(Polynomial):
 
-    def __init__(self, param) -> None:
+    def __init__(self, param, t0, t1) -> None:
         self.param = param
+        self.t0 = t0
+        self.t1 = t1
 
     def atTime(self, t):
+        if t < self.t0:
+            t = self.t0
+        if t > self.t1:
+            t = self.t1
+
         T = np.array([self.T0(t)])
-        return T @ self.param
+        x = T @ self.param
+        return x[0]
     
 
 class CubicPolyPathGenerator(SingleCubicPolyPathGenerator):
@@ -73,5 +81,5 @@ class CubicPolyPathGenerator(SingleCubicPolyPathGenerator):
             else:
                 params = np.concatenate((params, param), axis=1)
 
-        return Path(params)
+        return Path(params, t0, t1)
     
