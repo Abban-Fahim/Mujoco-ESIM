@@ -59,14 +59,12 @@ import mujoco
 import mujoco_viewer
 import os
 import numpy as np
-from kuka.utils.read_cfg import get_mjc_xml, get_jposes, get_cposes, get_cerr_lim, get_jerr_lim
-from kuka.utils.kinematics import current_ee_position
+from kuka.utils.read_cfg import get_mjc_xml, get_jposes, get_cposes, get_cerr_lim
 
 from kuka.controllers.ElasticCartesianPDController import ElasticCartesianPDController
 from kuka.controllers.PathController import PathController
 
 from kuka.pathPlanner.CubicPathPlanner import CubicPolyPathGenerator
-import matplotlib.pyplot as plt
 
 model = mujoco.MjModel.from_xml_path(get_mjc_xml())
 data = mujoco.MjData(model)
@@ -114,18 +112,10 @@ while (True):
         viapoint = viapoints.pop()
         tt = data.time
         pathController.newPathTo(poses[viapoint], tt)
-        print(viapoints)
 
 
-    # print(t, tt, tt+10)
-    # print("norm error", err_norm)
-    # print("error", error)
-    # print("Current viapoint", viapoint)
-    # print("Joint Values:", data.qpos)
+    print("norm error", err_norm)
+    print("error", error)
+    print("Current viapoint", viapoint)
+    print("Joint Values:", data.qpos)
 
-    
-
-    # if t%1 < 0.004:
-    #     plot_data.append(pose[0])
-    #     plt.plot(plot_data)
-    #     plt.pause(0.005)
