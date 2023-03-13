@@ -9,16 +9,16 @@ class PathController:
     A base for all joint based controllers
     '''
 
-    def __init__(self, controller, planner, targetPose=None) -> None:
+    def __init__(self, controller, planner, vmax=1, amax=1, jmax=1) -> None:
         super().__init__()
-
 
         self.controller = controller
         self.planner = planner
-
+        self.vmax = vmax
+        self.amax = amax
+        self.jmax = jmax
         
-        self.targetPose = targetPose
-
+        self.targetPose = None
         self.path = None
 
     def initStartPose(self, pose):
@@ -29,11 +29,23 @@ class PathController:
         if self.targetPose is None:
             raise Exception("no current pose for the robot given")
         
-        speed = 3
-        self.path = self.planner.genPath(tt, tt+speed, self.targetPose, target)
+        duration = self.calcDuration(self.targetPose, target, self.vmax, self.amax, self.jmax)
+        self.path = self.planner.genPath(tt, tt+duration, self.targetPose, target)
         self.targetPose = target
 
-    
+    def calcDuration(self, x0, x1, vmax, amax, jmax):
+        x = x1 - x0
+
+        times = []
+        for i in range(x.size):
+            tv = x[i] / vmax
+            ta = 2 * pow(x[i]/amax, 1.0/2)
+            tj = 2 * pow(4*x[i]/jmax, 1.0/3)
+            times += [tv, ta, tj]
+
+        print(times)
+        return max(times)
+
 
     def set_time(self, t):
         '''

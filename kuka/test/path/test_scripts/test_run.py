@@ -58,64 +58,62 @@ sys.path.append(os.getcwd())
 import mujoco
 import mujoco_viewer
 import os
+import time
 import numpy as np
-from kuka.utils.read_cfg import get_mjc_xml, get_jposes, get_cposes, get_cerr_lim
-
-from kuka.controllers.ElasticCartesianPDController import ElasticCartesianPDController
+# from controllers.NullSpaceViscoElasticCartesianPDController import NullSpaceViscoElasticCartesianPDController
+from kuka.utils.read_cfg import get_mjc_xml, get_jposes, get_cposes, get_cerr_lim, get_jerr_lim
+from kuka.utils.kinematics import current_ee_position
 from kuka.controllers.PathController import PathController
-
 from kuka.pathPlanner.CubicPathPlanner import CubicPolyPathGenerator
 
-model = mujoco.MjModel.from_xml_path(get_mjc_xml())
-data = mujoco.MjData(model)
+
+def test_run(viapoints, controllerClass):
+
+    model = mujoco.MjModel.from_xml_path(get_mjc_xml())
+    data = mujoco.MjData(model)
 
 
-viewer = mujoco_viewer.MujocoViewer(model, data)
-pathController = PathController(ElasticCartesianPDController(model, data), CubicPolyPathGenerator(6))
+    viewer = mujoco_viewer.MujocoViewer(model, data)
+    # controller = controllerClass(model, data)
+    pathController = PathController(controllerClass(model, data), CubicPolyPathGenerator(6))
 
 
+    # init first position
+    jposes = get_jposes()
+    cposes = get_cposes()
 
-# init first position
-jposes = get_jposes()
-cposes = get_cposes()
+    data.qpos = jposes["HOME_Q"]
 
-data.qpos = jposes["HOME_Q"]
 
-viapoints = ["TEST1", "HOME", "TEST2", "HOME","TEST1", "HOME", "TEST2", "HOME","TEST1", "HOME", "TEST2", "HOME"]
+    viapoint = viapoints.pop()
+    poses = {}
+    poses.update(jposes)
+    poses.update(cposes)
 
-viapoint = viapoints.pop()
-poses = {}
-poses.update(jposes)
-poses.update(cposes)
+    pathController.initStartPose(poses[viapoint])
 
-pathController.initStartPose(poses[viapoint])
-
-t = data.time
-tt = t
-err_limit = get_cerr_lim()
-
-plot_data = []
-
-while (True):
-    viewer.render()
-
-    pathController.set_time(t)
-    torque = pathController.get_torque()
-    
-    mujoco.mj_step(model, data)
     t = data.time
+    err_limit = get_cerr_lim()
 
-    # viapoint change when the last viapoint is reached
-    error = (pathController.error())
-    err_norm = np.linalg.norm(error)
-    if err_limit > err_norm  and viapoints:
-        viapoint = viapoints.pop()
-        tt = data.time
-        pathController.newPathTo(poses[viapoint], tt)
+    while (True):
+        viewer.render()
+
+        pathController.set_time(t)
+        torque = pathController.get_torque()
+        
+        mujoco.mj_step(model, data)
+        t = data.time
+
+        # viapoint change when the last viapoint is reached
+        error = (pathController.error())
+        err_norm = np.linalg.norm(error)
+        if err_limit > err_norm  and viapoints:
+            viapoint = viapoints.pop()
+            tt = data.time
+            pathController.newPathTo(poses[viapoint], tt)
 
 
-    print("norm error", err_norm)
-    print("error", error)
-    print("Current viapoint", viapoint)
-    print("Joint Values:", data.qpos)
-
+        print("norm error", err_norm)
+        # print("error", error)
+        # print("Current viapoint", viapoint)
+        # print("Joint Values:", data.qpos)
