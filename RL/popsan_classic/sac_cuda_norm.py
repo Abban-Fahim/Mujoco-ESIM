@@ -103,7 +103,7 @@ class SpikeActorDeepCritic(nn.Module):
 #               update_after=1000, update_every=50, num_test_episodes=10, max_ep_len=1000,
 #               save_freq=5, norm_clip_limit=3, norm_update=50, tb_comment='', model_idx=0, use_cuda=True):
 
-def spike_sac(env_fn, actor_critic=SpikeActorDeepCritic, ac_kwargs=dict(), seed=0,
+def spike_sac(env_name, actor_critic=SpikeActorDeepCritic, ac_kwargs=dict(), seed=0,
               steps_per_epoch=1000, epochs=10, replay_size=int(1e6), gamma=0.99,
               polyak=0.995, popsan_lr=1e-4, q_lr=1e-3, alpha=0.2, batch_size=100, start_steps=1000,
               update_after=100, update_every=50, num_test_episodes=10, max_ep_len=100,
@@ -222,6 +222,7 @@ def spike_sac(env_fn, actor_critic=SpikeActorDeepCritic, ac_kwargs=dict(), seed=
     torch.manual_seed(seed)
     np.random.seed(seed)
 
+    env_fn = lambda: gym.make(env_name)
     env, test_env = env_fn(), env_fn()
     obs_dim = env.observation_space.shape
     act_dim = env.action_space.shape[0]
@@ -250,6 +251,39 @@ def spike_sac(env_fn, actor_critic=SpikeActorDeepCritic, ac_kwargs=dict(), seed=
     # Experience buffer
     replay_buffer = ReplayBuffer(obs_dim=obs_dim, act_dim=act_dim, size=replay_size,
                                  clip_limit=norm_clip_limit, norm_update_every=norm_update)
+    
+    # env_fn, actor_critic=SpikeActorDeepCritic, ac_kwargs=dict(), seed=0,
+    #           steps_per_epoch=1000, epochs=10, replay_size=int(1e6), gamma=0.99,
+    #           polyak=0.995, popsan_lr=1e-4, q_lr=1e-3, alpha=0.2, batch_size=100, start_steps=1000,
+    #           update_after=100, update_every=50, num_test_episodes=10, max_ep_len=100,
+    #           save_freq=5, norm_clip_limit=3, norm_update=50, tb_comment='', model_idx=0, use_cuda=True):
+
+    # Save parameters
+    model_dir = "./params/spike-sac_" + tb_comment
+    with open(model_dir + "/training_parameters.txt", "w") as f:
+        f.write("env_name " + env_name + "\n")
+        f.write("ac_kwargs " + str(ac_kwargs) + "\n")
+        f.write("steps_per_epoch " + str(steps_per_epoch) + "\n")
+        f.write("epochs " + str(epochs) + "\n")
+        f.write("replay_size " + str(replay_size) + "\n")
+        f.write("gamma " + str(gamma) + "\n")
+        f.write("polyak " + str(polyak) + "\n")
+        f.write("popsan_lr " + str(popsan_lr) + "\n")
+        f.write("q_lr " + str(q_lr) + "\n")
+        f.write("alpha " + str(alpha) + "\n")
+        f.write("batch_size " + str(batch_size) + "\n")
+        f.write("start_steps " + str(start_steps) + "\n")
+        f.write("update_after " + str(update_after) + "\n")
+        f.write("update_every " + str(update_every) + "\n")
+        f.write("num_test_episodes " + str(num_test_episodes) + "\n")
+        f.write("max_ep_len " + str(max_ep_len) + "\n")
+        f.write("save_freq " + str(save_freq) + "\n")
+        f.write("norm_clip_limit " + str(norm_clip_limit) + "\n")
+        f.write("norm_update " + str(norm_update) + "\n")
+        f.write("tb_comment " + str(tb_comment) + "\n")
+        f.write("model_idx " + str(model_idx) + "\n")
+        f.write("use_cuda " + str(use_cuda) + "\n")
+
 
     # Set up function for computing Spike-SAC Q-losses
     def compute_loss_q(data):
@@ -367,7 +401,7 @@ def spike_sac(env_fn, actor_critic=SpikeActorDeepCritic, ac_kwargs=dict(), seed=
         print("Directory params Created")
     except FileExistsError:
         print("Directory params already exists")
-    model_dir = "./params/spike-sac_" + tb_comment
+    
     try:
         os.mkdir(model_dir)
         print("Directory ", model_dir, " Created")
@@ -478,7 +512,7 @@ if __name__ == '__main__':
               "-decoder-dim-" + str(AC_KWARGS['decoder_pop_dim'])
     for num in range(START_MODEL, START_MODEL + NUM_MODEL):
         seed = num * 10
-        spike_sac(lambda: gym.make(args.env), actor_critic=SpikeActorDeepCritic, ac_kwargs=AC_KWARGS,
+        spike_sac(args.env, actor_critic=SpikeActorDeepCritic, ac_kwargs=AC_KWARGS,
                   popsan_lr=1e-4, gamma=0.99, seed=seed, epochs=args.epochs,
                   norm_clip_limit=3.0, tb_comment=COMMENT, model_idx=num)
 
