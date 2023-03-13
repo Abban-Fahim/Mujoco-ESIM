@@ -462,7 +462,7 @@ if __name__ == '__main__':
     parser.add_argument('--encoder_var', type=float, default=0.15)
     parser.add_argument('--start_model_idx', type=int, default=0)
     parser.add_argument('--num_model', type=int, default=10)
-    parser.add_argument('--epochs', type=int, default=100)
+    parser.add_argument('--epochs', type=int, default=10)
     args = parser.parse_args()
 
     START_MODEL = args.start_model_idx
