@@ -106,9 +106,9 @@ class SpikeActorDeepCritic(nn.Module):
 
 
 def spike_sac(env_fn, actor_critic=SpikeActorDeepCritic, ac_kwargs=dict(), seed=0,
-              steps_per_epoch=10000, epochs=200, replay_size=int(1e6), gamma=0.99,
-              polyak=0.995, popsan_lr=1e-4, q_lr=1e-3, alpha=0.2, batch_size=100, start_steps=10000,
-              update_after=1000, update_every=50, num_test_episodes=1, max_ep_len=1000, env_name="", render_every=50,
+              steps_per_epoch=1000, epochs=200, replay_size=int(1e6), gamma=0.99,
+              polyak=0.995, popsan_lr=1e-4, q_lr=1e-3, alpha=0.2, batch_size=100, start_steps=1000,
+              update_after=100, update_every=50, num_test_episodes=1, max_ep_len=100, env_name="", render_every=50,
               save_freq=20, norm_clip_limit=3, norm_update=50, tb_comment='', model_idx=0, use_cuda=True):
     """
     Spike Soft Actor-Critic (SAC)
@@ -351,20 +351,25 @@ def spike_sac(env_fn, actor_critic=SpikeActorDeepCritic, ac_kwargs=dict(), seed=
         ###
         print("testing env...")
         test_reward_sum = 0
-        test_accuracy_sum = 0
+        # test_accuracy_sum = 0
         for j in tqdm( range(num_test_episodes) ):
             o, d, ep_ret, ep_len = test_env.reset(), False, 0, 0
+            o = o[0]
             while not(d or (ep_len == max_ep_len)):
                 # Take deterministic actions at test time 
-                o, r, d, _ = test_env.step(get_action(replay_buffer.normalize_obs(o), True))
+                a = get_action(replay_buffer.normalize_obs(o), True)
+                a = a.flatten()
+                o, r, d, _, info = test_env.step(a)
                 ep_ret += r
                 ep_len += 1
             test_reward_sum += ep_ret
-            test_accuracy_sum += test_env.err
+            # test_accuracy_sum += test_env.err
 
 
         print("done testing env")
-        return test_reward_sum / num_test_episodes, test_accuracy_sum/num_test_episodes
+        # return test_reward_sum / num_test_episodes, test_accuracy_sum/num_test_episodes
+        return test_reward_sum / num_test_episodes
+    
 
     def render_agent(e):
         ###
@@ -435,6 +440,8 @@ def spike_sac(env_fn, actor_critic=SpikeActorDeepCritic, ac_kwargs=dict(), seed=
             a = env.action_space.sample()
 
         # Step the env
+        # print("test", "a:", a)
+        a = a.flatten()
         o2, r, d, _, info = env.step(a)
 
         ep_ret += r
@@ -495,11 +502,13 @@ def spike_sac(env_fn, actor_critic=SpikeActorDeepCritic, ac_kwargs=dict(), seed=
                 print("Weights saved in ", model_dir + '/' + "model" + str(model_idx) + "_e" + str(epoch) + '.pt')
 
             # Test the performance of the deterministic version of the agent.
-            test_mean_reward, test_mean_accuracy = test_agent()
+            # test_mean_reward, test_mean_accuracy = test_agent()
+            test_mean_reward = test_agent()
+
             save_test_reward.append(test_mean_reward)
             save_test_reward_steps.append(t + 1)
             writer.add_scalar(tb_comment + '/Test-Mean-Reward', test_mean_reward, t + 1)
-            writer.add_scalar(tb_comment + '/Test-Mean-Accuracy', test_mean_accuracy, t + 1)
+            # writer.add_scalar(tb_comment + '/Test-Mean-Accuracy', test_mean_accuracy, t + 1)
             print("Model: ", model_idx, " Steps: ", t + 1, " Mean Reward: ", test_mean_reward)
 
             if epoch % render_every == 0 and epoch > 0:
@@ -528,7 +537,7 @@ if __name__ == '__main__':
     parser.add_argument('--start_model_idx', type=int, default=0)
     parser.add_argument('--num_model', type=int, default=1)
     parser.add_argument('--epochs', type=int, default=200)
-    parser.add_argument('--steps_per_epoch', type=int, default=10000)
+    parser.add_argument('--steps_per_epoch', type=int, default=1000)
     parser.add_argument('--max_ep_len', type=int, default=200)
     
     args = parser.parse_args()
