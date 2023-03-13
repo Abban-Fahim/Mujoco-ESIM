@@ -61,6 +61,8 @@ from torch.utils.tensorboard import SummaryWriter
 import gym
 import gym_env
 
+from tqdm import tqdm
+
 import os
 import pickle
 import sys
@@ -95,10 +97,16 @@ class SpikeActorDeepCritic(nn.Module):
             return a.numpy()
 
 
+# def spike_sac(env_fn, actor_critic=SpikeActorDeepCritic, ac_kwargs=dict(), seed=0,
+#               steps_per_epoch=10000, epochs=100, replay_size=int(1e6), gamma=0.99,
+#               polyak=0.995, popsan_lr=1e-4, q_lr=1e-3, alpha=0.2, batch_size=100, start_steps=10000,
+#               update_after=1000, update_every=50, num_test_episodes=10, max_ep_len=1000,
+#               save_freq=5, norm_clip_limit=3, norm_update=50, tb_comment='', model_idx=0, use_cuda=True):
+
 def spike_sac(env_fn, actor_critic=SpikeActorDeepCritic, ac_kwargs=dict(), seed=0,
-              steps_per_epoch=10000, epochs=100, replay_size=int(1e6), gamma=0.99,
-              polyak=0.995, popsan_lr=1e-4, q_lr=1e-3, alpha=0.2, batch_size=100, start_steps=10000,
-              update_after=1000, update_every=50, num_test_episodes=10, max_ep_len=1000,
+              steps_per_epoch=1000, epochs=10, replay_size=int(1e6), gamma=0.99,
+              polyak=0.995, popsan_lr=1e-4, q_lr=1e-3, alpha=0.2, batch_size=100, start_steps=1000,
+              update_after=100, update_every=50, num_test_episodes=10, max_ep_len=100,
               save_freq=5, norm_clip_limit=3, norm_update=50, tb_comment='', model_idx=0, use_cuda=True):
     """
     Spike Soft Actor-Critic (SAC)
@@ -334,11 +342,14 @@ def spike_sac(env_fn, actor_critic=SpikeActorDeepCritic, ac_kwargs=dict(), seed=
         # compuate the return mean test reward
         ###
         test_reward_sum = 0
-        for j in range(num_test_episodes):
+        for j in tqdm( range(num_test_episodes) ):
             o, d, ep_ret, ep_len = test_env.reset(), False, 0, 0
+            o = o[0]
             while not(d or (ep_len == max_ep_len)):
                 # Take deterministic actions at test time 
-                o, r, d, _ = test_env.step(get_action(replay_buffer.normalize_obs(o), True))
+                a = get_action(replay_buffer.normalize_obs(o), True)
+                a = a.flatten()
+                o, r, d, _, info = test_env.step(a)
                 ep_ret += r
                 ep_len += 1
             test_reward_sum += ep_ret
@@ -366,9 +377,10 @@ def spike_sac(env_fn, actor_critic=SpikeActorDeepCritic, ac_kwargs=dict(), seed=
     # Prepare for interaction with environment
     total_steps = steps_per_epoch * epochs
     o, ep_ret, ep_len = env.reset(), 0, 0
+    o = o[0]
 
     # Main loop: collect experience in env and update/log each epoch
-    for t in range(total_steps):
+    for t in tqdm( range(total_steps), desc ="Total progress" ):
         
         # Until start_steps have elapsed, randomly sample actions
         # from a uniform distribution for better exploration. Afterwards, 
@@ -379,7 +391,8 @@ def spike_sac(env_fn, actor_critic=SpikeActorDeepCritic, ac_kwargs=dict(), seed=
             a = env.action_space.sample()
 
         # Step the env
-        o2, r, d, _ = env.step(a)
+        a = a.flatten()
+        o2, r, d, _, info = env.step(a)
         ep_ret += r
         ep_len += 1
 
@@ -399,6 +412,7 @@ def spike_sac(env_fn, actor_critic=SpikeActorDeepCritic, ac_kwargs=dict(), seed=
         if d or (ep_len == max_ep_len):
             writer.add_scalar(tb_comment + '/Train-Reward', ep_ret, t + 1)
             o, ep_ret, ep_len = env.reset(), 0, 0
+            o = o[0]
 
         # Update handling
         if t >= update_after and t % update_every == 0:
@@ -415,6 +429,9 @@ def spike_sac(env_fn, actor_critic=SpikeActorDeepCritic, ac_kwargs=dict(), seed=
                 ac.popsan.to('cpu')
                 torch.save(ac.popsan.state_dict(),
                            model_dir + '/' + "model" + str(model_idx) + "_e" + str(epoch) + '.pt')
+                rb_path = model_dir + '/' + "replay_buffer" + str(model_idx) + "_e" + str(epoch) + ".p"
+                pickle.dump(replay_buffer, open(rb_path, "wb")) 
+
                 print("Learned Mean for encoder population: ")
                 print(ac.popsan.encoder.mean.data)
                 print("Learned STD for encoder population: ")
