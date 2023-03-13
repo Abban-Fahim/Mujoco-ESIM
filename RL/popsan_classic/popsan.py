@@ -6,7 +6,7 @@ from torch.distributions.normal import Normal
 import sys
 
 sys.path.append('../../')
-import core_cuda as core
+import popsan_drl.popsan_sac.core_cuda as core
 
 
 """
