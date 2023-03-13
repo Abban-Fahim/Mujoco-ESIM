@@ -251,12 +251,6 @@ def spike_sac(env_name, actor_critic=SpikeActorDeepCritic, ac_kwargs=dict(), see
     # Experience buffer
     replay_buffer = ReplayBuffer(obs_dim=obs_dim, act_dim=act_dim, size=replay_size,
                                  clip_limit=norm_clip_limit, norm_update_every=norm_update)
-    
-    # env_fn, actor_critic=SpikeActorDeepCritic, ac_kwargs=dict(), seed=0,
-    #           steps_per_epoch=1000, epochs=10, replay_size=int(1e6), gamma=0.99,
-    #           polyak=0.995, popsan_lr=1e-4, q_lr=1e-3, alpha=0.2, batch_size=100, start_steps=1000,
-    #           update_after=100, update_every=50, num_test_episodes=10, max_ep_len=100,
-    #           save_freq=5, norm_clip_limit=3, norm_update=50, tb_comment='', model_idx=0, use_cuda=True):
 
     # Save parameters
     model_dir = "./params/spike-sac_" + tb_comment
