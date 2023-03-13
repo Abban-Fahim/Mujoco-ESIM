@@ -72,9 +72,7 @@ def test_run(viapoints, controllerClass):
     model = mujoco.MjModel.from_xml_path(get_mjc_xml())
     data = mujoco.MjData(model)
 
-
     viewer = mujoco_viewer.MujocoViewer(model, data)
-    # controller = controllerClass(model, data)
     pathController = PathController(controllerClass(model, data), CubicPolyPathGenerator(6))
 
 
