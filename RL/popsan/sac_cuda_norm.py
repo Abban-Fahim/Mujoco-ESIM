@@ -515,7 +515,7 @@ if __name__ == '__main__':
     import argparse
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('--env', type=str, default='Ant-v3')
+    parser.add_argument('--env', type=str, default='InvertedPendulum-v4')
     parser.add_argument('--encoder_pop_dim', type=int, default=10)
     parser.add_argument('--decoder_pop_dim', type=int, default=10)
     parser.add_argument('--encoder_var', type=float, default=0.15)
