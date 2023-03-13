@@ -74,7 +74,7 @@ class PegInHoleRandomEventsVisualServoingGuidingBase(gym.Env):
     def __init__(self, sim_speed=32, headless=False, render_every_frame=True, running_events=True):
         
         cwd = os.getcwd()
-        xml_file_name = "full_kuka_INRC3_mounted_camera_hole.xml"
+        xml_file_name = "sim_hole.xml"
         xml_path = os.path.join(cwd, "kuka", "envs", "assets", xml_file_name)
 
         self.model = mujoco.MjModel.from_xml_path(xml_path)
