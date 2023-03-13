@@ -224,7 +224,9 @@ def spike_sac(env_fn, actor_critic=SpikeActorDeepCritic, ac_kwargs=dict(), seed=
     torch.manual_seed(seed)
     np.random.seed(seed)
 
+    # render_env = gym.make(env_name)
     render_env = gym.make(env_name, sim_speed=1, headless=True, render_every_frame=True)
+
     env, test_env = env_fn(), env_fn()
 
     obs_dim = env.observation_space.shape
