@@ -354,18 +354,12 @@ class SpikeSAC():
             o = o2
 
             # End of trajectory handling
-            self.endOfEpisodeHandling(d, ep_len, ep_ret, t)
-            # if d or (ep_len == self.max_ep_len):
-            #     self.writer.add_scalar(self.tb_comment + '/Train-Reward', ep_ret, t + 1)
-            #     o, ep_ret, ep_len = self.env.reset(), 0, 0
-            #     o = o[0]
+            if self.isEndOfEpidode(d, ep_len):
+                self.endOfEpisodeHandling(ep_ret, t)
 
             # Update handling
-            self.popsanUpdateHandling(t)
-            # if t >= self.update_after and t % self.update_every == 0:
-            #     for j in range(self.update_every):
-            #         batch = self.replay_buffer.sample_batch(self.device, self.batch_size)
-            #         self.update(data=batch)
+            if self.isUpdateRequired(t):
+                self.popsanUpdateHandling()
 
             # End of epoch handling
             self.epochEndHandling(t, ep_len, ep_ret, d)
@@ -375,18 +369,22 @@ class SpikeSAC():
         self.saveTestRewardList()
         # pickle.dump([self.save_test_reward, self.save_test_reward_steps],
         #             open(self.model_dir + '/' + "model" + str(self.model_idx) + "_test_rewards.p", "wb+"))
-    
-    def endOfEpisodeHandling(self, d, ep_len, ep_ret, t):
-        if d or (ep_len == self.max_ep_len):
-                self.writer.add_scalar(self.tb_comment + '/Train-Reward', ep_ret, t + 1)
-                o, ep_ret, ep_len = self.env.reset(), 0, 0
-                o = o[0]
 
-    def popsanUpdateHandling(self, t):
-        if t >= self.update_after and t % self.update_every == 0:
-            for j in range(self.update_every):
-                batch = self.replay_buffer.sample_batch(self.device, self.batch_size)
-                self.update(data=batch)
+    def isEndOfEpidode(self, d, ep_len):
+        return d or (ep_len == self.max_ep_len)
+
+    def endOfEpisodeHandling(self, ep_ret, t):
+        self.writer.add_scalar(self.tb_comment + '/Train-Reward', ep_ret, t + 1)
+        o, ep_ret, ep_len = self.env.reset(), 0, 0
+        o = o[0]
+
+    def isUpdateRequired(self, t):
+        return t >= self.update_after and t % self.update_every == 0
+
+    def popsanUpdateHandling(self):
+        for j in range(self.update_every):
+            batch = self.replay_buffer.sample_batch(self.device, self.batch_size)
+            self.update(data=batch)
 
     def saveTestRewardList(self):
         pickle.dump([self.save_test_reward, self.save_test_reward_steps],
