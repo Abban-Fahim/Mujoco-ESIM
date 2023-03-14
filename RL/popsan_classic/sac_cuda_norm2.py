@@ -208,6 +208,11 @@ class SpikeSAC():
             f.write("model_idx " + str(model_idx) + "\n")
             f.write("use_cuda " + str(use_cuda) + "\n")
 
+        self.writer = SummaryWriter(comment="_" + self.tb_comment + "_" + str(self.model_idx))
+        self.save_test_reward = []
+        self.save_test_reward_steps = []
+        
+
     
      # Set up function for computing Spike-SAC Q-losses
     def compute_loss_q(self, data):
@@ -313,9 +318,7 @@ class SpikeSAC():
         # add tensorboard support and save rewards
         # Also create dir for saving parameters
         ###
-        writer = SummaryWriter(comment="_" + self.tb_comment + "_" + str(self.model_idx))
-        save_test_reward = []
-        save_test_reward_steps = []
+        
 
 
         # Prepare for interaction with environment
@@ -354,7 +357,7 @@ class SpikeSAC():
 
             # End of trajectory handling
             if d or (ep_len == self.max_ep_len):
-                writer.add_scalar(self.tb_comment + '/Train-Reward', ep_ret, t + 1)
+                self.writer.add_scalar(self.tb_comment + '/Train-Reward', ep_ret, t + 1)
                 o, ep_ret, ep_len = self.env.reset(), 0, 0
                 o = o[0]
 
@@ -365,34 +368,73 @@ class SpikeSAC():
                     self.update(data=batch)
 
             # End of epoch handling
-            if (t+1) % self.steps_per_epoch == 0:
-                epoch = (t+1) // self.steps_per_epoch
+            self.epochEndHandling(t, ep_len, ep_ret, d)
+            # if (t+1) % self.steps_per_epoch == 0:
+            #     epoch = (t+1) // self.steps_per_epoch
 
-                # Save model
-                if (epoch % self.save_freq == 0) or (epoch == self.epochs):
-                    self.ac.popsan.to('cpu')
-                    torch.save(self.ac.popsan.state_dict(),
-                            self.model_dir + '/' + "model" + str(self.model_idx) + "_e" + str(epoch) + '.pt')
-                    rb_path = self.model_dir + '/' + "replay_buffer" + str(self.model_idx) + "_e" + str(epoch) + ".p"
-                    pickle.dump(self.replay_buffer, open(rb_path, "wb")) 
+            #     # Save model
+            #     if (epoch % self.save_freq == 0) or (epoch == self.epochs):
+            #         self.ac.popsan.to('cpu')
+            #         torch.save(self.ac.popsan.state_dict(),
+            #                 self.model_dir + '/' + "model" + str(self.model_idx) + "_e" + str(epoch) + '.pt')
+            #         rb_path = self.model_dir + '/' + "replay_buffer" + str(self.model_idx) + "_e" + str(epoch) + ".p"
+            #         pickle.dump(self.replay_buffer, open(rb_path, "wb")) 
 
-                    print("Learned Mean for encoder population: ")
-                    print(self.ac.popsan.encoder.mean.data)
-                    print("Learned STD for encoder population: ")
-                    print(self.ac.popsan.encoder.std.data)
-                    self.ac.popsan.to(self.device)
-                    print("Weights saved in ", self.model_dir + '/' + "model" + str(self.model_idx) + "_e" + str(epoch) + '.pt')
+            #         print("Learned Mean for encoder population: ")
+            #         print(self.ac.popsan.encoder.mean.data)
+            #         print("Learned STD for encoder population: ")
+            #         print(self.ac.popsan.encoder.std.data)
+            #         self.ac.popsan.to(self.device)
+            #         print("Weights saved in ", self.model_dir + '/' + "model" + str(self.model_idx) + "_e" + str(epoch) + '.pt')
 
-                # Test the performance of the deterministic version of the agent.
-                test_mean_reward = self.test_agent()
-                save_test_reward.append(test_mean_reward)
-                save_test_reward_steps.append(t + 1)
-                writer.add_scalar(self.tb_comment + '/Test-Mean-Reward', test_mean_reward, t + 1)
-                print("Model: ", self.model_idx, " Steps: ", t + 1, " Mean Reward: ", test_mean_reward)
+            #     # Test the performance of the deterministic version of the agent.
+            #     test_mean_reward = self.test_agent()
+            #     self.save_test_reward.append(test_mean_reward)
+            #     self.save_test_reward_steps.append(t + 1)
+            #     self.writer.add_scalar(self.tb_comment + '/Test-Mean-Reward', test_mean_reward, t + 1)
+            #     print("Model: ", self.model_idx, " Steps: ", t + 1, " Mean Reward: ", test_mean_reward)
 
         # Save Test Reward List
-        pickle.dump([save_test_reward, save_test_reward_steps],
+        pickle.dump([self.save_test_reward, self.save_test_reward_steps],
                     open(self.model_dir + '/' + "model" + str(self.model_idx) + "_test_rewards.p", "wb+"))
+        
+    def epochEndHandling(self, t, ep_len, ep_ret, d):
+        if d or (ep_len == self.max_ep_len):
+            self.writer.add_scalar(self.tb_comment + '/Train-Reward', ep_ret, t + 1)
+            o, ep_ret, ep_len = self.env.reset(), 0, 0
+            o = o[0]
+
+        # Update handling
+        if t >= self.update_after and t % self.update_every == 0:
+            for j in range(self.update_every):
+                batch = self.replay_buffer.sample_batch(self.device, self.batch_size)
+                self.update(data=batch)
+
+        # End of epoch handling
+        if (t+1) % self.steps_per_epoch == 0:
+            epoch = (t+1) // self.steps_per_epoch
+
+            # Save model
+            if (epoch % self.save_freq == 0) or (epoch == self.epochs):
+                self.ac.popsan.to('cpu')
+                torch.save(self.ac.popsan.state_dict(),
+                        self.model_dir + '/' + "model" + str(self.model_idx) + "_e" + str(epoch) + '.pt')
+                rb_path = self.model_dir + '/' + "replay_buffer" + str(self.model_idx) + "_e" + str(epoch) + ".p"
+                pickle.dump(self.replay_buffer, open(rb_path, "wb")) 
+
+                print("Learned Mean for encoder population: ")
+                print(self.ac.popsan.encoder.mean.data)
+                print("Learned STD for encoder population: ")
+                print(self.ac.popsan.encoder.std.data)
+                self.ac.popsan.to(self.device)
+                print("Weights saved in ", self.model_dir + '/' + "model" + str(self.model_idx) + "_e" + str(epoch) + '.pt')
+
+            # Test the performance of the deterministic version of the agent.
+            test_mean_reward = self.test_agent()
+            self.save_test_reward.append(test_mean_reward)
+            self.save_test_reward_steps.append(t + 1)
+            self.writer.add_scalar(self.tb_comment + '/Test-Mean-Reward', test_mean_reward, t + 1)
+            print("Model: ", self.model_idx, " Steps: ", t + 1, " Mean Reward: ", test_mean_reward)
 
 
 

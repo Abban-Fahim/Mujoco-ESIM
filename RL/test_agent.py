@@ -131,19 +131,8 @@ ac = SpikeActorDeepCritic(env.observation_space, env.action_space, **ac_kwargs)
 ac.popsan.load_state_dict(torch.load(param_path))
 ac.to(device)
 
-
-
-# replay_buffer = ReplayBuffer(obs_dim=obs_dim, act_dim=act_dim, size=replay_size,
-#                                  clip_limit=norm_clip_limit, norm_update_every=norm_update)    
-   
-
- # Experience buffer        
- #self.replay_buffer = ReplayBuffer(obs_dim=obs_dim, act_dim=act_dim, size=replay_size,        
- #                            clip_limit=norm_clip_limit, norm_update_every=norm_update)        
-#  self.dir_path = os.path.dirname(os.path.realpath(__file__))        
+     
 replay_buffer = pickle.load(open(rb_param_path, "rb"))        
-#  self.ep_replay_buffer = ReplayBuffer(obs_dim=obs_dim, act_dim=act_dim, size=replay_size,                                    
-#                                     clip_limit=norm_clip_limit, norm_update_every=norm_update) #None
 
 
 def get_action(o, deterministic=False):
