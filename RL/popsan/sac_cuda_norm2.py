@@ -357,13 +357,15 @@ class SpikeSAC():
         # Also create dir for saving parameters
         ###
 
-        exploration_episode_num = self.start_steps // self.steps_per_epoch
+        total_steps = self.steps_per_epoch * self.epochs
+        exploration_episode_num = self.start_steps // self.max_ep_len
         for episode in tqdm( range(exploration_episode_num), desc ="Exploration progress" ):
             self.simEpisode(self.test_env, action_func=lambda o: self.env.action_space.sample(), enableStore=True)
 
+        total_steps -= exploration_episode_num * self.max_ep_len
         
         # Prepare for interaction with environment
-        total_steps = self.steps_per_epoch * self.epochs
+        # total_steps = self.steps_per_epoch * self.epochs
         o, ep_ret, ep_len = self.env.reset(), 0, 0
         o = o[0]
 
