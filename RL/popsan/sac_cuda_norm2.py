@@ -349,22 +349,21 @@ class SpikeSAC():
             test_reward_sum += ep_ret
         return test_reward_sum / self.num_test_episodes
     
-    # def isExploration(self, t):
-    #     return t <= self.start_steps
-    
     def run(self):
          ###
         # add tensorboard support and save rewards
         # Also create dir for saving parameters
         ###
 
-        # total_steps = self.steps_per_epoch * self.epochs
-        exploration_episode_num = self.start_steps // self.max_ep_len
-        for episode in tqdm( range(exploration_episode_num), desc ="Exploration progress" ):
-            self.simEpisode(self.test_env, action_func=lambda o: self.env.action_space.sample(), enableStore=True)
+        print("Exploration in progress...")
+        steps = 0
+        while (steps < self.start_steps):
+            _, ep_len = self.simEpisode(self.test_env, action_func=lambda o: self.env.action_space.sample(), enableStore=True)
+            steps += ep_len
+        print("Exploration done")
+        
 
         for epoch in tqdm( range(self.epochs), desc ="Training progress" ):
-            # episode_num = self.steps_per_epoch // self.max_ep_len
             steps = 0
             while (steps < self.steps_per_epoch):
                 ep_ret, ep_len = self.simEpisode(self.test_env, action_func=lambda o: self.trainer.get_action(self.replay_buffer.normalize_obs(o)), enableStore=True)
@@ -379,74 +378,12 @@ class SpikeSAC():
 
             if self.isSaveRequired(epoch):
                 self.saveModels(epoch)
-
-        # total_steps -= exploration_episode_num * self.max_ep_len
-        
-        # # Prepare for interaction with environment
-        # # total_steps = self.steps_per_epoch * self.epochs
-        # o, ep_ret, ep_len = self.env.reset(), 0, 0
-        # o = o[0]
-
-        # # Main loop: collect experience in env and update/log each epoch
-        # for t in tqdm( range(total_steps), desc ="Total progress" ):
-            
-        #     # if self.isExploration(t):
-        #     #     a = self.env.action_space.sample()
-        #     # else:
-        #     #     a = self.trainer.get_action(self.replay_buffer.normalize_obs(o))
-
-        #     a = self.trainer.get_action(self.replay_buffer.normalize_obs(o))
-
-        #     # Step the env
-        #     a = a.flatten()
-        #     o2, r, d, _, info = self.env.step(a)
-        #     ep_ret += r
-        #     ep_len += 1
-
-        #     # d = False if ep_len==self.max_ep_len else d
-        #     self.replay_buffer.store(o, a, r, o2, d)
-        #     o = o2
-
-            # epoch = (t+1) // self.steps_per_epoch
-
-            # if self.isEpidodeEnd(d, ep_len):
-            #     self.endOfEpisodeHandling(ep_ret, t)
-
-            # if self.isUpdateRequired(t):
-            #     self.popsanUpdateHandling()
-
-            # if self.isEpochEnd(t):
-            #     # Test the performance of the deterministic version of the agent.
-            #     test_mean_reward = self.test_agent()
-            #     self.writer.add_scalar(self.tb_comment + '/Test-Mean-Reward', test_mean_reward, t + 1)
-            #     print("Model: ", self.model_idx, " Steps: ", t + 1, " Mean Reward: ", test_mean_reward)
-
-            #     epoch = (t+1) // self.steps_per_epoch
-            #     if self.isSaveRequired(epoch):
-            #         self.saveModels(epoch)
-
-
-    # def isEpidodeEnd(self, d, ep_len):
-    #     return d or (ep_len == self.max_ep_len)
-
-    # def endOfEpisodeHandling(self, ep_ret, t):
-    #     self.writer.add_scalar(self.tb_comment + '/Train-Reward', ep_ret, t + 1)
-    #     o, ep_ret, ep_len = self.env.reset(), 0, 0
-    #     o = o[0]
-
-    # def isUpdateRequired(self, epoch):
-    #     # return t >= self.update_after and t % self.update_every == 0
-    #     return  t % self.update_every == 0
     
 
     def popsanUpdateHandling(self):
-        # for j in range(self.update_every):
         for j in range(self.steps_per_epoch):
             batch = self.replay_buffer.sample_batch(self.device, self.batch_size)
             self.trainer.update(data=batch)
-    
-    # def isEpochEnd(self, t):
-    #     return (t+1) % self.steps_per_epoch == 0
     
     def isSaveRequired(self, epoch):
         return (epoch % self.save_freq == 0) or (epoch == self.epochs)
@@ -455,7 +392,7 @@ class SpikeSAC():
         self.trainer.save(self.model_dir, self.model_idx, epoch)
         self.replay_buffer.save(self.model_dir, self.model_idx, epoch)
 
-        self.trainer.printStatistics()
+        # self.trainer.printStatistics()
         print("Weights saved in ", self.model_dir)
 
 
