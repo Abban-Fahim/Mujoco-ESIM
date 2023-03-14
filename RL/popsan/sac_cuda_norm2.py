@@ -104,10 +104,10 @@ class SpikeActorDeepCritic(nn.Module):
 
 class SpikeSAC():
     def __init__(self, env_name, actor_critic=SpikeActorDeepCritic, ac_kwargs=dict(), seed=0,
-              steps_per_epoch=1000, epochs=10, replay_size=int(1e6), gamma=0.99,
-              polyak=0.995, popsan_lr=1e-4, q_lr=1e-3, alpha=0.2, batch_size=100, start_steps=1000,
-              update_after=100, update_every=50, num_test_episodes=10, max_ep_len=100,
-              save_freq=5, norm_clip_limit=3, norm_update=50, tb_comment='', model_idx=0, use_cuda=True) -> None:
+              steps_per_epoch=100, epochs=10, replay_size=int(1e6), gamma=0.99,
+              polyak=0.995, popsan_lr=1e-4, q_lr=1e-3, alpha=0.2, batch_size=100, start_steps=100,
+              update_after=100, update_every=50, num_test_episodes=10, max_ep_len=10,
+              save_freq=1, norm_clip_limit=3, norm_update=50, tb_comment='', model_idx=0, use_cuda=True) -> None:
         
             # Set device
         if use_cuda:
@@ -312,14 +312,13 @@ class SpikeSAC():
             test_reward_sum += ep_ret
         return test_reward_sum / self.num_test_episodes
     
+    
     def run(self):
          ###
         # add tensorboard support and save rewards
         # Also create dir for saving parameters
         ###
         
-
-
         # Prepare for interaction with environment
         total_steps = self.steps_per_epoch * self.epochs
         o, ep_ret, ep_len = self.env.reset(), 0, 0
@@ -355,45 +354,41 @@ class SpikeSAC():
             o = o2
 
             # End of trajectory handling
-            if d or (ep_len == self.max_ep_len):
+            self.endOfEpisodeHandling(d, ep_len, ep_ret, t)
+            # if d or (ep_len == self.max_ep_len):
+            #     self.writer.add_scalar(self.tb_comment + '/Train-Reward', ep_ret, t + 1)
+            #     o, ep_ret, ep_len = self.env.reset(), 0, 0
+            #     o = o[0]
+
+            # Update handling
+            self.popsanUpdateHandling(t)
+            # if t >= self.update_after and t % self.update_every == 0:
+            #     for j in range(self.update_every):
+            #         batch = self.replay_buffer.sample_batch(self.device, self.batch_size)
+            #         self.update(data=batch)
+
+            # End of epoch handling
+            self.epochEndHandling(t, ep_len, ep_ret, d)
+
+
+        # Save Test Reward List
+        self.saveTestRewardList()
+        # pickle.dump([self.save_test_reward, self.save_test_reward_steps],
+        #             open(self.model_dir + '/' + "model" + str(self.model_idx) + "_test_rewards.p", "wb+"))
+    
+    def endOfEpisodeHandling(self, d, ep_len, ep_ret, t):
+        if d or (ep_len == self.max_ep_len):
                 self.writer.add_scalar(self.tb_comment + '/Train-Reward', ep_ret, t + 1)
                 o, ep_ret, ep_len = self.env.reset(), 0, 0
                 o = o[0]
 
-            # Update handling
-            if t >= self.update_after and t % self.update_every == 0:
-                for j in range(self.update_every):
-                    batch = self.replay_buffer.sample_batch(self.device, self.batch_size)
-                    self.update(data=batch)
+    def popsanUpdateHandling(self, t):
+        if t >= self.update_after and t % self.update_every == 0:
+            for j in range(self.update_every):
+                batch = self.replay_buffer.sample_batch(self.device, self.batch_size)
+                self.update(data=batch)
 
-            # End of epoch handling
-            self.epochEndHandling(t, ep_len, ep_ret, d)
-            # if (t+1) % self.steps_per_epoch == 0:
-            #     epoch = (t+1) // self.steps_per_epoch
-
-            #     # Save model
-            #     if (epoch % self.save_freq == 0) or (epoch == self.epochs):
-            #         self.ac.popsan.to('cpu')
-            #         torch.save(self.ac.popsan.state_dict(),
-            #                 self.model_dir + '/' + "model" + str(self.model_idx) + "_e" + str(epoch) + '.pt')
-            #         rb_path = self.model_dir + '/' + "replay_buffer" + str(self.model_idx) + "_e" + str(epoch) + ".p"
-            #         pickle.dump(self.replay_buffer, open(rb_path, "wb")) 
-
-            #         print("Learned Mean for encoder population: ")
-            #         print(self.ac.popsan.encoder.mean.data)
-            #         print("Learned STD for encoder population: ")
-            #         print(self.ac.popsan.encoder.std.data)
-            #         self.ac.popsan.to(self.device)
-            #         print("Weights saved in ", self.model_dir + '/' + "model" + str(self.model_idx) + "_e" + str(epoch) + '.pt')
-
-            #     # Test the performance of the deterministic version of the agent.
-            #     test_mean_reward = self.test_agent()
-            #     self.save_test_reward.append(test_mean_reward)
-            #     self.save_test_reward_steps.append(t + 1)
-            #     self.writer.add_scalar(self.tb_comment + '/Test-Mean-Reward', test_mean_reward, t + 1)
-            #     print("Model: ", self.model_idx, " Steps: ", t + 1, " Mean Reward: ", test_mean_reward)
-
-        # Save Test Reward List
+    def saveTestRewardList(self):
         pickle.dump([self.save_test_reward, self.save_test_reward_steps],
                     open(self.model_dir + '/' + "model" + str(self.model_idx) + "_test_rewards.p", "wb+"))
         
@@ -447,8 +442,8 @@ if __name__ == '__main__':
     parser.add_argument('--decoder_pop_dim', type=int, default=10)
     parser.add_argument('--encoder_var', type=float, default=0.15)
     parser.add_argument('--start_model_idx', type=int, default=0)
-    parser.add_argument('--num_model', type=int, default=10)
-    parser.add_argument('--epochs', type=int, default=10)
+    parser.add_argument('--num_model', type=int, default=1)
+    parser.add_argument('--epochs', type=int, default=2)
     args = parser.parse_args()
 
     START_MODEL = args.start_model_idx
