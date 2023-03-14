@@ -340,9 +340,6 @@ class SpikeSAC():
         return ep_ret, ep_len
         
     def test_agent(self):
-        ###
-        # compuate the return mean test reward
-        ###
         test_reward_sum = 0
         for j in tqdm( range(self.num_test_episodes) ):
             ep_ret, ep_len = self.simEpisode(self.test_env, action_func=lambda o: self.trainer.get_action(self.replay_buffer.normalize_obs(o), True))
@@ -350,10 +347,6 @@ class SpikeSAC():
         return test_reward_sum / self.num_test_episodes
     
     def run(self):
-         ###
-        # add tensorboard support and save rewards
-        # Also create dir for saving parameters
-        ###
 
         print("Exploration in progress...")
         steps = 0
