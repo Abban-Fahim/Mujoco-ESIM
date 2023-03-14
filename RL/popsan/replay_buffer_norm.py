@@ -1,6 +1,6 @@
 import numpy as np
 import torch
-import sys
+import pickle
 
 import sys
 import os
@@ -95,3 +95,7 @@ class ReplayBuffer:
         norm_obs = np.clip((obs - self.mean) / np.sqrt(self.var + eps),
                            -self.clip_limit, self.clip_limit)
         return norm_obs
+    
+    def save(self, model_dir, model_idx, epoch):
+        rb_path = model_dir + '/' + "replay_buffer" + str(model_idx) + "_e" + str(epoch) + ".p"
+        pickle.dump(self, open(rb_path, "wb")) 

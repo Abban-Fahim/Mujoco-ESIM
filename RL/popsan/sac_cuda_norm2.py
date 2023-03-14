@@ -221,7 +221,7 @@ class PopsanTrainer:
         return self.ac.act(torch.as_tensor(o, dtype=torch.float32, device=self.device), 1,
                       deterministic)
     
-    def savePopsan(self, model_dir, model_idx, epoch):
+    def save(self, model_dir, model_idx, epoch):
         torch.save(self.ac.popsan.state_dict(),
                         model_dir + '/' + "model" + str(model_idx) + "_e" + str(epoch) + '.pt')
         
@@ -284,19 +284,12 @@ class SpikeSAC():
         # Experience buffer
         self.replay_buffer = ReplayBuffer(obs_dim=obs_dim, act_dim=act_dim, size=replay_size,
                                     clip_limit=norm_clip_limit, norm_update_every=norm_update)
-
-        self.model_dir = "./params/spike-sac_" + tb_comment + "_" + str(model_idx)
-        try:
-            os.mkdir("./params")
-            print("Directory params Created")
-        except FileExistsError:
-            print("Directory params already exists")
         
-        try:
-            os.mkdir(self.model_dir)
-            print("Directory ", self.model_dir, " Created")
-        except FileExistsError:
-            print("Directory ", self.model_dir, " already exists")
+        self.model_dir = "./params/spike-sac_" + tb_comment + "_" + str(model_idx)
+        param_dir = "./params"
+        self.createFolder(self.model_dir)
+        self.createFolder(param_dir)
+
 
         # Save parameters
         with open(self.model_dir + "/training_parameters.txt", "w") as f:
@@ -326,6 +319,13 @@ class SpikeSAC():
         self.writer = SummaryWriter(comment="_" + self.tb_comment + "_" + str(self.model_idx))
         self.save_test_reward = []
         self.save_test_reward_steps = []
+
+    def createFolder(self, path):
+        try:
+            os.mkdir(path)
+            print("Directory ", path, " Created")
+        except FileExistsError:
+            print("Directory ", path, " already exists")
         
     def test_agent(self):
         ###
@@ -431,27 +431,15 @@ class SpikeSAC():
                 # self.ac.popsan.to('cpu')
                 self.trainer.ac.popsan.to('cpu')
 
-                # torch.save(self.ac.popsan.state_dict(),
-                #         self.model_dir + '/' + "model" + str(self.model_idx) + "_e" + str(epoch) + '.pt')
-                self.trainer.savePopsan(self.model_dir, self.model_idx, epoch)
-                
-                rb_path = self.model_dir + '/' + "replay_buffer" + str(self.model_idx) + "_e" + str(epoch) + ".p"
-                pickle.dump(self.replay_buffer, open(rb_path, "wb")) 
-
-                # print("Learned Mean for encoder population: ")
-                # # print(self.ac.popsan.encoder.mean.data)
-                # print(self.trainer.ac.popsan.encoder.mean.data)
-
-                # print("Learned STD for encoder population: ")
-                # # print(self.ac.popsan.encoder.std.data)
-                # print(self.trainer.ac.popsan.encoder.std.data)
+                self.trainer.save(self.model_dir, self.model_idx, epoch)
+                self.replay_buffer.save(self.model_dir, self.model_idx, epoch)
 
                 self.trainer.printStatistics()
 
                 # self.ac.popsan.to(self.device)
                 self.trainer.ac.popsan.to(self.device)
 
-                print("Weights saved in ", self.model_dir + '/' + "model" + str(self.model_idx) + "_e" + str(epoch) + '.pt')
+                print("Weights saved in ", self.model_dir)
 
             # Test the performance of the deterministic version of the agent.
             test_mean_reward = self.test_agent()
