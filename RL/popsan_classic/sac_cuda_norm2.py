@@ -60,17 +60,16 @@ from torch.optim import Adam
 from torch.utils.tensorboard import SummaryWriter
 import gym
 import gym_env
-
 from tqdm import tqdm
-
-import os
 import pickle
-import sys
 
-# sys.path.append("../../")
-from replay_buffer_norm import ReplayBuffer
-from popsan import SquashedGaussianPopSpikeActor
-from core_cuda import MLPQFunction
+import sys
+import os
+sys.path.append(os.getcwd())
+
+from RL.popsan_classic.replay_buffer_norm import ReplayBuffer
+from RL.popsan_classic.popsan import SquashedGaussianPopSpikeActor
+from RL.popsan_classic.core_cuda import MLPQFunction
 
 
 class SpikeActorDeepCritic(nn.Module):

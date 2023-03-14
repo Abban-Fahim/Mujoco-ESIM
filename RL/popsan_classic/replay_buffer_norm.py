@@ -2,8 +2,11 @@ import numpy as np
 import torch
 import sys
 
-# sys.path.append('../../')
-import core_cuda as core
+import sys
+import os
+sys.path.append(os.getcwd())
+
+import RL.popsan_classic.core_cuda as core
 
 
 class ReplayBuffer:

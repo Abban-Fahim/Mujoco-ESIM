@@ -60,37 +60,20 @@ import gym_env
 import math
 import pickle
 import cv2
+from gym.wrappers.monitoring.video_recorder import VideoRecorder
 
-from sac_cuda_norm import SpikeActorDeepCritic
-from replay_buffer_norm import ReplayBuffer
+import sys
+import os
+sys.path.append(os.getcwd())
 
-# choosing the model
-a = 0, 40
+from RL.popsan_classic.sac_cuda_norm2 import SpikeActorDeepCritic
+from RL.popsan_classic.replay_buffer_norm import ReplayBuffer
 
-path = ""
-# path = "19_09_2022/"
-# path = "20_09_2022/"
-# path = "21_09_2022/"
 
-#+
-# env_name = "PegInHole-rand_events_visual_servoing_guiding_activity"
-# param_path = path + f"params/spike-sac_sac-popsan-PegInHole-rand_events_visual_servoing_guiding_activity-encoder-dim-10-decoder-dim-10/model{a[0]}_e{a[1]}.pt"
-# rb_param_path = path + f"params/spike-sac_sac-popsan-PegInHole-rand_events_visual_servoing_guiding_activity-encoder-dim-10-decoder-dim-10/replay_buffer{a[0]}_e{a[1]}.p"
 
-#+
-# env_name = "PegInHole-rand_events_visual_servoing_guiding"
-# param_path = path + f"params/spike-sac_sac-popsan-PegInHole-rand_events_visual_servoing_guiding-encoder-dim-10-decoder-dim-10/model{a[0]}_e{a[1]}.pt"
-# rb_param_path = path +f"params/spike-sac_sac-popsan-PegInHole-rand_events_visual_servoing_guiding-encoder-dim-10-decoder-dim-10/replay_buffer{a[0]}_e{a[1]}.p"
-
-#+
-# env_name = "PegInHole-rand_events_visual_servoing_guiding_corner_activity"
-# param_path = path + f"params/spike-sac_sac-popsan-PegInHole-rand_events_visual_servoing_guiding_corner_activity-encoder-dim-10-decoder-dim-10/model{a[0]}_e{a[1]}.pt"
-# rb_param_path = path + f"params/spike-sac_sac-popsan-PegInHole-rand_events_visual_servoing_guiding_corner_activity-encoder-dim-10-decoder-dim-10/replay_buffer{a[0]}_e{a[1]}.p"
-
-#+
-env_name = "PegInHole-rand_events_visual_servoing_guiding_vae"
-param_path = path + f"params/spike-sac_sac-popsan-PegInHole-rand_events_visual_servoing_guiding_vae-encoder-dim-10-decoder-dim-10/model{a[0]}_e{a[1]}.pt"
-rb_param_path = path + f"params/spike-sac_sac-popsan-PegInHole-rand_events_visual_servoing_guiding_vae-encoder-dim-10-decoder-dim-10/replay_buffer{a[0]}_e{a[1]}.p"
+env_name = "InvertedPendulum-v4"
+param_path = "params/spike-sac_sac-popsan-InvertedPendulum-v4-encoder-dim-10-decoder-dim-10_0/model0_e5.pt"
+rb_param_path = "params/spike-sac_sac-popsan-InvertedPendulum-v4-encoder-dim-10-decoder-dim-10_0/replay_buffer0_e5.p"
 
 use_cuda = True
 
@@ -119,7 +102,7 @@ else:
     device = torch.device("cpu")
 
 
-env = gym.make(env_name, sim_speed=1, headless=False, render_every_frame=True)
+env = gym.make(env_name, render_mode="rgb_array")
 
 
 
@@ -131,8 +114,8 @@ ac = SpikeActorDeepCritic(env.observation_space, env.action_space, **ac_kwargs)
 ac.popsan.load_state_dict(torch.load(param_path))
 ac.to(device)
 
-     
-replay_buffer = pickle.load(open(rb_param_path, "rb"))        
+f = open(rb_param_path, "rb")
+replay_buffer = pickle.load(f)        
 
 
 def get_action(o, deterministic=False):
@@ -148,50 +131,58 @@ def test_agent(env):
         test_reward_sum = 0
         for j in tqdm( range(num_test_episodes) ):
             o, d, ep_ret, ep_len = env.reset(), False, 0, 0
+            o = o[0]
             while not(d or (ep_len == max_ep_len)):
                 # Take deterministic actions at test time 
-                o, r, d, _ = env.step(get_action(replay_buffer.normalize_obs(o), True))
+                a = get_action(replay_buffer.normalize_obs(o), True)
+                a = a.flatten()
+                o, r, d, _, info = env.step(a)
                 ep_ret += r
                 ep_len += 1
-                # print(r, ep_ret, o[2])
-                # print(r)
-
-                # print(ep_len, o, d)
 
             test_reward_sum += ep_ret
 
         print("done testing env")
-        return test_reward_sum / num_test_episodes
+        average_reward = test_reward_sum / num_test_episodes
+        print("Average reward:", average_reward)
+        return average_reward
 
 
 def render_agent(env):
         ###
         # compuate the return mean test reward
         ###
+        try:
+            os.mkdir("./clip")
+            print("Directory clip Created")
+        except FileExistsError:
+            print("Directory clip already exists")
+
         print("rendering env...")
 
-        # height, width, layers = frame.shape
+        video_recorder = VideoRecorder(env, f"clip/{env_name}_clip.mp4", enabled=True)
 
-        video = cv2.VideoWriter(f'epoch_{env_name}_{a[0]}_{a[1]}.avi', 0, 60, (64,64))
-
-    
         test_reward_sum = 0
         for j in tqdm( range(num_test_episodes) ):
             o, d, ep_ret, ep_len = env.reset(), False, 0, 0
+            o = o[0]
             while not(d or (ep_len == max_ep_len)):
+                env.unwrapped.render()
+                video_recorder.capture_frame()
                 # Take deterministic actions at test time 
-                o, r, d, _ = env.step(get_action(replay_buffer.normalize_obs(o), True))
-                frame = env.render_frame()
-                video.write(cv2.flip(frame, 0))
+                a = get_action(replay_buffer.normalize_obs(o), True)
+                a = a.flatten()
+                o, r, d, _, info = env.step(a)
+
 
                 ep_ret += r
                 ep_len += 1
             test_reward_sum += ep_ret
 
-        video.release()
+        video_recorder.close()
 
         print("done rendering env")
         return test_reward_sum / num_test_episodes
 
-test_agent(env)
-# render_agent(env)
+# test_agent(env)
+render_agent(env)
