@@ -323,15 +323,17 @@ class SpikeSAC():
         except FileExistsError:
             print("Directory ", path, " already exists")
 
-    def simEpisode(self, env, action_func=None):
+    def simEpisode(self, env, action_func=None, enableStore=False):
         o, d, ep_ret, ep_len = env.reset(), False, 0, 0
         o = o[0]
         while not(d or (ep_len == self.max_ep_len)):
             # Take deterministic actions at test time 
-            # a = self.trainer.get_action(self.replay_buffer.normalize_obs(o), True)
             a = action_func(o)
             a = a.flatten()
-            o, r, d, _, info = env.step(a)
+            o2, r, d, _, info = env.step(a)
+            if enableStore:
+                self.replay_buffer.store(o, a, r, o2, d)
+            o = o2
             ep_ret += r
             ep_len += 1
         
@@ -355,9 +357,9 @@ class SpikeSAC():
         # Also create dir for saving parameters
         ###
 
-        # exploration_episode_num = self.start_steps // self.steps_per_epoch
-        # for episode in range(exploration_episode_num):
-        #     self.simEpisode(self.test_env)
+        exploration_episode_num = self.start_steps // self.steps_per_epoch
+        for episode in tqdm( range(exploration_episode_num), desc ="Exploration progress" ):
+            self.simEpisode(self.test_env, action_func=lambda o: self.env.action_space.sample(), enableStore=True)
 
         
         # Prepare for interaction with environment
@@ -368,10 +370,10 @@ class SpikeSAC():
         # Main loop: collect experience in env and update/log each epoch
         for t in tqdm( range(total_steps), desc ="Total progress" ):
             
-            if self.isExploration(t):
-                a = self.env.action_space.sample()
-            else:
-                a = self.trainer.get_action(self.replay_buffer.normalize_obs(o))
+            # if self.isExploration(t):
+            #     a = self.env.action_space.sample()
+            # else:
+            #     a = self.trainer.get_action(self.replay_buffer.normalize_obs(o))
 
             a = self.trainer.get_action(self.replay_buffer.normalize_obs(o))
 
@@ -381,7 +383,7 @@ class SpikeSAC():
             ep_ret += r
             ep_len += 1
 
-            d = False if ep_len==self.max_ep_len else d
+            # d = False if ep_len==self.max_ep_len else d
             self.replay_buffer.store(o, a, r, o2, d)
             o = o2
 
