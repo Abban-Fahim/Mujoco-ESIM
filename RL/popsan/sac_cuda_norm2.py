@@ -224,6 +224,13 @@ class PopsanTrainer:
     def savePopsan(self, model_dir, model_idx, epoch):
         torch.save(self.ac.popsan.state_dict(),
                         model_dir + '/' + "model" + str(model_idx) + "_e" + str(epoch) + '.pt')
+        
+    def printStatistics(self):
+        print("Learned Mean for encoder population: ")
+        print(self.ac.popsan.encoder.mean.data)
+
+        print("Learned STD for encoder population: ")
+        print(self.ac.popsan.encoder.std.data)
 
 # def spike_sac(env_fn, actor_critic=SpikeActorDeepCritic, ac_kwargs=dict(), seed=0,
 #               steps_per_epoch=10000, epochs=100, replay_size=int(1e6), gamma=0.99,
@@ -431,13 +438,15 @@ class SpikeSAC():
                 rb_path = self.model_dir + '/' + "replay_buffer" + str(self.model_idx) + "_e" + str(epoch) + ".p"
                 pickle.dump(self.replay_buffer, open(rb_path, "wb")) 
 
-                print("Learned Mean for encoder population: ")
-                # print(self.ac.popsan.encoder.mean.data)
-                print(self.trainer.ac.popsan.encoder.mean.data)
+                # print("Learned Mean for encoder population: ")
+                # # print(self.ac.popsan.encoder.mean.data)
+                # print(self.trainer.ac.popsan.encoder.mean.data)
 
-                print("Learned STD for encoder population: ")
-                # print(self.ac.popsan.encoder.std.data)
-                print(self.trainer.ac.popsan.encoder.std.data)
+                # print("Learned STD for encoder population: ")
+                # # print(self.ac.popsan.encoder.std.data)
+                # print(self.trainer.ac.popsan.encoder.std.data)
+
+                self.trainer.printStatistics()
 
                 # self.ac.popsan.to(self.device)
                 self.trainer.ac.popsan.to(self.device)
