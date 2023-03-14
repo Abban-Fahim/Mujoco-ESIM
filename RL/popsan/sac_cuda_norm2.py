@@ -322,6 +322,19 @@ class SpikeSAC():
             print("Directory ", path, " Created")
         except FileExistsError:
             print("Directory ", path, " already exists")
+
+    def simEpisode(self, env):
+        o, d, ep_ret, ep_len = env.reset(), False, 0, 0
+        o = o[0]
+        while not(d or (ep_len == self.max_ep_len)):
+            # Take deterministic actions at test time 
+            a = self.trainer.get_action(self.replay_buffer.normalize_obs(o), True)
+            a = a.flatten()
+            o, r, d, _, info = env.step(a)
+            ep_ret += r
+            ep_len += 1
+        
+        return ep_ret
         
     def test_agent(self):
         ###
@@ -329,16 +342,17 @@ class SpikeSAC():
         ###
         test_reward_sum = 0
         for j in tqdm( range(self.num_test_episodes) ):
-            o, d, ep_ret, ep_len = self.test_env.reset(), False, 0, 0
-            o = o[0]
-            while not(d or (ep_len == self.max_ep_len)):
-                # Take deterministic actions at test time 
-                a = self.trainer.get_action(self.replay_buffer.normalize_obs(o), True)
-                a = a.flatten()
-                o, r, d, _, info = self.test_env.step(a)
-                ep_ret += r
-                ep_len += 1
-            test_reward_sum += ep_ret
+            
+            # o, d, ep_ret, ep_len = self.test_env.reset(), False, 0, 0
+            # o = o[0]
+            # while not(d or (ep_len == self.max_ep_len)):
+            #     # Take deterministic actions at test time 
+            #     a = self.trainer.get_action(self.replay_buffer.normalize_obs(o), True)
+            #     a = a.flatten()
+            #     o, r, d, _, info = self.test_env.step(a)
+            #     ep_ret += r
+            #     ep_len += 1
+            test_reward_sum += self.simEpisode(self.test_env)
         return test_reward_sum / self.num_test_episodes
     
     def isExploration(self, t):
@@ -349,6 +363,8 @@ class SpikeSAC():
         # add tensorboard support and save rewards
         # Also create dir for saving parameters
         ###
+
+
         
         # Prepare for interaction with environment
         total_steps = self.steps_per_epoch * self.epochs
