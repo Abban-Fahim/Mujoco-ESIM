@@ -345,6 +345,8 @@ class SpikeSAC():
             test_reward_sum += ep_ret
         return test_reward_sum / self.num_test_episodes
     
+    def isExploration(self, t):
+        return t <= self.start_steps
     
     def run(self):
          ###
@@ -360,13 +362,10 @@ class SpikeSAC():
         # Main loop: collect experience in env and update/log each epoch
         for t in tqdm( range(total_steps), desc ="Total progress" ):
             
-            # Until start_steps have elapsed, randomly sample actions
-            # from a uniform distribution for better exploration. Afterwards, 
-            # use the learned policy. 
-            if t > self.start_steps:
-                a = self.trainer.get_action(self.replay_buffer.normalize_obs(o))
-            else:
+            if self.isExploration(t):
                 a = self.env.action_space.sample()
+            else:
+                a = self.trainer.get_action(self.replay_buffer.normalize_obs(o))
 
             # Step the env
             a = a.flatten()
@@ -374,16 +373,8 @@ class SpikeSAC():
             ep_ret += r
             ep_len += 1
 
-            # Ignore the "done" signal if it comes from hitting the time
-            # horizon (that is, when it's an artificial terminal signal
-            # that isn't based on the agent's state)
             d = False if ep_len==self.max_ep_len else d
-
-            # Store experience to replay buffer
             self.replay_buffer.store(o, a, r, o2, d)
-
-            # Super critical, easy to overlook step: make sure to update 
-            # most recent observation!
             o = o2
 
             if self.isEpidodeEnd(d, ep_len):
@@ -400,7 +391,7 @@ class SpikeSAC():
 
                 epoch = (t+1) // self.steps_per_epoch
                 if self.isSaveRequired(epoch):
-                    self.save(epoch)
+                    self.saveModels(epoch)
 
 
     def isEpidodeEnd(self, d, ep_len):
@@ -425,7 +416,7 @@ class SpikeSAC():
     def isSaveRequired(self, epoch):
         return (epoch % self.save_freq == 0) or (epoch == self.epochs)
     
-    def save(self, epoch):
+    def saveModels(self, epoch):
         self.trainer.save(self.model_dir, self.model_idx, epoch)
         self.replay_buffer.save(self.model_dir, self.model_idx, epoch)
 
