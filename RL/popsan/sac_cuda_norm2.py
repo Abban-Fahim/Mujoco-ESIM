@@ -254,13 +254,10 @@ class SpikeSAC():
         torch.manual_seed(seed)
         np.random.seed(seed)
 
-        # self.gamma = gamma
-        # self.alpha = alpha
         self.batch_size = batch_size
         self.device = device
         self.num_test_episodes = num_test_episodes
         self.max_ep_len = max_ep_len
-        # self.polyak = polyak
         self.tb_comment = tb_comment
         self.model_idx = model_idx
         self.steps_per_epoch = steps_per_epoch
@@ -284,6 +281,9 @@ class SpikeSAC():
         # Experience buffer
         self.replay_buffer = ReplayBuffer(obs_dim=obs_dim, act_dim=act_dim, size=replay_size,
                                     clip_limit=norm_clip_limit, norm_update_every=norm_update)
+        
+        self.writer = SummaryWriter(comment="_" + self.tb_comment + "_" + str(self.model_idx))
+
 
         self.model_dir = "./params/spike-sac_" + tb_comment + "_" + str(model_idx)
         param_dir = "./params"
@@ -316,13 +316,9 @@ class SpikeSAC():
             f.write("model_idx " + str(model_idx) + "\n")
             f.write("use_cuda " + str(use_cuda) + "\n")
 
-        self.writer = SummaryWriter(comment="_" + self.tb_comment + "_" + str(self.model_idx))
-        self.save_test_reward = []
-        self.save_test_reward_steps = []
-
     def createFolder(self, path):
         try:
-            os.mkdir(path)
+            os.makedirs(path)
             print("Directory ", path, " Created")
         except FileExistsError:
             print("Directory ", path, " already exists")
@@ -455,8 +451,6 @@ if __name__ == '__main__':
         ss = SpikeSAC(args.env, actor_critic=SpikeActorDeepCritic, ac_kwargs=AC_KWARGS,
                   popsan_lr=1e-4, gamma=0.99, seed=seed, epochs=args.epochs,
                   norm_clip_limit=3.0, tb_comment=COMMENT, model_idx=num)
-        # spike_sac(args.env, actor_critic=SpikeActorDeepCritic, ac_kwargs=AC_KWARGS,
-        #           popsan_lr=1e-4, gamma=0.99, seed=seed, epochs=args.epochs,
-        #           norm_clip_limit=3.0, tb_comment=COMMENT, model_idx=num)
+
         ss.run()
 
