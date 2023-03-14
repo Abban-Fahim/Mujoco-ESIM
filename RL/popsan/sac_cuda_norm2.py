@@ -284,7 +284,7 @@ class SpikeSAC():
         # Experience buffer
         self.replay_buffer = ReplayBuffer(obs_dim=obs_dim, act_dim=act_dim, size=replay_size,
                                     clip_limit=norm_clip_limit, norm_update_every=norm_update)
-        
+
         self.model_dir = "./params/spike-sac_" + tb_comment + "_" + str(model_idx)
         param_dir = "./params"
         self.createFolder(self.model_dir)
@@ -386,22 +386,24 @@ class SpikeSAC():
             # most recent observation!
             o = o2
 
-            # End of trajectory handling
-            if self.isEndOfEpidode(d, ep_len):
+            if self.isEpidodeEnd(d, ep_len):
                 self.endOfEpisodeHandling(ep_ret, t)
 
-            # Update handling
             if self.isUpdateRequired(t):
                 self.popsanUpdateHandling()
 
-            # End of epoch handling
-            self.epochEndHandling(t)
+            if self.isEpochEnd(t):
+                # Test the performance of the deterministic version of the agent.
+                test_mean_reward = self.test_agent()
+                self.writer.add_scalar(self.tb_comment + '/Test-Mean-Reward', test_mean_reward, t + 1)
+                print("Model: ", self.model_idx, " Steps: ", t + 1, " Mean Reward: ", test_mean_reward)
+
+                epoch = (t+1) // self.steps_per_epoch
+                if self.isSaveRequired(epoch):
+                    self.save(epoch)
 
 
-        # Save Test Reward List
-        self.saveTestRewardList()
-
-    def isEndOfEpidode(self, d, ep_len):
+    def isEpidodeEnd(self, d, ep_len):
         return d or (ep_len == self.max_ep_len)
 
     def endOfEpisodeHandling(self, ep_ret, t):
@@ -416,38 +418,19 @@ class SpikeSAC():
         for j in range(self.update_every):
             batch = self.replay_buffer.sample_batch(self.device, self.batch_size)
             self.trainer.update(data=batch)
+    
+    def isEpochEnd(self, t):
+        return (t+1) % self.steps_per_epoch == 0
+    
+    def isSaveRequired(self, epoch):
+        return (epoch % self.save_freq == 0) or (epoch == self.epochs)
+    
+    def save(self, epoch):
+        self.trainer.save(self.model_dir, self.model_idx, epoch)
+        self.replay_buffer.save(self.model_dir, self.model_idx, epoch)
 
-    def saveTestRewardList(self):
-        pickle.dump([self.save_test_reward, self.save_test_reward_steps],
-                    open(self.model_dir + '/' + "model" + str(self.model_idx) + "_test_rewards.p", "wb+"))
-        
-    def epochEndHandling(self, t):
-        # End of epoch handling
-        if (t+1) % self.steps_per_epoch == 0:
-            epoch = (t+1) // self.steps_per_epoch
-
-            # Save model
-            if (epoch % self.save_freq == 0) or (epoch == self.epochs):
-                # self.ac.popsan.to('cpu')
-                self.trainer.ac.popsan.to('cpu')
-
-                self.trainer.save(self.model_dir, self.model_idx, epoch)
-                self.replay_buffer.save(self.model_dir, self.model_idx, epoch)
-
-                self.trainer.printStatistics()
-
-                # self.ac.popsan.to(self.device)
-                self.trainer.ac.popsan.to(self.device)
-
-                print("Weights saved in ", self.model_dir)
-
-            # Test the performance of the deterministic version of the agent.
-            test_mean_reward = self.test_agent()
-            self.save_test_reward.append(test_mean_reward)
-            self.save_test_reward_steps.append(t + 1)
-            self.writer.add_scalar(self.tb_comment + '/Test-Mean-Reward', test_mean_reward, t + 1)
-            print("Model: ", self.model_idx, " Steps: ", t + 1, " Mean Reward: ", test_mean_reward)
-
+        self.trainer.printStatistics()
+        print("Weights saved in ", self.model_dir)
 
 
 if __name__ == '__main__':
