@@ -61,24 +61,16 @@ from torch.utils.tensorboard import SummaryWriter
 import gym
 import gym_env
 
+from tqdm import tqdm
+
 import os
 import pickle
 import sys
 
-# import imageio
-import cv2
-from tqdm import tqdm
-from time import process_time
-
-sys.path.append("../../")
+# sys.path.append("../../")
 from replay_buffer_norm import ReplayBuffer
 from popsan import SquashedGaussianPopSpikeActor
 from core_cuda import MLPQFunction
-
-
-def serialize_RB(replay_buffer, rb_path):    
-    # dir_path = os.path.dirname(os.path.realpath(__file__))     
-    pickle.dump(replay_buffer, open(rb_path, "wb"))    
 
 
 class SpikeActorDeepCritic(nn.Module):
@@ -105,11 +97,17 @@ class SpikeActorDeepCritic(nn.Module):
             return a.numpy()
 
 
-def spike_sac(env_fn, actor_critic=SpikeActorDeepCritic, ac_kwargs=dict(), seed=0,
-              steps_per_epoch=10000, epochs=200, replay_size=int(1e6), gamma=0.99,
-              polyak=0.995, popsan_lr=1e-4, q_lr=1e-3, alpha=0.2, batch_size=100, start_steps=10000,
-              update_after=1000, update_every=50, num_test_episodes=1, max_ep_len=1000, env_name="", render_every=50,
-              save_freq=20, norm_clip_limit=3, norm_update=50, tb_comment='', model_idx=0, use_cuda=True):
+# def spike_sac(env_fn, actor_critic=SpikeActorDeepCritic, ac_kwargs=dict(), seed=0,
+#               steps_per_epoch=10000, epochs=100, replay_size=int(1e6), gamma=0.99,
+#               polyak=0.995, popsan_lr=1e-4, q_lr=1e-3, alpha=0.2, batch_size=100, start_steps=10000,
+#               update_after=1000, update_every=50, num_test_episodes=10, max_ep_len=1000,
+#               save_freq=5, norm_clip_limit=3, norm_update=50, tb_comment='', model_idx=0, use_cuda=True):
+
+def spike_sac(env_name, actor_critic=SpikeActorDeepCritic, ac_kwargs=dict(), seed=0,
+              steps_per_epoch=1000, epochs=10, replay_size=int(1e6), gamma=0.99,
+              polyak=0.995, popsan_lr=1e-4, q_lr=1e-3, alpha=0.2, batch_size=100, start_steps=1000,
+              update_after=100, update_every=50, num_test_episodes=10, max_ep_len=100,
+              save_freq=5, norm_clip_limit=3, norm_update=50, tb_comment='', model_idx=0, use_cuda=True):
     """
     Spike Soft Actor-Critic (SAC)
 
@@ -224,11 +222,8 @@ def spike_sac(env_fn, actor_critic=SpikeActorDeepCritic, ac_kwargs=dict(), seed=
     torch.manual_seed(seed)
     np.random.seed(seed)
 
-    # render_env = gym.make(env_name)
-    render_env = gym.make(env_name, sim_speed=1, headless=True, render_every_frame=True)
-
+    env_fn = lambda: gym.make(env_name)
     env, test_env = env_fn(), env_fn()
-
     obs_dim = env.observation_space.shape
     act_dim = env.action_space.shape[0]
 
@@ -256,6 +251,33 @@ def spike_sac(env_fn, actor_critic=SpikeActorDeepCritic, ac_kwargs=dict(), seed=
     # Experience buffer
     replay_buffer = ReplayBuffer(obs_dim=obs_dim, act_dim=act_dim, size=replay_size,
                                  clip_limit=norm_clip_limit, norm_update_every=norm_update)
+
+    # Save parameters
+    model_dir = "./params/spike-sac_" + tb_comment
+    with open(model_dir + "/training_parameters.txt", "w") as f:
+        f.write("env_name " + env_name + "\n")
+        f.write("ac_kwargs " + str(ac_kwargs) + "\n")
+        f.write("steps_per_epoch " + str(steps_per_epoch) + "\n")
+        f.write("epochs " + str(epochs) + "\n")
+        f.write("replay_size " + str(replay_size) + "\n")
+        f.write("gamma " + str(gamma) + "\n")
+        f.write("polyak " + str(polyak) + "\n")
+        f.write("popsan_lr " + str(popsan_lr) + "\n")
+        f.write("q_lr " + str(q_lr) + "\n")
+        f.write("alpha " + str(alpha) + "\n")
+        f.write("batch_size " + str(batch_size) + "\n")
+        f.write("start_steps " + str(start_steps) + "\n")
+        f.write("update_after " + str(update_after) + "\n")
+        f.write("update_every " + str(update_every) + "\n")
+        f.write("num_test_episodes " + str(num_test_episodes) + "\n")
+        f.write("max_ep_len " + str(max_ep_len) + "\n")
+        f.write("save_freq " + str(save_freq) + "\n")
+        f.write("norm_clip_limit " + str(norm_clip_limit) + "\n")
+        f.write("norm_update " + str(norm_update) + "\n")
+        f.write("tb_comment " + str(tb_comment) + "\n")
+        f.write("model_idx " + str(model_idx) + "\n")
+        f.write("use_cuda " + str(use_cuda) + "\n")
+
 
     # Set up function for computing Spike-SAC Q-losses
     def compute_loss_q(data):
@@ -347,50 +369,18 @@ def spike_sac(env_fn, actor_critic=SpikeActorDeepCritic, ac_kwargs=dict(), seed=
         ###
         # compuate the return mean test reward
         ###
-        print("testing env...")
         test_reward_sum = 0
-        test_accuracy_sum = 0
         for j in tqdm( range(num_test_episodes) ):
             o, d, ep_ret, ep_len = test_env.reset(), False, 0, 0
+            o = o[0]
             while not(d or (ep_len == max_ep_len)):
                 # Take deterministic actions at test time 
-                o, r, d, _ = test_env.step(get_action(replay_buffer.normalize_obs(o), True))
+                a = get_action(replay_buffer.normalize_obs(o), True)
+                a = a.flatten()
+                o, r, d, _, info = test_env.step(a)
                 ep_ret += r
                 ep_len += 1
             test_reward_sum += ep_ret
-            test_accuracy_sum += test_env.err
-
-
-        print("done testing env")
-        return test_reward_sum / num_test_episodes, test_accuracy_sum/num_test_episodes
-
-    def render_agent(e):
-        ###
-        # compuate the return mean test reward
-        ###
-        print("rendering env...")
-
-        # height, width, layers = frame.shape
-
-        video = cv2.VideoWriter(f'{num}_{tb_comment}_epoch_{e}.avi', 0, 60, (64,64))
-
-    
-        test_reward_sum = 0
-        for j in tqdm( range(num_test_episodes) ):
-            o, d, ep_ret, ep_len = render_env.reset(), False, 0, 0
-            while not(d or (ep_len == max_ep_len)):
-                # Take deterministic actions at test time 
-                o, r, d, _ = render_env.step(get_action(replay_buffer.normalize_obs(o), True))
-                frame = render_env.render_frame()
-                video.write(cv2.flip(frame, 0))
-
-                ep_ret += r
-                ep_len += 1
-            test_reward_sum += ep_ret
-
-        video.release()
-
-        print("done rendering env")
         return test_reward_sum / num_test_episodes
 
     ###
@@ -405,23 +395,21 @@ def spike_sac(env_fn, actor_critic=SpikeActorDeepCritic, ac_kwargs=dict(), seed=
         print("Directory params Created")
     except FileExistsError:
         print("Directory params already exists")
-    model_dir = "./params/spike-sac_" + tb_comment
+    
     try:
         os.mkdir(model_dir)
         print("Directory ", model_dir, " Created")
     except FileExistsError:
         print("Directory ", model_dir, " already exists")
 
-
     # Prepare for interaction with environment
     total_steps = steps_per_epoch * epochs
     o, ep_ret, ep_len = env.reset(), 0, 0
+    o = o[0]
 
-    t1_start = process_time() 
-    t1_stop = t1_start
     # Main loop: collect experience in env and update/log each epoch
     for t in tqdm( range(total_steps), desc ="Total progress" ):
-
+        
         # Until start_steps have elapsed, randomly sample actions
         # from a uniform distribution for better exploration. Afterwards, 
         # use the learned policy. 
@@ -431,7 +419,8 @@ def spike_sac(env_fn, actor_critic=SpikeActorDeepCritic, ac_kwargs=dict(), seed=
             a = env.action_space.sample()
 
         # Step the env
-        o2, r, d, _ = env.step(a)
+        a = a.flatten()
+        o2, r, d, _, info = env.step(a)
         ep_ret += r
         ep_len += 1
 
@@ -451,15 +440,9 @@ def spike_sac(env_fn, actor_critic=SpikeActorDeepCritic, ac_kwargs=dict(), seed=
         if d or (ep_len == max_ep_len):
             writer.add_scalar(tb_comment + '/Train-Reward', ep_ret, t + 1)
             o, ep_ret, ep_len = env.reset(), 0, 0
+            o = o[0]
 
         # Update handling
-        # if t >= update_after and t % update_every == 0:
-        #     print("Update handling...")
-        #     for j in tqdm( range(update_every) ):
-        #         batch = replay_buffer.sample_batch(device, batch_size)
-        #         update(data=batch)
-        #     print("Update handling done!")
-
         if t >= update_after and t % update_every == 0:
             for j in range(update_every):
                 batch = replay_buffer.sample_batch(device, batch_size)
@@ -468,18 +451,14 @@ def spike_sac(env_fn, actor_critic=SpikeActorDeepCritic, ac_kwargs=dict(), seed=
         # End of epoch handling
         if (t+1) % steps_per_epoch == 0:
             epoch = (t+1) // steps_per_epoch
-            print("epoch", epoch)
+
             # Save model
             if (epoch % save_freq == 0) or (epoch == epochs):
                 ac.popsan.to('cpu')
                 torch.save(ac.popsan.state_dict(),
                            model_dir + '/' + "model" + str(model_idx) + "_e" + str(epoch) + '.pt')
-
-                # serialize_RB(replay_buffer, model_dir + '/' + "replay_buffer" + str(model_idx) + "_e" + str(epoch) + ".picl")
                 rb_path = model_dir + '/' + "replay_buffer" + str(model_idx) + "_e" + str(epoch) + ".p"
                 pickle.dump(replay_buffer, open(rb_path, "wb")) 
-
-                print("Weights saved in ", rb_path)
 
                 print("Learned Mean for encoder population: ")
                 print(ac.popsan.encoder.mean.data)
@@ -489,21 +468,11 @@ def spike_sac(env_fn, actor_critic=SpikeActorDeepCritic, ac_kwargs=dict(), seed=
                 print("Weights saved in ", model_dir + '/' + "model" + str(model_idx) + "_e" + str(epoch) + '.pt')
 
             # Test the performance of the deterministic version of the agent.
-            test_mean_reward, test_mean_accuracy = test_agent()
+            test_mean_reward = test_agent()
             save_test_reward.append(test_mean_reward)
             save_test_reward_steps.append(t + 1)
             writer.add_scalar(tb_comment + '/Test-Mean-Reward', test_mean_reward, t + 1)
-            writer.add_scalar(tb_comment + '/Test-Mean-Accuracy', test_mean_accuracy, t + 1)
             print("Model: ", model_idx, " Steps: ", t + 1, " Mean Reward: ", test_mean_reward)
-
-            if epoch % render_every == 0 and epoch > 0:
-                render_agent(epoch)
-
-            t1_stop = process_time()
-            print("epoch time", t1_stop-t1_start)
-            t1_start = t1_stop
-
-
 
     # Save Test Reward List
     pickle.dump([save_test_reward, save_test_reward_steps],
@@ -520,11 +489,8 @@ if __name__ == '__main__':
     parser.add_argument('--decoder_pop_dim', type=int, default=10)
     parser.add_argument('--encoder_var', type=float, default=0.15)
     parser.add_argument('--start_model_idx', type=int, default=0)
-    parser.add_argument('--num_model', type=int, default=1)
-    parser.add_argument('--epochs', type=int, default=200)
-    parser.add_argument('--steps_per_epoch', type=int, default=10000)
-    parser.add_argument('--max_ep_len', type=int, default=200)
-    
+    parser.add_argument('--num_model', type=int, default=10)
+    parser.add_argument('--epochs', type=int, default=10)
     args = parser.parse_args()
 
     START_MODEL = args.start_model_idx
@@ -540,9 +506,7 @@ if __name__ == '__main__':
               "-decoder-dim-" + str(AC_KWARGS['decoder_pop_dim'])
     for num in range(START_MODEL, START_MODEL + NUM_MODEL):
         seed = num * 10
-        spike_sac(lambda: gym.make(args.env), actor_critic=SpikeActorDeepCritic, ac_kwargs=AC_KWARGS,
-                  popsan_lr=1e-4, gamma=0.99, seed=seed, 
-                  epochs=args.epochs, 
-                  steps_per_epoch=args.steps_per_epoch, max_ep_len=args.max_ep_len, env_name=args.env, render_every=20,
+        spike_sac(args.env, actor_critic=SpikeActorDeepCritic, ac_kwargs=AC_KWARGS,
+                  popsan_lr=1e-4, gamma=0.99, seed=seed, epochs=args.epochs,
                   norm_clip_limit=3.0, tb_comment=COMMENT, model_idx=num)
 

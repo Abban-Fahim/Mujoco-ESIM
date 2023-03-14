@@ -67,9 +67,9 @@ import sys
 import os
 sys.path.append(os.getcwd())
 
-from RL.popsan_classic.replay_buffer_norm import ReplayBuffer
-from RL.popsan_classic.popsan import SquashedGaussianPopSpikeActor
-from RL.popsan_classic.core_cuda import MLPQFunction
+from RL.popsan.replay_buffer_norm import ReplayBuffer
+from RL.popsan.popsan import SquashedGaussianPopSpikeActor
+from RL.popsan.core_cuda import MLPQFunction
 
 
 class SpikeActorDeepCritic(nn.Module):

@@ -66,8 +66,8 @@ import sys
 import os
 sys.path.append(os.getcwd())
 
-from RL.popsan_classic.sac_cuda_norm2 import SpikeActorDeepCritic
-from RL.popsan_classic.replay_buffer_norm import ReplayBuffer
+from RL.popsan.sac_cuda_norm2 import SpikeActorDeepCritic
+from RL.popsan.replay_buffer_norm import ReplayBuffer
 
 
 

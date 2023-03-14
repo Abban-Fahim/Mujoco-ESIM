@@ -3,10 +3,12 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torch.distributions.normal import Normal
-import sys
 
-sys.path.append('../../')
-import core_cuda as core
+import sys
+import os
+sys.path.append(os.getcwd())
+
+import RL.popsan.core_cuda as core
 
 
 """
