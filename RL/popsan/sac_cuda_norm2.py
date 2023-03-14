@@ -323,12 +323,13 @@ class SpikeSAC():
         except FileExistsError:
             print("Directory ", path, " already exists")
 
-    def simEpisode(self, env):
+    def simEpisode(self, env, action_func=None):
         o, d, ep_ret, ep_len = env.reset(), False, 0, 0
         o = o[0]
         while not(d or (ep_len == self.max_ep_len)):
             # Take deterministic actions at test time 
-            a = self.trainer.get_action(self.replay_buffer.normalize_obs(o), True)
+            # a = self.trainer.get_action(self.replay_buffer.normalize_obs(o), True)
+            a = action_func(o)
             a = a.flatten()
             o, r, d, _, info = env.step(a)
             ep_ret += r
@@ -342,17 +343,7 @@ class SpikeSAC():
         ###
         test_reward_sum = 0
         for j in tqdm( range(self.num_test_episodes) ):
-            
-            # o, d, ep_ret, ep_len = self.test_env.reset(), False, 0, 0
-            # o = o[0]
-            # while not(d or (ep_len == self.max_ep_len)):
-            #     # Take deterministic actions at test time 
-            #     a = self.trainer.get_action(self.replay_buffer.normalize_obs(o), True)
-            #     a = a.flatten()
-            #     o, r, d, _, info = self.test_env.step(a)
-            #     ep_ret += r
-            #     ep_len += 1
-            test_reward_sum += self.simEpisode(self.test_env)
+            test_reward_sum += self.simEpisode(self.test_env, action_func=lambda o: self.trainer.get_action(self.replay_buffer.normalize_obs(o), True))
         return test_reward_sum / self.num_test_episodes
     
     def isExploration(self, t):
@@ -364,6 +355,9 @@ class SpikeSAC():
         # Also create dir for saving parameters
         ###
 
+        # exploration_episode_num = self.start_steps // self.steps_per_epoch
+        # for episode in range(exploration_episode_num):
+        #     self.simEpisode(self.test_env)
 
         
         # Prepare for interaction with environment
@@ -378,6 +372,8 @@ class SpikeSAC():
                 a = self.env.action_space.sample()
             else:
                 a = self.trainer.get_action(self.replay_buffer.normalize_obs(o))
+
+            a = self.trainer.get_action(self.replay_buffer.normalize_obs(o))
 
             # Step the env
             a = a.flatten()
