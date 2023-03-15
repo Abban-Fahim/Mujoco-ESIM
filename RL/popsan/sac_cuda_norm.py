@@ -256,33 +256,19 @@ class SpikeSAC():
                 path=".", tb_comment="") -> None:  
 
         self.env = env
-        self.batch_size = batch_size
-        self.num_test_episodes = num_test_episodes
+        self.trainer = trainer
+        self.replay_buffer = replay_buffer        
         self.max_ep_len = max_ep_len
-        self.tb_comment = tb_comment
-        self.path = path
-        # self.model_idx = model_idx
+        self.start_steps = start_steps
         self.steps_per_epoch = steps_per_epoch
         self.epochs = epochs
-        self.start_steps = start_steps
+        self.batch_size = batch_size
+        self.num_test_episodes = num_test_episodes
         self.save_freq = save_freq
-        
-        self.trainer = trainer
-        self.replay_buffer = replay_buffer
+        self.path = path
+        self.tb_comment = tb_comment
 
-        self.model_name = model_name
-        
-        # self.writer = SummaryWriter(comment="_" + self.tb_comment + "_" + str(self.model_idx))
         self.writer = SummaryWriter(comment="_" + tb_comment)
-
-
-        # self.model_dir = train_dir + "/" + model_name
-
-
-        # param_dir = "./params"
-        # self.createFolder(self.model_dir)
-        # self.createFolder(param_dir)
-
 
         # Save parameters
         with open(path + "/parameter_log_ss.txt", "w") as f:
@@ -296,15 +282,8 @@ class SpikeSAC():
             f.write("batch_size " + str(batch_size) + "\n")
             f.write("num_test_episodes " + str(num_test_episodes) + "\n")
             f.write("save_freq " + str(save_freq) + "\n")
-            # f.write("tb_comment " + str(tb_comment) + "\n")
-            # f.write("model_idx " + str(model_idx) + "\n")
-
-    # def createFolder(self, path):
-        # try:
-        #     os.makedirs(path)
-        #     print("Directory ", path, " Created")
-        # except FileExistsError:
-        #     print("Directory ", path, " already exists")
+            f.write("path " + str(path) + "\n")
+            f.write("tb_comment " + str(tb_comment) + "\n")
         
     def test_agent(self):
         test_reward_sum = 0
@@ -381,8 +360,7 @@ if __name__ == '__main__':
                      std=math.sqrt(args.encoder_var),
                      spike_ts=5,
                      device=torch.device('cuda'))
-    COMMENT = "sac-popsan-" + args.env + "-encoder-dim-" + str(AC_KWARGS['encoder_pop_dim']) + \
-              "-decoder-dim-" + str(AC_KWARGS['decoder_pop_dim'])
+    
     
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     
@@ -393,7 +371,8 @@ if __name__ == '__main__':
 
         replay_size=int(1e6)
         norm_clip_limit=3
-        norm_update=50
+        steps_per_epoch = 1000
+        norm_update = steps_per_epoch
 
         env = gym.make(args.env)
         obs_dim, act_dim = env.observation_space, env.action_space
@@ -409,9 +388,9 @@ if __name__ == '__main__':
         trainer = PopsanTrainer(obs_dim, act_dim, device, ac_kwargs=AC_KWARGS, path=path)
 
         replay_buffer = ReplayBuffer(obs_dim.shape, act_dim.shape[0], device, size=replay_size,
-                                    clip_limit=norm_clip_limit, norm_update_every=norm_update, path=path)
+                                    clip_limit=norm_clip_limit, norm_update_every=steps_per_epoch, path=path)
         
-        ss = SpikeSAC(env, trainer, replay_buffer, tb_comment=COMMENT, path=path)
+        ss = SpikeSAC(env, trainer, replay_buffer, steps_per_epoch=steps_per_epoch, tb_comment=model_name, path=path)
 
         ss.run()
 
