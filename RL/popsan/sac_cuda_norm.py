@@ -352,7 +352,7 @@ if __name__ == '__main__':
     parser.add_argument('--decoder_pop_dim', type=int, default=10)
     parser.add_argument('--encoder_var', type=float, default=0.15)
     parser.add_argument('--start_model_idx', type=int, default=0)
-    parser.add_argument('--num_model', type=int, default=1)
+    parser.add_argument('--num_model', type=int, default=3)
     parser.add_argument('--epochs', type=int, default=5)
     args = parser.parse_args()
 
@@ -395,7 +395,8 @@ if __name__ == '__main__':
         replay_buffer = ReplayBuffer(obs_dim.shape, act_dim.shape[0], device, size=replay_size,
                                     clip_limit=norm_clip_limit, norm_update_every=steps_per_epoch, path=path)
         
-        ss = SpikeSAC(env, trainer, replay_buffer, steps_per_epoch=steps_per_epoch, epochs=args.epochs, tb_comment=model_name, save_freq=args.epochs+1, path=path)
+        COMMMENT = ""
+        ss = SpikeSAC(env, trainer, replay_buffer, steps_per_epoch=steps_per_epoch, epochs=args.epochs, tb_comment=model_name+COMMMENT, save_freq=args.epochs+1, path=path)
 
         ss.run()
 
