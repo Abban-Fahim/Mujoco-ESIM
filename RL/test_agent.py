@@ -52,22 +52,14 @@
 #
 
 
-import torch
 from tqdm import tqdm
-import numpy as np
-import gym
-import gym_env
-import math
-import pickle
-import cv2
-from gym.wrappers.monitoring.video_recorder import VideoRecorder
 
 import sys
 import os
 sys.path.append(os.getcwd())
 
-from RL.popsan.SpikeActorDeepCritic import SpikeActorDeepCritic
 from RL.popsan.util import simEpisode
+from test_scripts import get_action, setup
 
 
 env_name = "InvertedPendulum-v4"
@@ -77,31 +69,7 @@ rb_param_path = "params/pop_sac_InvertedPendulum-v4_0/replay_buffer_e5.p"
 num_test_episodes = 10
 max_ep_len = 200
 
-ac_kwargs = dict(hidden_sizes=[256, 256],
-                     encoder_pop_dim=10,
-                     decoder_pop_dim=10,
-                     mean_range=(-3, 3),
-                     std=math.sqrt(0.15),
-                     spike_ts=5,
-                     device=torch.device('cuda'))
-
-# Set device
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
-env = gym.make(env_name, render_mode="rgb_array")
-
-ac = SpikeActorDeepCritic(env.observation_space, env.action_space, **ac_kwargs)
-ac.popsan.load_state_dict(torch.load(param_path))
-ac.to(device)
-
-f = open(rb_param_path, "rb")
-replay_buffer = pickle.load(f)        
-
-
-def get_action(o, deterministic=False):
-        return ac.act(torch.as_tensor(o, dtype=torch.float32, device=device), 1,
-                      deterministic)
-
+env, ac, replay_buffer, device =  setup(env_name, param_path, rb_param_path)
 
 def test_agent(env):
         ###
@@ -110,7 +78,7 @@ def test_agent(env):
         print("testing env...")
         test_reward_sum = 0
         for j in tqdm( range(num_test_episodes) ):
-            ep_ret, _ = simEpisode(env, max_ep_len, action_func=lambda o: get_action(replay_buffer.normalize_obs(o), True))
+            ep_ret, _ = simEpisode(env, max_ep_len, action_func=lambda o: get_action(replay_buffer.normalize_obs(o), ac, device, True))
             test_reward_sum += ep_ret
 
         print("done testing env")
@@ -118,36 +86,4 @@ def test_agent(env):
         print("Average reward:", average_reward)
         return average_reward
 
-
-def recordedAction(env, video_recorder, o):
-    env.unwrapped.render()
-    video_recorder.capture_frame()
-    # Take deterministic actions at test time 
-    return get_action(replay_buffer.normalize_obs(o), True)
-
-def render_agent(env):
-        ###
-        # compuate the return mean test reward
-        ###
-        try:
-            os.mkdir("./clip")
-            print("Directory clip Created")
-        except FileExistsError:
-            print("Directory clip already exists")
-
-        print("rendering env...")
-
-        video_recorder = VideoRecorder(env, f"clip/{env_name}_clip.mp4", enabled=True)
-
-        test_reward_sum = 0
-        for j in tqdm( range(num_test_episodes) ):
-            ep_ret, _ = simEpisode(env, max_ep_len, action_func=lambda o: recordedAction(env, video_recorder, o))
-            test_reward_sum += ep_ret
-
-        video_recorder.close()
-
-        print("done rendering env")
-        return test_reward_sum / num_test_episodes
-
 test_agent(env)
-# render_agent(env)
