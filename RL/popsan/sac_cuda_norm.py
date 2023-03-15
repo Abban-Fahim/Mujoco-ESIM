@@ -99,8 +99,9 @@ class SpikeActorDeepCritic(nn.Module):
 
 class PopsanTrainer:
     def __init__(self, observation_space, action_space, device, actor_critic=SpikeActorDeepCritic, ac_kwargs=dict(), gamma=0.99,
-              polyak=0.995, popsan_lr=1e-4, q_lr=1e-3, alpha=0.2, batch_size=100, ) -> None:
+              polyak=0.995, popsan_lr=1e-4, q_lr=1e-3, alpha=0.2, batch_size=100, path=".") -> None:
 
+        self.path = path
         self.gamma = gamma
         self.alpha = alpha
         self.batch_size = batch_size
@@ -129,6 +130,20 @@ class PopsanTrainer:
         # Freeze target networks with respect to optimizers (only update via polyak averaging)
         for p in self.ac_targ.parameters():
             p.requires_grad = False
+
+        # Save parameters
+        with open(path + "/parameter_log_trainer.txt", "w") as f:
+            f.write("observation_space " + str(observation_space) + "\n")
+            f.write("action_space " + str(action_space) + "\n")
+            f.write("device " + str(device) + "\n")
+            f.write("actor_critic " + str(actor_critic) + "\n")
+            f.write("ac_kwargs " + str(ac_kwargs) + "\n")
+            f.write("gamma " + str(gamma) + "\n")
+            f.write("polyak " + str(polyak) + "\n")
+            f.write("popsan_lr " + str(popsan_lr) + "\n")
+            f.write("q_lr " + str(q_lr) + "\n")
+            f.write("alpha " + str(alpha) + "\n")
+            f.write("batch_size " + str(batch_size) + "\n")
             
     def setGradRequired(self, params, status):
         for p in params:
@@ -223,9 +238,9 @@ class PopsanTrainer:
         return self.ac.act(torch.as_tensor(o, dtype=torch.float32, device=self.device), 1,
                       deterministic)
     
-    def save(self, model_dir, model_idx, epoch):
+    def save(self, epoch):
         torch.save(self.ac.popsan.state_dict(),
-                        model_dir + '/' + "model" + str(model_idx) + "_e" + str(epoch) + '.pt')
+                        self.path + '/model_e' + str(epoch) + '.pt')
         
     def printStatistics(self):
         print("Learned Mean for encoder population: ")
@@ -237,15 +252,16 @@ class PopsanTrainer:
 
 class SpikeSAC():
     def __init__(self, env, trainer, replay_buffer, 
-                 start_steps=1000, max_ep_len=100, epochs=10, steps_per_epoch=1000, batch_size=100, num_test_episodes=10, save_freq=2, use_cuda=True,
-                 tb_comment='', model_idx=0) -> None:  
+                 max_ep_len=100, start_steps=1000, steps_per_epoch=1000, epochs=10, batch_size=100, num_test_episodes=10, save_freq=2,
+                path=".", tb_comment="") -> None:  
 
         self.env = env
         self.batch_size = batch_size
         self.num_test_episodes = num_test_episodes
         self.max_ep_len = max_ep_len
         self.tb_comment = tb_comment
-        self.model_idx = model_idx
+        self.path = path
+        # self.model_idx = model_idx
         self.steps_per_epoch = steps_per_epoch
         self.epochs = epochs
         self.start_steps = start_steps
@@ -253,46 +269,42 @@ class SpikeSAC():
         
         self.trainer = trainer
         self.replay_buffer = replay_buffer
-        
-        self.writer = SummaryWriter(comment="_" + self.tb_comment + "_" + str(self.model_idx))
 
-        self.model_dir = "./params/spike-sac_" + self.tb_comment + "_" + str(model_idx)
-        param_dir = "./params"
-        self.createFolder(self.model_dir)
-        self.createFolder(param_dir)
+        self.model_name = model_name
+        
+        # self.writer = SummaryWriter(comment="_" + self.tb_comment + "_" + str(self.model_idx))
+        self.writer = SummaryWriter(comment="_" + tb_comment)
+
+
+        # self.model_dir = train_dir + "/" + model_name
+
+
+        # param_dir = "./params"
+        # self.createFolder(self.model_dir)
+        # self.createFolder(param_dir)
 
 
         # Save parameters
-        # with open(self.model_dir + "/training_parameters.txt", "w") as f:
-        #     f.write("env_name " + env_name + "\n")
-        #     f.write("ac_kwargs " + str(ac_kwargs) + "\n")
-        #     f.write("steps_per_epoch " + str(steps_per_epoch) + "\n")
-        #     f.write("epochs " + str(epochs) + "\n")
-        #     f.write("replay_size " + str(replay_size) + "\n")
-        #     f.write("gamma " + str(gamma) + "\n")
-        #     f.write("polyak " + str(polyak) + "\n")
-        #     f.write("popsan_lr " + str(popsan_lr) + "\n")
-        #     f.write("q_lr " + str(q_lr) + "\n")
-        #     f.write("alpha " + str(alpha) + "\n")
-        #     f.write("batch_size " + str(batch_size) + "\n")
-        #     f.write("start_steps " + str(start_steps) + "\n")
-        #     f.write("update_after " + str(update_after) + "\n")
-        #     f.write("update_every " + str(update_every) + "\n")
-        #     f.write("num_test_episodes " + str(num_test_episodes) + "\n")
-        #     f.write("max_ep_len " + str(max_ep_len) + "\n")
-        #     f.write("save_freq " + str(save_freq) + "\n")
-        #     f.write("norm_clip_limit " + str(norm_clip_limit) + "\n")
-        #     f.write("norm_update " + str(norm_update) + "\n")
-        #     f.write("tb_comment " + str(tb_comment) + "\n")
-        #     f.write("model_idx " + str(model_idx) + "\n")
-        #     f.write("use_cuda " + str(use_cuda) + "\n")
+        with open(path + "/parameter_log_ss.txt", "w") as f:
+            f.write("env " + str(env) + "\n")
+            f.write("trainer " + str(trainer) + "\n")
+            f.write("replay_buffer " + str(replay_buffer) + "\n")
+            f.write("max_ep_len " + str(max_ep_len) + "\n")
+            f.write("start_steps " + str(start_steps) + "\n")
+            f.write("steps_per_epoch " + str(steps_per_epoch) + "\n")
+            f.write("epochs " + str(epochs) + "\n")
+            f.write("batch_size " + str(batch_size) + "\n")
+            f.write("num_test_episodes " + str(num_test_episodes) + "\n")
+            f.write("save_freq " + str(save_freq) + "\n")
+            # f.write("tb_comment " + str(tb_comment) + "\n")
+            # f.write("model_idx " + str(model_idx) + "\n")
 
-    def createFolder(self, path):
-        try:
-            os.makedirs(path)
-            print("Directory ", path, " Created")
-        except FileExistsError:
-            print("Directory ", path, " already exists")
+    # def createFolder(self, path):
+        # try:
+        #     os.makedirs(path)
+        #     print("Directory ", path, " Created")
+        # except FileExistsError:
+        #     print("Directory ", path, " already exists")
         
     def test_agent(self):
         test_reward_sum = 0
@@ -323,7 +335,7 @@ class SpikeSAC():
 
             test_mean_reward = self.test_agent()
             self.writer.add_scalar(self.tb_comment + '/Test-Mean-Reward', test_mean_reward, epoch + 1)
-            print("Model: ", self.model_idx, " Epochs: ", epoch + 1, " Mean Reward: ", test_mean_reward)
+            print("Model: ", self.path, " Epochs: ", epoch + 1, " Mean Reward: ", test_mean_reward)
 
             if self.isSaveRequired(epoch+1):
                 self.saveModels(epoch+1)
@@ -339,11 +351,11 @@ class SpikeSAC():
         return (epoch % self.save_freq == 0) or (epoch == self.epochs)
     
     def saveModels(self, epoch):
-        self.trainer.save(self.model_dir, self.model_idx, epoch)
-        self.replay_buffer.save(self.model_dir, self.model_idx, epoch)
+        self.trainer.save(epoch)
+        self.replay_buffer.save(epoch)
 
         # self.trainer.printStatistics()
-        print("Weights saved in ", self.model_dir)
+        print("Weights saved in ", self.path)
 
 
 if __name__ == '__main__':
@@ -386,13 +398,20 @@ if __name__ == '__main__':
         env = gym.make(args.env)
         obs_dim, act_dim = env.observation_space, env.action_space
 
+        model_name = "pop_sac_" + args.env + "_" + str(num)
+        path = "./params/" + model_name
+        try:
+            os.makedirs(path)
+            print("Directory ", path, " Created")
+        except FileExistsError:
+            print("Directory ", path, " already exists")
 
-        trainer = PopsanTrainer(obs_dim, act_dim, device, ac_kwargs=AC_KWARGS)
+        trainer = PopsanTrainer(obs_dim, act_dim, device, ac_kwargs=AC_KWARGS, path=path)
 
         replay_buffer = ReplayBuffer(obs_dim.shape, act_dim.shape[0], device, size=replay_size,
-                                    clip_limit=norm_clip_limit, norm_update_every=norm_update)
+                                    clip_limit=norm_clip_limit, norm_update_every=norm_update, path=path)
         
-        ss = SpikeSAC(env, trainer, replay_buffer, tb_comment=COMMENT, model_idx=num)
+        ss = SpikeSAC(env, trainer, replay_buffer, tb_comment=COMMENT, path=path)
 
         ss.run()
 

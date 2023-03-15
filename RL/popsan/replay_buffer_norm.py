@@ -16,7 +16,7 @@ class ReplayBuffer:
     with Running Mean and Var from hill-a/stable-baselines
     """
 
-    def __init__(self, obs_dim, act_dim, device, size, clip_limit, norm_update_every=1000):
+    def __init__(self, obs_dim, act_dim, device, size, clip_limit, norm_update_every=1000, path="."):
         """
         :param obs_dim: observation dimension
         :param act_dim: action dimension
@@ -25,6 +25,7 @@ class ReplayBuffer:
         :param norm_update_every: update freq
         """
 
+        self.path = path
         self.device = device
         self.obs_buf = np.zeros(core.combined_shape(size, obs_dim), dtype=np.float32)
         self.obs2_buf = np.zeros(core.combined_shape(size, obs_dim), dtype=np.float32)
@@ -39,6 +40,15 @@ class ReplayBuffer:
         self.norm_update_count = 0
         self.norm_total_count = np.finfo(np.float32).eps.item()
         self.mean, self.var = np.zeros(obs_dim, dtype=np.float32), np.ones(obs_dim, dtype=np.float32)
+
+        # Save parameters
+        with open(path + "/parameter_log_replay_buffer.txt", "w") as f:
+            f.write("obs_dim " + str(obs_dim) + "\n")
+            f.write("act_dim " + str(act_dim) + "\n")
+            f.write("device " + str(device) + "\n")
+            f.write("size " + str(size) + "\n")
+            f.write("clip_limit " + str(clip_limit) + "\n")
+            f.write("norm_update_every " + str(norm_update_every) + "\n")
 
     def store(self, obs, act, rew, next_obs, done):
         """
@@ -98,6 +108,6 @@ class ReplayBuffer:
                            -self.clip_limit, self.clip_limit)
         return norm_obs
     
-    def save(self, model_dir, model_idx, epoch):
-        rb_path = model_dir + '/' + "replay_buffer" + str(model_idx) + "_e" + str(epoch) + ".p"
+    def save(self, epoch):
+        rb_path = self.path + '/' + "replay_buffer_e" + str(epoch) + ".p"
         pickle.dump(self, open(rb_path, "wb")) 
