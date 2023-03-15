@@ -293,30 +293,10 @@ class SpikeSAC():
             print("Directory ", path, " Created")
         except FileExistsError:
             print("Directory ", path, " already exists")
-
-    # def simEpisode(self, action_func=None, enableStore=False):
-    #     if action_func is None:
-    #         raise Exception("no action function given as a parameter for simEpisode.")
-        
-    #     o, d, ep_ret, ep_len = self.env.reset(), False, 0, 0
-    #     o = o[0]
-    #     while not(d or (ep_len == self.max_ep_len)):
-    #         # Take deterministic actions at test time 
-    #         a = action_func(o)
-    #         a = a.flatten()
-    #         o2, r, d, _, info = self.env.step(a)
-    #         if enableStore:
-    #             self.replay_buffer.store(o, a, r, o2, d)
-    #         o = o2
-    #         ep_ret += r
-    #         ep_len += 1
-        
-    #     return ep_ret, ep_len
         
     def test_agent(self):
         test_reward_sum = 0
         for j in tqdm( range(self.num_test_episodes) ):
-            # ep_ret, _ = self.simEpisode(action_func=lambda o: self.trainer.get_action(self.replay_buffer.normalize_obs(o), True))
             ep_ret, _ = simEpisode(self.env, self.max_ep_len, action_func=lambda o: self.trainer.get_action(self.replay_buffer.normalize_obs(o), True))
             test_reward_sum += ep_ret
         return test_reward_sum / self.num_test_episodes
@@ -326,7 +306,6 @@ class SpikeSAC():
         print("Exploration in progress...")
         steps = 0
         while (steps < self.start_steps):
-            # _, ep_len = self.simEpisode(action_func=lambda o: self.env.action_space.sample(), enableStore=True)
             _, ep_len = simEpisode(self.env, self.max_ep_len, action_func=lambda o: self.env.action_space.sample(), enableStore=True, replay_buffer=self.replay_buffer)
             steps += ep_len
         print("Exploration done")
@@ -335,7 +314,6 @@ class SpikeSAC():
         for epoch in tqdm( range(self.epochs), desc ="Training progress" ):
             steps = 0
             while (steps < self.steps_per_epoch):
-                # ep_ret, ep_len = self.simEpisode(action_func=lambda o: self.trainer.get_action(self.replay_buffer.normalize_obs(o)), enableStore=True)
                 ep_ret, ep_len = simEpisode(self.env, self.max_ep_len, action_func=lambda o: self.trainer.get_action(self.replay_buffer.normalize_obs(o)), enableStore=True, replay_buffer=self.replay_buffer)
                 steps += ep_len
 

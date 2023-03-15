@@ -67,8 +67,8 @@ import os
 sys.path.append(os.getcwd())
 
 from RL.popsan.sac_cuda_norm import SpikeActorDeepCritic
-from RL.popsan.replay_buffer_norm import ReplayBuffer
-
+# from RL.popsan.replay_buffer_norm import ReplayBuffer
+from RL.popsan.util import simEpisode
 
 
 env_name = "InvertedPendulum-v4"
@@ -94,13 +94,8 @@ norm_clip_limit = 3
 norm_update = 50
 
 
-
 # Set device
-if use_cuda:
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-else:
-    device = torch.device("cpu")
-
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 env = gym.make(env_name, render_mode="rgb_array")
 
@@ -124,16 +119,7 @@ def test_agent(env):
         print("testing env...")
         test_reward_sum = 0
         for j in tqdm( range(num_test_episodes) ):
-            o, d, ep_ret, ep_len = env.reset(), False, 0, 0
-            o = o[0]
-            while not(d or (ep_len == max_ep_len)):
-                # Take deterministic actions at test time 
-                a = get_action(replay_buffer.normalize_obs(o), True)
-                a = a.flatten()
-                o, r, d, _, info = env.step(a)
-                ep_ret += r
-                ep_len += 1
-
+            ep_ret, _ = simEpisode(env, max_ep_len, action_func=lambda o: get_action(replay_buffer.normalize_obs(o), True))
             test_reward_sum += ep_ret
 
         print("done testing env")
@@ -141,6 +127,12 @@ def test_agent(env):
         print("Average reward:", average_reward)
         return average_reward
 
+
+def recordedAction(env, video_recorder, o):
+    env.unwrapped.render()
+    video_recorder.capture_frame()
+    # Take deterministic actions at test time 
+    return get_action(replay_buffer.normalize_obs(o), True)
 
 def render_agent(env):
         ###
@@ -158,19 +150,7 @@ def render_agent(env):
 
         test_reward_sum = 0
         for j in tqdm( range(num_test_episodes) ):
-            o, d, ep_ret, ep_len = env.reset(), False, 0, 0
-            o = o[0]
-            while not(d or (ep_len == max_ep_len)):
-                env.unwrapped.render()
-                video_recorder.capture_frame()
-                # Take deterministic actions at test time 
-                a = get_action(replay_buffer.normalize_obs(o), True)
-                a = a.flatten()
-                o, r, d, _, info = env.step(a)
-
-
-                ep_ret += r
-                ep_len += 1
+            ep_ret, _ = simEpisode(env, max_ep_len, action_func=lambda o: recordedAction(env, video_recorder, o))
             test_reward_sum += ep_ret
 
         video_recorder.close()
