@@ -225,7 +225,7 @@ class PegInHoleRandomEventsVisualServoingGuidingBase(gym.Env):
             done = True
 
         info = {}
-        return observation, reward, done, info
+        return observation, reward, done, False, info
 
     def reset(self):
 
