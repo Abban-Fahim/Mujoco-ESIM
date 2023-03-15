@@ -97,19 +97,8 @@ class SpikeActorDeepCritic(nn.Module):
 
 
 class PopsanTrainer:
-
-    # def __init__(self, env, actor_critic=SpikeActorDeepCritic, ac_kwargs=dict(), gamma=0.99,
-    #           polyak=0.995, popsan_lr=1e-4, q_lr=1e-3, alpha=0.2, batch_size=100,
-    #           use_cuda=True) -> None:
-        
     def __init__(self, observation_space, action_space, device, actor_critic=SpikeActorDeepCritic, ac_kwargs=dict(), gamma=0.99,
               polyak=0.995, popsan_lr=1e-4, q_lr=1e-3, alpha=0.2, batch_size=100, ) -> None:
-        
-        # Set device
-        # if use_cuda:
-        #     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        # else:
-        #     device = torch.device("cpu")
 
         self.gamma = gamma
         self.alpha = alpha
@@ -235,32 +224,14 @@ class PopsanTrainer:
         print("Learned STD for encoder population: ")
         print(self.ac.popsan.encoder.std.data)
 
-# def spike_sac(env_fn, actor_critic=SpikeActorDeepCritic, ac_kwargs=dict(), seed=0,
-#               steps_per_epoch=10000, epochs=100, replay_size=int(1e6), gamma=0.99,
-#               polyak=0.995, popsan_lr=1e-4, q_lr=1e-3, alpha=0.2, batch_size=100, start_steps=10000,
-#               update_after=1000, update_every=50, num_test_episodes=10, max_ep_len=1000,
-#               save_freq=5, norm_clip_limit=3, norm_update=50, tb_comment='', model_idx=0, use_cuda=True):
 
 class SpikeSAC():
-    # def __init__(self, env_name, actor_critic=SpikeActorDeepCritic, ac_kwargs=dict(), seed=0,
-    #           steps_per_epoch=1000, epochs=10, replay_size=int(1e6), gamma=0.99,
-    #           polyak=0.995, popsan_lr=1e-4, q_lr=1e-3, alpha=0.2, batch_size=100, start_steps=1000,
-    #           update_after=1000, update_every=50, num_test_episodes=10, max_ep_len=100,
-    #           save_freq=2, norm_clip_limit=3, norm_update=50, tb_comment='', model_idx=0, use_cuda=True) -> None:
-        
     def __init__(self, env, trainer, replay_buffer, 
                  start_steps=1000, max_ep_len=100, epochs=10, steps_per_epoch=1000, batch_size=100, num_test_episodes=10, save_freq=2, use_cuda=True,
-                 tb_comment='', model_idx=0) -> None:
-        
-        # Set device
-        # if use_cuda:
-        #     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        # else:
-        #     device = torch.device("cpu")
+                 tb_comment='', model_idx=0) -> None:  
 
         self.env = env
         self.batch_size = batch_size
-        # self.device = device
         self.num_test_episodes = num_test_episodes
         self.max_ep_len = max_ep_len
         self.tb_comment = tb_comment
@@ -269,13 +240,11 @@ class SpikeSAC():
         self.epochs = epochs
         self.start_steps = start_steps
         self.save_freq = save_freq
-
         
         self.trainer = trainer
         self.replay_buffer = replay_buffer
         
         self.writer = SummaryWriter(comment="_" + self.tb_comment + "_" + str(self.model_idx))
-
 
         self.model_dir = "./params/spike-sac_" + self.tb_comment + "_" + str(model_idx)
         param_dir = "./params"
@@ -372,7 +341,6 @@ class SpikeSAC():
 
     def popsanUpdateHandling(self):
         for j in range(self.steps_per_epoch):
-            # batch = self.replay_buffer.sample_batch(self.device, self.batch_size)
             batch = self.replay_buffer.sample_batch(self.batch_size)
             self.trainer.update(data=batch)
     
