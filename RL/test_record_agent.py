@@ -66,13 +66,14 @@ import sys
 import os
 sys.path.append(os.getcwd())
 
-from RL.popsan.SpikeActorDeepCritic import SpikeActorDeepCritic
+from RL.popsan.sac_cuda_norm import SpikeActorDeepCritic
+# from RL.popsan.replay_buffer_norm import ReplayBuffer
 from RL.popsan.util import simEpisode
 
 
 env_name = "InvertedPendulum-v4"
-param_path = "params/pop_sac_InvertedPendulum-v4_0/model_e5.pt"
-rb_param_path = "params/pop_sac_InvertedPendulum-v4_0/replay_buffer_e5.p"
+param_path = "params/spike-sac_sac-popsan-InvertedPendulum-v4-encoder-dim-10-decoder-dim-10_0/model0_e10.pt"
+rb_param_path = "params/spike-sac_sac-popsan-InvertedPendulum-v4-encoder-dim-10-decoder-dim-10_0/replay_buffer0_e10.p"
 
 num_test_episodes = 10
 max_ep_len = 200
@@ -149,5 +150,5 @@ def render_agent(env):
         print("done rendering env")
         return test_reward_sum / num_test_episodes
 
-test_agent(env)
-# render_agent(env)
+# test_agent(env)
+render_agent(env)
