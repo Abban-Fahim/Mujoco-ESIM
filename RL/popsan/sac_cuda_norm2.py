@@ -243,7 +243,7 @@ class SpikeSAC():
               steps_per_epoch=1000, epochs=10, replay_size=int(1e6), gamma=0.99,
               polyak=0.995, popsan_lr=1e-4, q_lr=1e-3, alpha=0.2, batch_size=100, start_steps=1000,
               update_after=1000, update_every=50, num_test_episodes=10, max_ep_len=100,
-              save_freq=5, norm_clip_limit=3, norm_update=50, tb_comment='', model_idx=0, use_cuda=True) -> None:
+              save_freq=2, norm_clip_limit=3, norm_update=50, tb_comment='', model_idx=0, use_cuda=True) -> None:
         
         # Set device
         if use_cuda:
@@ -369,9 +369,10 @@ class SpikeSAC():
             self.writer.add_scalar(self.tb_comment + '/Test-Mean-Reward', test_mean_reward, epoch + 1)
             print("Model: ", self.model_idx, " Epochs: ", epoch + 1, " Mean Reward: ", test_mean_reward)
 
-            if self.isSaveRequired(epoch):
-                self.saveModels(epoch)
-    
+            if self.isSaveRequired(epoch+1):
+                self.saveModels(epoch+1)
+
+        self.saveModels(self.epochs)
 
     def popsanUpdateHandling(self):
         for j in range(self.steps_per_epoch):
@@ -400,7 +401,7 @@ if __name__ == '__main__':
     parser.add_argument('--encoder_var', type=float, default=0.15)
     parser.add_argument('--start_model_idx', type=int, default=0)
     parser.add_argument('--num_model', type=int, default=1)
-    parser.add_argument('--epochs', type=int, default=10)
+    parser.add_argument('--epochs', type=int, default=5)
     args = parser.parse_args()
 
     START_MODEL = args.start_model_idx
@@ -417,9 +418,17 @@ if __name__ == '__main__':
     for num in range(START_MODEL, START_MODEL + NUM_MODEL):
         seed = num * 10
 
+        # env = gym.make(args.env)
+
+        # trainer = PopsanTrainer(env.observation_space, env.action_space)
+
         ss = SpikeSAC(args.env, actor_critic=SpikeActorDeepCritic, ac_kwargs=AC_KWARGS,
                   popsan_lr=1e-4, gamma=0.99, seed=seed, epochs=args.epochs,
                   norm_clip_limit=3.0, tb_comment=COMMENT, model_idx=num)
+        
+        # ss = SpikeSAC(env, actor_critic=SpikeActorDeepCritic, ac_kwargs=AC_KWARGS,
+        #           popsan_lr=1e-4, gamma=0.99, seed=seed, epochs=args.epochs,
+        #           norm_clip_limit=3.0, tb_comment=COMMENT, model_idx=num)
 
         ss.run()
 
