@@ -98,7 +98,11 @@ class SpikeActorDeepCritic(nn.Module):
 
 class PopsanTrainer:
 
-    def __init__(self, env, actor_critic=SpikeActorDeepCritic, ac_kwargs=dict(), gamma=0.99,
+    # def __init__(self, env, actor_critic=SpikeActorDeepCritic, ac_kwargs=dict(), gamma=0.99,
+    #           polyak=0.995, popsan_lr=1e-4, q_lr=1e-3, alpha=0.2, batch_size=100,
+    #           use_cuda=True) -> None:
+        
+    def __init__(self, observation_space, action_space, actor_critic=SpikeActorDeepCritic, ac_kwargs=dict(), gamma=0.99,
               polyak=0.995, popsan_lr=1e-4, q_lr=1e-3, alpha=0.2, batch_size=100,
               use_cuda=True) -> None:
         
@@ -115,7 +119,7 @@ class PopsanTrainer:
         self.polyak = polyak
         
         # Create actor-critic module and target networks
-        self.ac = actor_critic(env.observation_space, env.action_space, **ac_kwargs)
+        self.ac = actor_critic(observation_space, action_space, **ac_kwargs)
         self.ac_targ = deepcopy(self.ac)
         self.ac.to(device)
         self.ac_targ.to(device)
@@ -239,11 +243,15 @@ class PopsanTrainer:
 #               save_freq=5, norm_clip_limit=3, norm_update=50, tb_comment='', model_idx=0, use_cuda=True):
 
 class SpikeSAC():
-    def __init__(self, env_name, actor_critic=SpikeActorDeepCritic, ac_kwargs=dict(), seed=0,
-              steps_per_epoch=1000, epochs=10, replay_size=int(1e6), gamma=0.99,
-              polyak=0.995, popsan_lr=1e-4, q_lr=1e-3, alpha=0.2, batch_size=100, start_steps=1000,
-              update_after=1000, update_every=50, num_test_episodes=10, max_ep_len=100,
-              save_freq=2, norm_clip_limit=3, norm_update=50, tb_comment='', model_idx=0, use_cuda=True) -> None:
+    # def __init__(self, env_name, actor_critic=SpikeActorDeepCritic, ac_kwargs=dict(), seed=0,
+    #           steps_per_epoch=1000, epochs=10, replay_size=int(1e6), gamma=0.99,
+    #           polyak=0.995, popsan_lr=1e-4, q_lr=1e-3, alpha=0.2, batch_size=100, start_steps=1000,
+    #           update_after=1000, update_every=50, num_test_episodes=10, max_ep_len=100,
+    #           save_freq=2, norm_clip_limit=3, norm_update=50, tb_comment='', model_idx=0, use_cuda=True) -> None:
+        
+    def __init__(self, env, trainer, replay_buffer, 
+                 start_steps=1000, max_ep_len=100, epochs=10, steps_per_epoch=1000, batch_size=100, num_test_episodes=10, save_freq=2, use_cuda=True,
+                 tb_comment='', model_idx=0) -> None:
         
         # Set device
         if use_cuda:
@@ -251,9 +259,7 @@ class SpikeSAC():
         else:
             device = torch.device("cpu")
 
-        torch.manual_seed(seed)
-        np.random.seed(seed)
-
+        self.env = env
         self.batch_size = batch_size
         self.device = device
         self.num_test_episodes = num_test_episodes
@@ -263,57 +269,45 @@ class SpikeSAC():
         self.steps_per_epoch = steps_per_epoch
         self.epochs = epochs
         self.start_steps = start_steps
-        self.update_after = update_after
-        self.update_every = update_every
         self.save_freq = save_freq
 
-        env_fn = lambda: gym.make(env_name)
-        # self.env, self.test_env = env_fn(), env_fn()
-        self.env = env_fn()
-
-        obs_dim = self.env.observation_space.shape
-        act_dim = self.env.action_space.shape[0]
-
-        self.trainer = PopsanTrainer(self.env, actor_critic, ac_kwargs, gamma,
-              polyak, popsan_lr, q_lr, alpha, batch_size, use_cuda)
-
-        # Experience buffer
-        self.replay_buffer = ReplayBuffer(obs_dim=obs_dim, act_dim=act_dim, size=replay_size,
-                                    clip_limit=norm_clip_limit, norm_update_every=norm_update)
+        
+        self.trainer = trainer
+        self.replay_buffer = replay_buffer
         
         self.writer = SummaryWriter(comment="_" + self.tb_comment + "_" + str(self.model_idx))
 
 
-        self.model_dir = "./params/spike-sac_" + tb_comment + "_" + str(model_idx)
+        self.model_dir = "./params/spike-sac_" + self.tb_comment + "_" + str(model_idx)
         param_dir = "./params"
         self.createFolder(self.model_dir)
         self.createFolder(param_dir)
 
 
         # Save parameters
-        with open(self.model_dir + "/training_parameters.txt", "w") as f:
-            f.write("env_name " + env_name + "\n")
-            f.write("ac_kwargs " + str(ac_kwargs) + "\n")
-            f.write("steps_per_epoch " + str(steps_per_epoch) + "\n")
-            f.write("epochs " + str(epochs) + "\n")
-            f.write("replay_size " + str(replay_size) + "\n")
-            f.write("gamma " + str(gamma) + "\n")
-            f.write("polyak " + str(polyak) + "\n")
-            f.write("popsan_lr " + str(popsan_lr) + "\n")
-            f.write("q_lr " + str(q_lr) + "\n")
-            f.write("alpha " + str(alpha) + "\n")
-            f.write("batch_size " + str(batch_size) + "\n")
-            f.write("start_steps " + str(start_steps) + "\n")
-            f.write("update_after " + str(update_after) + "\n")
-            f.write("update_every " + str(update_every) + "\n")
-            f.write("num_test_episodes " + str(num_test_episodes) + "\n")
-            f.write("max_ep_len " + str(max_ep_len) + "\n")
-            f.write("save_freq " + str(save_freq) + "\n")
-            f.write("norm_clip_limit " + str(norm_clip_limit) + "\n")
-            f.write("norm_update " + str(norm_update) + "\n")
-            f.write("tb_comment " + str(tb_comment) + "\n")
-            f.write("model_idx " + str(model_idx) + "\n")
-            f.write("use_cuda " + str(use_cuda) + "\n")
+        # with open(self.model_dir + "/training_parameters.txt", "w") as f:
+        #     f.write("env_name " + env_name + "\n")
+        #     f.write("ac_kwargs " + str(ac_kwargs) + "\n")
+        #     f.write("steps_per_epoch " + str(steps_per_epoch) + "\n")
+        #     f.write("epochs " + str(epochs) + "\n")
+        #     f.write("replay_size " + str(replay_size) + "\n")
+        #     f.write("gamma " + str(gamma) + "\n")
+        #     f.write("polyak " + str(polyak) + "\n")
+        #     f.write("popsan_lr " + str(popsan_lr) + "\n")
+        #     f.write("q_lr " + str(q_lr) + "\n")
+        #     f.write("alpha " + str(alpha) + "\n")
+        #     f.write("batch_size " + str(batch_size) + "\n")
+        #     f.write("start_steps " + str(start_steps) + "\n")
+        #     f.write("update_after " + str(update_after) + "\n")
+        #     f.write("update_every " + str(update_every) + "\n")
+        #     f.write("num_test_episodes " + str(num_test_episodes) + "\n")
+        #     f.write("max_ep_len " + str(max_ep_len) + "\n")
+        #     f.write("save_freq " + str(save_freq) + "\n")
+        #     f.write("norm_clip_limit " + str(norm_clip_limit) + "\n")
+        #     f.write("norm_update " + str(norm_update) + "\n")
+        #     f.write("tb_comment " + str(tb_comment) + "\n")
+        #     f.write("model_idx " + str(model_idx) + "\n")
+        #     f.write("use_cuda " + str(use_cuda) + "\n")
 
     def createFolder(self, path):
         try:
@@ -363,7 +357,7 @@ class SpikeSAC():
             while (steps < self.steps_per_epoch):
                 ep_ret, ep_len = self.simEpisode(action_func=lambda o: self.trainer.get_action(self.replay_buffer.normalize_obs(o)), enableStore=True)
                 steps += ep_len
-                
+
                 self.writer.add_scalar(self.tb_comment + '/Train-Reward', ep_ret, epoch*self.steps_per_epoch + steps)
             
             self.popsanUpdateHandling()
@@ -418,20 +412,26 @@ if __name__ == '__main__':
                      device=torch.device('cuda'))
     COMMENT = "sac-popsan-" + args.env + "-encoder-dim-" + str(AC_KWARGS['encoder_pop_dim']) + \
               "-decoder-dim-" + str(AC_KWARGS['decoder_pop_dim'])
+    
     for num in range(START_MODEL, START_MODEL + NUM_MODEL):
         seed = num * 10
+        torch.manual_seed(seed)
+        np.random.seed(seed)
 
-        # env = gym.make(args.env)
+        replay_size=int(1e6)
+        norm_clip_limit=3
+        norm_update=50
 
-        # trainer = PopsanTrainer(env.observation_space, env.action_space)
+        env = gym.make(args.env)
+        obs_dim, act_dim = env.observation_space, env.action_space
 
-        ss = SpikeSAC(args.env, actor_critic=SpikeActorDeepCritic, ac_kwargs=AC_KWARGS,
-                  popsan_lr=1e-4, gamma=0.99, seed=seed, epochs=args.epochs,
-                  norm_clip_limit=3.0, tb_comment=COMMENT, model_idx=num)
+
+        trainer = PopsanTrainer(obs_dim, act_dim, ac_kwargs=AC_KWARGS)
+
+        replay_buffer = ReplayBuffer(obs_dim.shape, act_dim.shape[0], size=replay_size,
+                                    clip_limit=norm_clip_limit, norm_update_every=norm_update)
         
-        # ss = SpikeSAC(env, actor_critic=SpikeActorDeepCritic, ac_kwargs=AC_KWARGS,
-        #           popsan_lr=1e-4, gamma=0.99, seed=seed, epochs=args.epochs,
-        #           norm_clip_limit=3.0, tb_comment=COMMENT, model_idx=num)
+        ss = SpikeSAC(env, trainer, replay_buffer, tb_comment=COMMENT, model_idx=num)
 
         ss.run()
 
