@@ -292,16 +292,15 @@ class SpikeSAC():
             test_reward_sum += ep_ret
         return test_reward_sum / self.num_test_episodes
     
-    def run(self):
-
+    def exploration(self):
         print("Exploration in progress...")
         steps = 0
         while (steps < self.start_steps):
             _, ep_len = simEpisode(self.env, self.max_ep_len, action_func=lambda o: self.env.action_space.sample(), enableStore=True, replay_buffer=self.replay_buffer)
             steps += ep_len
         print("Exploration done")
-        
 
+    def train(self):
         for epoch in tqdm( range(self.epochs), desc ="Training progress" ):
             steps = 0
             while (steps < self.steps_per_epoch):
@@ -318,8 +317,8 @@ class SpikeSAC():
 
             if self.isSaveRequired(epoch+1):
                 self.saveModels(epoch+1)
+    
 
-        self.saveModels(self.epochs)
 
     def popsanUpdateHandling(self):
         for j in range(self.steps_per_epoch):
@@ -335,6 +334,12 @@ class SpikeSAC():
 
         # self.trainer.printStatistics()
         print("Weights saved in ", self.path)
+
+
+    def run(self):
+        self.exploration()
+        self.train()
+        self.saveModels(self.epochs)
 
 
 if __name__ == '__main__':
@@ -390,7 +395,7 @@ if __name__ == '__main__':
         replay_buffer = ReplayBuffer(obs_dim.shape, act_dim.shape[0], device, size=replay_size,
                                     clip_limit=norm_clip_limit, norm_update_every=steps_per_epoch, path=path)
         
-        ss = SpikeSAC(env, trainer, replay_buffer, steps_per_epoch=steps_per_epoch, tb_comment=model_name, path=path)
+        ss = SpikeSAC(env, trainer, replay_buffer, steps_per_epoch=steps_per_epoch, epochs=args.epochs, tb_comment=model_name, save_freq=args.epochs+1, path=path)
 
         ss.run()
 
