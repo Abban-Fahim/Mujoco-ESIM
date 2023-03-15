@@ -75,9 +75,6 @@ env_name = "InvertedPendulum-v4"
 param_path = "params/spike-sac_sac-popsan-InvertedPendulum-v4-encoder-dim-10-decoder-dim-10_0/model0_e10.pt"
 rb_param_path = "params/spike-sac_sac-popsan-InvertedPendulum-v4-encoder-dim-10-decoder-dim-10_0/replay_buffer0_e10.p"
 
-use_cuda = True
-
-
 num_test_episodes = 10
 max_ep_len = 200
 
@@ -88,11 +85,6 @@ ac_kwargs = dict(hidden_sizes=[256, 256],
                      std=math.sqrt(0.15),
                      spike_ts=5,
                      device=torch.device('cuda'))
-
-replay_size = int(1e6)
-norm_clip_limit = 3
-norm_update = 50
-
 
 # Set device
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
