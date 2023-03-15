@@ -66,14 +66,14 @@ import sys
 import os
 sys.path.append(os.getcwd())
 
-from RL.popsan.sac_cuda_norm2 import SpikeActorDeepCritic
+from RL.popsan.sac_cuda_norm import SpikeActorDeepCritic
 from RL.popsan.replay_buffer_norm import ReplayBuffer
 
 
 
 env_name = "InvertedPendulum-v4"
-param_path = "params/spike-sac_sac-popsan-InvertedPendulum-v4-encoder-dim-10-decoder-dim-10_0/model0_e5.pt"
-rb_param_path = "params/spike-sac_sac-popsan-InvertedPendulum-v4-encoder-dim-10-decoder-dim-10_0/replay_buffer0_e5.p"
+param_path = "params/spike-sac_sac-popsan-InvertedPendulum-v4-encoder-dim-10-decoder-dim-10_0/model0_e10.pt"
+rb_param_path = "params/spike-sac_sac-popsan-InvertedPendulum-v4-encoder-dim-10-decoder-dim-10_0/replay_buffer0_e10.p"
 
 use_cuda = True
 
@@ -103,12 +103,6 @@ else:
 
 
 env = gym.make(env_name, render_mode="rgb_array")
-
-
-
-obs_dim = env.observation_space.shape[0]
-act_dim = env.action_space.shape[0]
-
 
 ac = SpikeActorDeepCritic(env.observation_space, env.action_space, **ac_kwargs)
 ac.popsan.load_state_dict(torch.load(param_path))
