@@ -129,7 +129,9 @@ class PopsanTrainer:
         for p in self.ac_targ.parameters():
             p.requires_grad = False
             
-        
+    def setGradRequired(self, params, status):
+        for p in params:
+            p.requires_grad = status
 
     def update(self, data):
         # First run one gradient descent step for Q1 and Q2
@@ -140,8 +142,9 @@ class PopsanTrainer:
 
         # Freeze Q-networks so you don't waste computational effort 
         # computing gradients for them during the policy learning step.
-        for p in self.q_params:
-            p.requires_grad = False
+        # for p in self.q_params:
+        #     p.requires_grad = False
+        self.setGradRequired(self.q_params, False)
 
         # Next run one gradient descent step for pi.
         self.popsan_mean_optimizer.zero_grad()
@@ -152,8 +155,10 @@ class PopsanTrainer:
         self.pi_std_optimizer.step()
 
         # Unfreeze Q-networks so you can optimize it at next DDPG step.
-        for p in self.q_params:
-            p.requires_grad = True
+        # for p in self.q_params:
+        #     p.requires_grad = True
+        self.setGradRequired(self.q_params, True)
+        
 
         # Finally, update target networks by polyak averaging.
         with torch.no_grad():
