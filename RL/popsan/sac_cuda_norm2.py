@@ -133,20 +133,17 @@ class PopsanTrainer:
         for p in params:
             p.requires_grad = status
 
-    def update(self, data):
-        # First run one gradient descent step for Q1 and Q2
+    def updateQ(self, data):
         self.q_optimizer.zero_grad()
         loss_q, q_info = self.compute_loss_q(data)
         loss_q.backward()
         self.q_optimizer.step()
 
+    def updatePi(self, data):
         # Freeze Q-networks so you don't waste computational effort 
         # computing gradients for them during the policy learning step.
-        # for p in self.q_params:
-        #     p.requires_grad = False
         self.setGradRequired(self.q_params, False)
 
-        # Next run one gradient descent step for pi.
         self.popsan_mean_optimizer.zero_grad()
         self.pi_std_optimizer.zero_grad()
         loss_pi, pi_info = self.compute_loss_pi(data)
@@ -155,18 +152,25 @@ class PopsanTrainer:
         self.pi_std_optimizer.step()
 
         # Unfreeze Q-networks so you can optimize it at next DDPG step.
-        # for p in self.q_params:
-        #     p.requires_grad = True
         self.setGradRequired(self.q_params, True)
-        
 
-        # Finally, update target networks by polyak averaging.
+    def updateTargetNetwork(self):
         with torch.no_grad():
             for p, p_targ in zip(self.ac.parameters(), self.ac_targ.parameters()):
                 # NB: We use an in-place operations "mul_", "add_" to update target
                 # params, as opposed to "mul" and "add", which would make new tensors.
                 p_targ.data.mul_(self.polyak)
                 p_targ.data.add_((1 - self.polyak) * p.data)
+
+    def update(self, data):
+        # First run one gradient descent step for Q1 and Q2
+        self.updateQ(data)
+
+        # Next run one gradient descent step for pi.
+        self.updatePi(data)
+
+        # Finally, update target networks by polyak averaging.
+        self.updateTargetNetwork()
                 
 
     # Set up function for computing SAC pi loss
