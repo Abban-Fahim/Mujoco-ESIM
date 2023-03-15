@@ -16,7 +16,7 @@ class ReplayBuffer:
     with Running Mean and Var from hill-a/stable-baselines
     """
 
-    def __init__(self, obs_dim, act_dim, size, clip_limit, norm_update_every=1000):
+    def __init__(self, obs_dim, act_dim, device, size, clip_limit, norm_update_every=1000):
         """
         :param obs_dim: observation dimension
         :param act_dim: action dimension
@@ -24,6 +24,8 @@ class ReplayBuffer:
         :param clip_limit: limit for clip value
         :param norm_update_every: update freq
         """
+
+        self.device = device
         self.obs_buf = np.zeros(core.combined_shape(size, obs_dim), dtype=np.float32)
         self.obs2_buf = np.zeros(core.combined_shape(size, obs_dim), dtype=np.float32)
         self.act_buf = np.zeros(core.combined_shape(size, act_dim), dtype=np.float32)
@@ -70,7 +72,7 @@ class ReplayBuffer:
             self.var = m_2 / tmp_total_count
             self.norm_total_count = tmp_total_count
 
-    def sample_batch(self, device, batch_size=32):
+    def sample_batch(self, batch_size=32):
         """
         Sample batch from memory
         :param device: pytorch device
@@ -83,7 +85,7 @@ class ReplayBuffer:
                      act=self.act_buf[idxs],
                      rew=self.rew_buf[idxs],
                      done=self.done_buf[idxs])
-        return {k: torch.as_tensor(v, dtype=torch.float32, device=device) for k, v in batch.items()}
+        return {k: torch.as_tensor(v, dtype=torch.float32, device=self.device) for k, v in batch.items()}
 
     def normalize_obs(self, obs):
         """

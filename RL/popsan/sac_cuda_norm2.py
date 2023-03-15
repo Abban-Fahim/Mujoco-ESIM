@@ -102,15 +102,14 @@ class PopsanTrainer:
     #           polyak=0.995, popsan_lr=1e-4, q_lr=1e-3, alpha=0.2, batch_size=100,
     #           use_cuda=True) -> None:
         
-    def __init__(self, observation_space, action_space, actor_critic=SpikeActorDeepCritic, ac_kwargs=dict(), gamma=0.99,
-              polyak=0.995, popsan_lr=1e-4, q_lr=1e-3, alpha=0.2, batch_size=100,
-              use_cuda=True) -> None:
+    def __init__(self, observation_space, action_space, device, actor_critic=SpikeActorDeepCritic, ac_kwargs=dict(), gamma=0.99,
+              polyak=0.995, popsan_lr=1e-4, q_lr=1e-3, alpha=0.2, batch_size=100, ) -> None:
         
         # Set device
-        if use_cuda:
-            device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        else:
-            device = torch.device("cpu")
+        # if use_cuda:
+        #     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        # else:
+        #     device = torch.device("cpu")
 
         self.gamma = gamma
         self.alpha = alpha
@@ -254,14 +253,14 @@ class SpikeSAC():
                  tb_comment='', model_idx=0) -> None:
         
         # Set device
-        if use_cuda:
-            device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        else:
-            device = torch.device("cpu")
+        # if use_cuda:
+        #     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        # else:
+        #     device = torch.device("cpu")
 
         self.env = env
         self.batch_size = batch_size
-        self.device = device
+        # self.device = device
         self.num_test_episodes = num_test_episodes
         self.max_ep_len = max_ep_len
         self.tb_comment = tb_comment
@@ -373,7 +372,8 @@ class SpikeSAC():
 
     def popsanUpdateHandling(self):
         for j in range(self.steps_per_epoch):
-            batch = self.replay_buffer.sample_batch(self.device, self.batch_size)
+            # batch = self.replay_buffer.sample_batch(self.device, self.batch_size)
+            batch = self.replay_buffer.sample_batch(self.batch_size)
             self.trainer.update(data=batch)
     
     def isSaveRequired(self, epoch):
@@ -413,6 +413,8 @@ if __name__ == '__main__':
     COMMENT = "sac-popsan-" + args.env + "-encoder-dim-" + str(AC_KWARGS['encoder_pop_dim']) + \
               "-decoder-dim-" + str(AC_KWARGS['decoder_pop_dim'])
     
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    
     for num in range(START_MODEL, START_MODEL + NUM_MODEL):
         seed = num * 10
         torch.manual_seed(seed)
@@ -426,9 +428,9 @@ if __name__ == '__main__':
         obs_dim, act_dim = env.observation_space, env.action_space
 
 
-        trainer = PopsanTrainer(obs_dim, act_dim, ac_kwargs=AC_KWARGS)
+        trainer = PopsanTrainer(obs_dim, act_dim, device, ac_kwargs=AC_KWARGS)
 
-        replay_buffer = ReplayBuffer(obs_dim.shape, act_dim.shape[0], size=replay_size,
+        replay_buffer = ReplayBuffer(obs_dim.shape, act_dim.shape[0], device, size=replay_size,
                                     clip_limit=norm_clip_limit, norm_update_every=norm_update)
         
         ss = SpikeSAC(env, trainer, replay_buffer, tb_comment=COMMENT, model_idx=num)
