@@ -69,8 +69,9 @@ class VSBase(gym.Env):
 
     def __init__(self, headless=False, render_every_frame=True, running_events=True):
         
-        cwd = os.getcwd()
+        self.target_object = "target"
         xml_file_name = "sim_vga.xml"
+        cwd = os.getcwd()
         xml_path = os.path.join(cwd, "kuka", "envs", "assets", xml_file_name)
 
         self.model = mujoco.MjModel.from_xml_path(xml_path)
@@ -112,7 +113,7 @@ class VSBase(gym.Env):
 
         # init hole position
         self.init_hole_pos = self.get_hole_pose()
-        self.max_rand_offset = 0.01
+        self.max_rand_offset = 0.08
         np.random.seed(int(time.time()))
 
         self.randomize_hole_position()
@@ -246,41 +247,32 @@ class VSBase(gym.Env):
         return observation
 
     def randomize_hole_position(self):
-        offset_pos = (np.random.rand(3) - 0.5) * self.max_rand_offset
+        offset_pos = 2*(np.random.rand(3) - 0.5) * self.max_rand_offset
         offset_pos[2] = 0.0                     # no offset in z
-
-        offset_pos = np.zeros_like(offset_pos)
-
         self.set_hole_pose(offset_pos)
-
+        print(offset_pos)
 
     def close(self):
         self.viewer.close()
 
 
     def change_to_shape(self, a):
-        if a.shape == (1, 2):
-            return a[0]
-
-        return a
+        return a.flatten()
 
     def render_frame(self):
         return self.viewer.capture_frame(1)
 
     def get_hole_pose(self):
-        # get body offset
-        body_id = mujoco.mj_name2id(self.model, mujoco.mjtObj.mjOBJ_BODY, "test_box0")
-        pos_offset = self.model.body_pos[body_id]
-
-        return pos_offset
+        body_id = mujoco.mj_name2id(self.model, mujoco.mjtObj.mjOBJ_BODY, self.target_object)
+        return self.model.body_pos[body_id]
 
     def set_hole_pose(self, offset_pos):
-        obj_names = ["test_box0", "test_box1", "test_box2", "test_box3", "test_box4"]
+        obj_names = [self.target_object]
 
         # get body offset
         for name in obj_names:
             body_id = mujoco.mj_name2id(self.model, mujoco.mjtObj.mjOBJ_BODY, name)
-            self.model.body_pos[body_id][:3] += offset_pos
+            self.model.body_pos[body_id][:3] += offset_pos            
 
     def apply_event_noise(self, img, n, res):
 
@@ -302,15 +294,9 @@ class VSBase(gym.Env):
     def apply_event_stream_noise(self, e_stream, e_img, n, res):
         
         backgorund_map = e_img == 127
-
         e_time_set = set(e_stream[:,2])
 
-        # print("real")
-        # print(e_stream)
-
         for t in e_time_set:
-
-
             # event noise
             a = np.random.uniform(0, 100, res)
             ne = a < n/2.0
@@ -322,9 +308,6 @@ class VSBase(gym.Env):
             ne_hits = np.where(filtered_ne)
             pe_hits = np.where(filtered_pe)
 
-            # print(e_stream)
-
-
             for i in range(len(ne_hits[0])):
                 e_stream = np.append(e_stream, [[ne_hits[0][i], ne_hits[1][i], t, -1]], axis = 0)
 
@@ -332,11 +315,7 @@ class VSBase(gym.Env):
                 e_stream = np.append(e_stream, [[pe_hits[0][i], pe_hits[1][i], t, 1]], axis = 0)
 
         e_stream = e_stream[e_stream[:, 2].argsort()]
-
         noisy_e_stream = e_stream.copy()
-
-        # print("changed")
-        # print(e_stream)
 
         return noisy_e_stream
 

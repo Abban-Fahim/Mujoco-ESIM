@@ -178,8 +178,8 @@ class VSActivity(VSBase):
 
 
         # observe result. (debug camera view) 
-        # cv2.imshow("resized image", img)
-        # cv2.waitKey(0)
+        cv2.imshow("resized image", img)
+        cv2.waitKey(0)
 
         return img
 
