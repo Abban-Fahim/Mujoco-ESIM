@@ -70,7 +70,7 @@ class VSBase(gym.Env):
     def __init__(self, headless=False, render_every_frame=True, running_events=True):
         
         cwd = os.getcwd()
-        xml_file_name = "sim_hole.xml"
+        xml_file_name = "sim_vga.xml"
         xml_path = os.path.join(cwd, "kuka", "envs", "assets", xml_file_name)
 
         self.model = mujoco.MjModel.from_xml_path(xml_path)
@@ -118,23 +118,12 @@ class VSBase(gym.Env):
         self.randomize_hole_position()
 
         self.current_pose = np.array([0.0, 0.43, 0.10, 3.14, 0, 0])
-        # self.current_pose = np.array([0.0 ,0.6,0.10, 3.14, 0, 0])  # on top of the hole
-        # self.current_pose = np.array([0.0 ,0.6,0.05, 3.14, 0, 0]) # inside the hole
-        # self.goal_pose = np.array([0.0, 0.6, 0.02, 3.14, 0, 0])
 
         self.current_step = 0
         self.old_a = 0
 
         self.ac_position_scale = 0.3
         self.ac_orientation_scale = 0.1
-
-        self.ob_position_scale = 10
-        self.ob_orientation_scale = 10
-        self.ob_linear_force_scale = 1000
-        self.ob_rotation_force_scale = 1000
-        self.ob_image_scale = 255.0
-        self.ob_img_dist_scale = 1000
-
         
     def get_pose(self, action):
         pass
@@ -204,15 +193,13 @@ class VSBase(gym.Env):
             #         np.abs(self.controller.fk()[3])  < self.current_pose[3]-0.1 ,
             #         self.controller.fk()[4] > self.current_pose[4]+0.1,
             #         self.controller.fk()[4] < self.current_pose[4]-0.1  )
-            reward = -1
+            reward = -10
             done = True
 
         self.err = err
         
         if err < 2:
-        # if observation[3] * 45 < 2:
-            # print("achieved goal ######################")
-            reward = 1e+4
+            reward = 1e+2
             done = True
 
         info = {}

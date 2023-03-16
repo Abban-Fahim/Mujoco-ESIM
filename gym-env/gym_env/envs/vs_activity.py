@@ -135,7 +135,9 @@ class VSActivity(VSBase):
         self.old_a = self.action.copy()
         err = self.dist_metric(self.img)
 
-        reward = 1/(0.01*err+0.04) - 1*dx
+        # reward = 1/(0.01*err+0.04) - 1*dx
+        reward = -1 - 1*dx
+
 
         return reward, err
 
@@ -147,10 +149,10 @@ class VSActivity(VSBase):
         self.goal_coord = self.random_goal_coord()
 
     def change_to_shape(self, a):
-        if a.shape == (1, 2):
-            return a[0]
+        # if a.shape == (1, 2):
+        #     return a[0]
 
-        return a
+        return a.flatten()
 
     def preprocessing(self, img):
 

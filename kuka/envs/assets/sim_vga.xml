@@ -25,7 +25,7 @@
   <worldbody>
     <include file="station.xml"/>
     <body name="target" pos="0 0 0">
-      <geom pos="0.0 0.6 0" euler="0 0 0" type="mesh" mesh="vga_mesh"/>
+      <geom name="vga" pos="0.0 0.6 0" euler="0 0 0" type="mesh" mesh="vga_mesh"/>
     </body>
   </worldbody>
 
