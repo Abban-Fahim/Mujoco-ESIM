@@ -175,25 +175,19 @@ class VSBase(gym.Env):
         reward, err = self.get_reward()
 
         # ======== done condition ==========
-        condition = self.controller.fk()[0] < self.current_pose[0]-0.15 or \
-                    self.controller.fk()[0] > self.current_pose[0]+0.15 or \
-                    self.controller.fk()[1] < self.current_pose[1]-0.05 or \
-                    self.controller.fk()[1] > self.current_pose[1]+0.6 or \
-                    self.controller.fk()[2] > self.current_pose[2]+0.1 or \
-                    np.abs(self.controller.fk()[3]) > self.current_pose[3]+0.1 or \
-                    np.abs(self.controller.fk()[3])  < self.current_pose[3]-0.1 or \
-                    self.controller.fk()[4] > self.current_pose[4]+0.1 or \
+        conditions = np.array([
+                    self.controller.fk()[0] < self.current_pose[0]-0.15,
+                    self.controller.fk()[0] > self.current_pose[0]+0.15,
+                    self.controller.fk()[1] < self.current_pose[1]-0.05,
+                    self.controller.fk()[1] > self.current_pose[1]+0.6,
+                    self.controller.fk()[2] > self.current_pose[2]+0.1,
+                    np.abs(self.controller.fk()[3]) > self.current_pose[3]+0.1,
+                    np.abs(self.controller.fk()[3])  < self.current_pose[3]-0.1,
+                    self.controller.fk()[4] > self.current_pose[4]+0.1,
                     self.controller.fk()[4] < self.current_pose[4]-0.1 
-        if condition:
-            # print(self.controller.fk()[0] < self.current_pose[0]-0.15 ,
-            #         self.controller.fk()[0] > self.current_pose[0]+0.15 ,
-            #         self.controller.fk()[1] < self.current_pose[1]-0.05 ,
-            #         self.controller.fk()[1] > self.current_pose[1]+0.6 ,
-            #         self.controller.fk()[2] > self.current_pose[2]+0.1 ,
-            #         np.abs(self.controller.fk()[3]) > self.current_pose[3]+0.1 ,
-            #         np.abs(self.controller.fk()[3])  < self.current_pose[3]-0.1 ,
-            #         self.controller.fk()[4] > self.current_pose[4]+0.1,
-            #         self.controller.fk()[4] < self.current_pose[4]-0.1  )
+                    ])
+        if np.any(conditions):
+            print(conditions)
             reward = -10
             done = True
 
