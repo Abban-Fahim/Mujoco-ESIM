@@ -20,4 +20,4 @@ from gym_env.envs.PegInHole_CIC_env_rand_events_visual_servoing_guiding_vae_2_ra
 from gym_env.envs.PegInHole_CIC_env_rand_events_visual_servoing_guiding_vae_2_no_coord_rand import PegInHoleRandomEventsVisualServoingGuidingVAE2NCRand
 
 
-
+from gym_env.envs.vs_activity import VSActivity

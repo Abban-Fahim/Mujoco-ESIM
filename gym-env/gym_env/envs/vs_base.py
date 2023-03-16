@@ -59,7 +59,11 @@ import numpy as np
 import gym
 import time
 
+import sys
+import os
+sys.path.append(os.getcwd())
 
+from kuka.controllers.NullSpaceViscoElasticCartesianPDController import NullSpaceViscoElasticCartesianPDController
 
 class VSBase(gym.Env):
 
@@ -74,7 +78,7 @@ class VSBase(gym.Env):
 
         # init first position
         self.viewer = mujoco_viewer.MujocoViewer(self.model, self.data, headless=headless, render_every_frame=render_every_frame, running_events=running_events)
-        self.controller = FullImpedanceController(self.model, self.data) 
+        self.controller = NullSpaceViscoElasticCartesianPDController(self.model, self.data) 
 
         # inti esim
         self.viewer.init_esim(contrast_threshold_negative=0.9, contrast_threshold_positive=0.9, refractory_period_ns=100)

@@ -90,3 +90,9 @@ register(
     id='PegInHole-rand_events_visual_servoing_guiding_vae2_no_coord_rand',
     entry_point='gym_env.envs:PegInHoleRandomEventsVisualServoingGuidingVAE2NCRand',
 ) 
+
+
+register(
+    id='vs_activity',
+    entry_point='gym_env.envs:VSActivity',
+) 
