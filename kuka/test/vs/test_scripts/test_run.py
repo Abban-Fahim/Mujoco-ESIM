@@ -73,15 +73,11 @@ def test_run(controllerClass):
     controller = controllerClass(model, data)
 
     # init first position
-    data.qpos = np.array([-1.57,
-                            -0.68,
-                            0,
-                            1.85,
-                            0.0,
-                            -0.6,
-                            -1.57])
+    data.qpos = np.array([-1.63042613, -0.95663209,  0.08660753,  1.55094155, -0.11856101, -0.64075765, -1.48511576])
+    
+    
 
-    center_pose = np.array([0.0, 0.43, 0.10, 3.14, 0, 0])
+    center_pose = np.array([0.0, 0.58, 0.05, 3.14, 0, 0])
 
     rand = np.array([0,0])
     count = 0
@@ -93,7 +89,13 @@ def test_run(controllerClass):
             rand = (np.random.rand(2) - 0.5) / 3
             print(rand)
 
-        pose = center_pose + np.array([rand[0], rand[1]+0.1, 0, 0, 0, 0])
+        # pose = center_pose + np.array([rand[0], rand[1]+0.1, 0, 0, 0, 0])
+        # off = 0.05
+        off = 0.15
+        # pose = center_pose + np.array([0, -off, 0, 0, 0, 0])
+        pose = center_pose 
+
+        # print(controller.sim_data.qpos)
         controller.set_action(pose)
         torque = controller.get_torque()
 

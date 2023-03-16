@@ -85,13 +85,8 @@ class VSBase(gym.Env):
         self.viewer.init_esim(contrast_threshold_negative=0.9, contrast_threshold_positive=0.9, refractory_period_ns=100)
 
         # in radians
-        self.init_pose = np.array([-1.57,
-                                    -0.68,
-                                    0,
-                                    1.85,
-                                    0.0,
-                                    -0.6,
-                                    -1.57])
+        self.init_pose = np.array([-1.63042613, -0.95663209,  0.08660753,  1.55094155, -0.11856101, -0.64075765, -1.48511576])
+
 
         self.data.qpos = self.init_pose
 
@@ -113,7 +108,9 @@ class VSBase(gym.Env):
 
         # init hole position
         self.init_hole_pos = self.get_hole_pose()
-        self.max_rand_offset = 0.08
+        # self.max_rand_offset = np.array([0.16, 0.1, 0])
+        self.max_rand_offset = 0.04
+
         np.random.seed(int(time.time()))
 
         self.randomize_hole_position()
@@ -123,7 +120,9 @@ class VSBase(gym.Env):
         self.current_step = 0
         self.old_a = 0
 
+        # self.ac_position_scale = self.max_rand_offset[:2] + np.array([0.01, 0.01])
         self.ac_position_scale = 0.3
+
         self.ac_orientation_scale = 0.1
         
     def get_pose(self, action):
@@ -195,6 +194,7 @@ class VSBase(gym.Env):
         
         if err < 2:
             reward = 1e+2
+            print("reached")
             done = True
 
         info = {}
@@ -244,11 +244,9 @@ class VSBase(gym.Env):
         offset_pos = 2*(np.random.rand(3) - 0.5) * self.max_rand_offset
         offset_pos[2] = 0.0                     # no offset in z
         self.set_hole_pose(offset_pos)
-        print(offset_pos)
 
     def close(self):
         self.viewer.close()
-
 
     def change_to_shape(self, a):
         return a.flatten()

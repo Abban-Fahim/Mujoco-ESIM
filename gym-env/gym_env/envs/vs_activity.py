@@ -77,7 +77,7 @@ class VSActivity(VSBase):
 
     def get_pose(self, action):
         pose = self.current_pose.copy()
-        ac_position = action[:2]
+        ac_position = action
         pose[:2] +=  ac_position * self.ac_position_scale 
 
         self.action = action
