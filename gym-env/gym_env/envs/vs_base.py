@@ -107,15 +107,15 @@ class VSBase(gym.Env):
 
 
         # init hole position
-        self.init_hole_pos = self.get_hole_pose()
+        self.init_hole_pose = self.get_hole_pose()
         # self.max_rand_offset = np.array([0.16, 0.1, 0])
-        self.max_rand_offset = 0.04
+        self.max_rand_offset = 0.06
 
         np.random.seed(int(time.time()))
 
-        self.randomize_hole_position()
+        self.target_off = self.randomize_hole_position()
 
-        self.current_pose = np.array([0.0, 0.43, 0.10, 3.14, 0, 0])
+        self.current_pose = np.array([0.0, 0.58, 0.05, 3.14, 0, 0])
 
         self.current_step = 0
         self.old_a = 0
@@ -174,28 +174,24 @@ class VSBase(gym.Env):
         reward, err = self.get_reward()
 
         # ======== done condition ==========
+        off = 0.1
         conditions = np.array([
-                    self.controller.fk()[0] < self.current_pose[0]-0.15,
-                    self.controller.fk()[0] > self.current_pose[0]+0.15,
-                    self.controller.fk()[1] < self.current_pose[1]-0.05,
-                    self.controller.fk()[1] > self.current_pose[1]+0.6,
-                    self.controller.fk()[2] > self.current_pose[2]+0.1,
-                    np.abs(self.controller.fk()[3]) > self.current_pose[3]+0.1,
-                    np.abs(self.controller.fk()[3])  < self.current_pose[3]-0.1,
-                    self.controller.fk()[4] > self.current_pose[4]+0.1,
-                    self.controller.fk()[4] < self.current_pose[4]-0.1 
+                    self.controller.fk()[0] < self.current_pose[0] + self.target_off[0] - off,
+                    self.controller.fk()[0] > self.current_pose[0] + self.target_off[0] + off,
+                    self.controller.fk()[1] < self.current_pose[1] + self.target_off[1] - off,
+                    self.controller.fk()[1] > self.current_pose[1] + self.target_off[1] + off,
                     ])
         if np.any(conditions):
-            print(conditions)
-            reward = -10
+            print(conditions, self.controller.fk()[:3])
+            # reward = -10
             done = True
 
         self.err = err
         
-        if err < 2:
-            reward = 1e+2
-            print("reached")
-            done = True
+        # if err < 2:
+        #     reward = 1e+2
+        #     print("reached")
+        #     done = True
 
         info = {}
         return observation, reward, done, False, info
@@ -232,7 +228,7 @@ class VSBase(gym.Env):
         pose = self.current_pose
         self.controller.set_action(pose)
 
-        self.randomize_hole_position()
+        self.target_off = self.randomize_hole_position()
 
         # ======== observation ==========
 
@@ -243,7 +239,9 @@ class VSBase(gym.Env):
     def randomize_hole_position(self):
         offset_pos = 2*(np.random.rand(3) - 0.5) * self.max_rand_offset
         offset_pos[2] = 0.0                     # no offset in z
+        # offset_pos = np.array([self.max_rand_offset, self.max_rand_offset, 0])
         self.set_hole_pose(offset_pos)
+        return offset_pos
 
     def close(self):
         self.viewer.close()
@@ -256,7 +254,7 @@ class VSBase(gym.Env):
 
     def get_hole_pose(self):
         body_id = mujoco.mj_name2id(self.model, mujoco.mjtObj.mjOBJ_BODY, self.target_object)
-        return self.model.body_pos[body_id]
+        return self.model.body_pos[body_id].copy()
 
     def set_hole_pose(self, offset_pos):
         obj_names = [self.target_object]
@@ -264,6 +262,7 @@ class VSBase(gym.Env):
         # get body offset
         for name in obj_names:
             body_id = mujoco.mj_name2id(self.model, mujoco.mjtObj.mjOBJ_BODY, name)
-            self.model.body_pos[body_id][:3] += offset_pos            
+            self.model.body_pos[body_id][:3] =  self.init_hole_pose[:3] + offset_pos         
+            print(self.model.body_pos[body_id][:3], self.init_hole_pose[:3])   
 
 

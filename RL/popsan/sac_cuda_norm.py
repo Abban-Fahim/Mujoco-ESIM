@@ -74,7 +74,7 @@ from RL.popsan.PopsanTrainer import PopsanTrainer
 
 class SpikeSAC():
     def __init__(self, env, trainer, replay_buffer, 
-                 max_ep_len=100, start_steps=1000, steps_per_epoch=1000, epochs=10, batch_size=100, num_test_episodes=10, save_freq=2,
+                 max_ep_len=15, start_steps=100, steps_per_epoch=100, epochs=10, batch_size=100, num_test_episodes=10, save_freq=2,
                 path=".", tb_comment="") -> None:  
 
         self.env = env
@@ -174,8 +174,8 @@ if __name__ == '__main__':
     parser.add_argument('--decoder_pop_dim', type=int, default=10)
     parser.add_argument('--encoder_var', type=float, default=0.15)
     parser.add_argument('--start_model_idx', type=int, default=0)
-    parser.add_argument('--num_model', type=int, default=3)
-    parser.add_argument('--epochs', type=int, default=20)
+    parser.add_argument('--num_model', type=int, default=10)
+    parser.add_argument('--epochs', type=int, default=100)
     args = parser.parse_args()
 
     START_MODEL = args.start_model_idx

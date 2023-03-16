@@ -73,7 +73,7 @@ class VSActivity(VSBase):
         img_err = 1
         self.observation_space = gym.spaces.Box(low=-1, high=1, shape=(position_ob + img_err,), dtype=np.float32)
 
-        self.goal_coord = 15,15
+        self.goal_coord = 15, 15
 
     def get_pose(self, action):
         pose = self.current_pose.copy()
@@ -119,8 +119,8 @@ class VSActivity(VSBase):
         self.old_a = self.action.copy()
         err = self.dist_metric(self.img)
 
-        # reward = 1/(0.01*err+0.04) - 1*dx
-        reward = -1 - 1*dx
+        reward = 1/(0.01*err+0.04)
+        # reward = -1 - 1*dx
 
 
         return reward, err
