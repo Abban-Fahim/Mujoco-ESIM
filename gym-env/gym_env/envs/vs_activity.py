@@ -73,30 +73,14 @@ class VSActivity(VSBase):
         img_err = 1
         self.observation_space = gym.spaces.Box(low=-1, high=1, shape=(position_ob + img_err,), dtype=np.float32)
 
-    def random_goal_coord(self):
-        min_c = 4
-        max_c = 29
-        goal_coord = np.random.randint(min_c, max_c), np.random.randint(min_c, max_c)
-        goal_coord = 5,5 # rezults with 5,5
-        # print(goal_coord)
-
-        # latent_img = np.ones((32, 32)) * 0
-        # latent_img[goal_coord[0], goal_coord[1]] = 255
-
-        # cv2.imshow("goal coord image", latent_img.astype(np.uint8))
-        # cv2.waitKey(0)
-
-        return goal_coord
-
+        self.goal_coord = 15,15
 
     def get_pose(self, action):
-
         pose = self.current_pose.copy()
         ac_position = action[:2]
         pose[:2] +=  ac_position * self.ac_position_scale 
 
         self.action = action
-
         return pose
 
     def observe_0(self): 
@@ -146,8 +130,6 @@ class VSActivity(VSBase):
         self.img = np.ones((32, 32)) * 127
         self.activity_coord = 31, 31
 
-        self.goal_coord = self.random_goal_coord()
-
     def change_to_shape(self, a):
         # if a.shape == (1, 2):
         #     return a[0]
@@ -178,8 +160,8 @@ class VSActivity(VSBase):
 
 
         # observe result. (debug camera view) 
-        cv2.imshow("resized image", img)
-        cv2.waitKey(0)
+        # cv2.imshow("resized image", img)
+        # cv2.waitKey(0)
 
         return img
 

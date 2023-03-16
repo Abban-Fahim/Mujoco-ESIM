@@ -274,48 +274,4 @@ class VSBase(gym.Env):
             body_id = mujoco.mj_name2id(self.model, mujoco.mjtObj.mjOBJ_BODY, name)
             self.model.body_pos[body_id][:3] += offset_pos            
 
-    def apply_event_noise(self, img, n, res):
-
-        backgorund_map = img == 127
-
-        # event noise
-        a = np.random.uniform(0, 100, res)
-        ne = a < n/2.0
-        pe = a > 100-n/2.0
-
-        filtered_ne = ne * backgorund_map
-        filtered_pe = pe * backgorund_map
-
-        img1 = np.where(filtered_ne, 0, img)
-        img2 = np.where(filtered_pe, 255, img1)
-        
-        return img2
-
-    def apply_event_stream_noise(self, e_stream, e_img, n, res):
-        
-        backgorund_map = e_img == 127
-        e_time_set = set(e_stream[:,2])
-
-        for t in e_time_set:
-            # event noise
-            a = np.random.uniform(0, 100, res)
-            ne = a < n/2.0
-            pe = a > 100-n/2.0
-
-            filtered_ne = ne * backgorund_map
-            filtered_pe = pe * backgorund_map
-
-            ne_hits = np.where(filtered_ne)
-            pe_hits = np.where(filtered_pe)
-
-            for i in range(len(ne_hits[0])):
-                e_stream = np.append(e_stream, [[ne_hits[0][i], ne_hits[1][i], t, -1]], axis = 0)
-
-            for i in range(len(pe_hits[0])):
-                e_stream = np.append(e_stream, [[pe_hits[0][i], pe_hits[1][i], t, 1]], axis = 0)
-
-        e_stream = e_stream[e_stream[:, 2].argsort()]
-        noisy_e_stream = e_stream.copy()
-
-        return noisy_e_stream
 
