@@ -188,8 +188,8 @@ class VSBase(gym.Env):
 
         self.err = err
         
-        # if err < 2:
-        #     reward = 1e+2
+        # if err < 1:
+        #     reward = 1
         #     print("reached")
         #     done = True
 
@@ -234,7 +234,7 @@ class VSBase(gym.Env):
 
         observation = self.observe()
 
-        return observation
+        return observation, {}
 
     def randomize_hole_position(self):
         offset_pos = 2*(np.random.rand(3) - 0.5) * self.max_rand_offset
@@ -263,6 +263,5 @@ class VSBase(gym.Env):
         for name in obj_names:
             body_id = mujoco.mj_name2id(self.model, mujoco.mjtObj.mjOBJ_BODY, name)
             self.model.body_pos[body_id][:3] =  self.init_hole_pose[:3] + offset_pos         
-            print(self.model.body_pos[body_id][:3], self.init_hole_pose[:3])   
 
 

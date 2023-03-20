@@ -71,7 +71,7 @@ class VSActivity(VSBase):
 
         position_ob = 3
         img_err = 1
-        self.observation_space = gym.spaces.Box(low=-1, high=1, shape=(position_ob + img_err,), dtype=np.float32)
+        self.observation_space = gym.spaces.Box(low=-1, high=1, shape=(2,), dtype=np.float32)
 
         self.goal_coord = 15, 15
 
@@ -107,10 +107,14 @@ class VSActivity(VSBase):
 
         pose = self.controller.fk()
 
-        observation = (pose[0] - self.current_pose[0]) / (self.ac_position_scale ), \
-                      (pose[1] - self.current_pose[1]) / (self.ac_position_scale ), \
-                      (pose[2] - self.current_pose[2]) / (self.ac_position_scale ), \
-                      err / 45.0
+        # observation = (pose[0] - self.current_pose[0]) / (self.ac_position_scale ), \
+        #               (pose[1] - self.current_pose[1]) / (self.ac_position_scale ), \
+        #               (pose[2] - self.current_pose[2]) / (self.ac_position_scale ), \
+        #               err / 45.0
+        
+        observation = ((self.activity_coord[0] - 16) / 16.0), \
+                      ((self.activity_coord[1] - 16) / 16.0)
+                        # err / 45.0
 
         return observation
 
@@ -119,9 +123,9 @@ class VSActivity(VSBase):
         self.old_a = self.action.copy()
         err = self.dist_metric(self.img)
 
-        reward = 1/(0.01*err+0.04)
-        # reward = -1 - 1*dx
-
+        reward = 0
+        if err < 3:
+            reward = 1
 
         return reward, err
 
