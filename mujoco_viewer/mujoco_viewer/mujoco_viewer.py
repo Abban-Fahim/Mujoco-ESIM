@@ -149,36 +149,49 @@ class MujocoViewer:
                 self.cam.fixedcamid = -1
                 self.cam.type = mujoco.mjtCamera.mjCAMERA_FREE
 
+    def toggleBool(self, val):
+        return not val
+
+    def mulSimSpeed(self, val):
+        self._run_speed *= val
+
+    def emptyViewImg(self):
+        window_shape = glfw.get_framebuffer_size(self.window)
+        shape = window_shape[1], window_shape[0], 3
+        return np.zeros(shape, dtype=np.uint8)
+    
+    def renderImg(self):
+        img = self.emptyViewImg()
+        mujoco.mjr_readPixels(img, None, self.viewport, self.ctx)
+        return np.flipud(img)
+
     def _key_callback(self, window, key, scancode, action, mods):
         if action != glfw.RELEASE:
             return
-        # Switch cameras
         elif key == glfw.KEY_TAB:
             self.iterateCameraView()
         # Pause simulation
-        elif key == glfw.KEY_SPACE and self._paused is not None:
-            self._paused = not self._paused
+        elif key == glfw.KEY_SPACE:
+            self._paused = self.toggleBool(self._paused)
         # Advances simulation by one step.
-        elif key == glfw.KEY_RIGHT and self._paused is not None:
+        elif key == glfw.KEY_RIGHT:
             self._advance_by_one_step = True
             self._paused = True
-        # Slows down simulation
         elif key == glfw.KEY_S:
-            self._run_speed /= 2.0
-        # Speeds up simulation
+            # self._run_speed /= 2.0
+            self.mulSimSpeed(0.5)
         elif key == glfw.KEY_F:
-            self._run_speed *= 2.0
+            # self._run_speed *= 2.0
+            self.mulSimSpeed(2)
         # Turn off / turn on rendering every frame.
         elif key == glfw.KEY_D:
-            self._render_every_frame = not self._render_every_frame
+            # self._render_every_frame = not self._render_every_frame
+            self._render_every_frame = self.toggleBool(self._render_every_frame)
         # Capture screenshot
         elif key == glfw.KEY_T:
-            img = np.zeros(
-                (glfw.get_framebuffer_size(
-                    self.window)[1], glfw.get_framebuffer_size(
-                    self.window)[0], 3), dtype=np.uint8)
-            mujoco.mjr_readPixels(img, None, self.viewport, self.ctx)
-            imageio.imwrite(self._image_path % self._image_idx, np.flipud(img))
+            # img = self.emptyViewImg()
+            # mujoco.mjr_readPixels(img, None, self.viewport, self.ctx)
+            imageio.imwrite(self._image_path % self._image_idx, self.renderImg())
             self._image_idx += 1
         # Display contact forces
         elif key == glfw.KEY_C:
