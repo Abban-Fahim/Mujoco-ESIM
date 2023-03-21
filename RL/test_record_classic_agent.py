@@ -52,7 +52,7 @@
 #
 
 from tqdm import tqdm
-import cv2
+from gym.wrappers.monitoring.video_recorder import VideoRecorder
 
 import sys
 import os
@@ -66,14 +66,14 @@ env_name = "vs_activity"
 param_path = "params/pop_sac_vs_activity_0/model_e50.pt"
 rb_param_path = "params/pop_sac_vs_activity_0/replay_buffer_e50.p"
 
-num_test_episodes = 1
-max_ep_len = 30
+num_test_episodes = 10
+max_ep_len = 200
 
 env, ac, replay_buffer, device =  setup(env_name, param_path, rb_param_path)
 
 def recordedAction(env, video_recorder, o):
-    frame = env.render_frame()
-    video_recorder.write(cv2.flip(frame, 0))
+    env.unwrapped.render()
+    video_recorder.capture_frame()
     # Take deterministic actions at test time 
     return get_action(replay_buffer.normalize_obs(o), ac, device, True)
 
@@ -89,15 +89,14 @@ def render_agent(env):
 
         print("rendering env...")
 
-        # video_recorder = VideoRecorder(env, f"clip/{env_name}_clip.mp4", enabled=True)
-        video_recorder = cv2.VideoWriter(f"clip/{env_name}_clip.avi", 0, 60, (64,64))
+        video_recorder = VideoRecorder(env, f"clip/{env_name}_clip.mp4", enabled=True)
 
         test_reward_sum = 0
         for j in tqdm( range(num_test_episodes) ):
             ep_ret, _ = simEpisode(env, max_ep_len, action_func=lambda o: recordedAction(env, video_recorder, o))
             test_reward_sum += ep_ret
 
-        video_recorder.release()
+        video_recorder.close()
 
         print("done rendering env")
         return test_reward_sum / num_test_episodes

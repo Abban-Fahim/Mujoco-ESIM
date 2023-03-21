@@ -60,7 +60,7 @@ from .vs_base import VSBase
 
 class VSActivity(VSBase):
 
-    def __init__(self, headless=False, render_every_frame=True, running_events=True):
+    def __init__(self, headless=False, render_every_frame=True, running_events=True, render_mode=None):
         super().__init__(headless, render_every_frame, running_events)
 
         self.env_reset()
@@ -123,9 +123,9 @@ class VSActivity(VSBase):
         self.old_a = self.action.copy()
         err = self.dist_metric(self.img)
 
-        reward = 0
-        if err < 3:
-            reward = 1
+        reward = -1
+        # if err < 3:
+        #     reward = 1
 
         return reward, err
 
@@ -135,9 +135,6 @@ class VSActivity(VSBase):
         self.activity_coord = 31, 31
 
     def change_to_shape(self, a):
-        # if a.shape == (1, 2):
-        #     return a[0]
-
         return a.flatten()
 
     def preprocessing(self, img):

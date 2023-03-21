@@ -188,10 +188,10 @@ class VSBase(gym.Env):
 
         self.err = err
         
-        # if err < 1:
-        #     reward = 1
-        #     print("reached")
-        #     done = True
+        if err < 1:
+            reward = 100
+            print("reached")
+            done = True
 
         info = {}
         return observation, reward, done, False, info
@@ -250,7 +250,7 @@ class VSBase(gym.Env):
         return a.flatten()
 
     def render_frame(self):
-        return self.viewer.capture_frame(1)
+        return self.viewer.capture_frame(1, self.data.time)
 
     def get_hole_pose(self):
         body_id = mujoco.mj_name2id(self.model, mujoco.mjtObj.mjOBJ_BODY, self.target_object)
