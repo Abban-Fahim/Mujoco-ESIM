@@ -123,7 +123,7 @@ class VSActivity(VSBase):
         self.old_a = self.action.copy()
         err = self.dist_metric(self.img)
 
-        reward = -1
+        reward = -1 - dx
         # if err < 3:
         #     reward = 1
 

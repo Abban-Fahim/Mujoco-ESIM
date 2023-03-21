@@ -173,7 +173,7 @@ if __name__ == '__main__':
     parser.add_argument('--encoder_pop_dim', type=int, default=10)
     parser.add_argument('--decoder_pop_dim', type=int, default=10)
     parser.add_argument('--encoder_var', type=float, default=0.15)
-    parser.add_argument('--start_model_idx', type=int, default=0)
+    parser.add_argument('--start_model_idx', type=int, default=1)
     parser.add_argument('--num_model', type=int, default=10)
     parser.add_argument('--epochs', type=int, default=50)
     args = parser.parse_args()
@@ -196,8 +196,8 @@ if __name__ == '__main__':
         torch.manual_seed(seed)
         np.random.seed(seed)
 
-        replay_size=int(1e6)
-        norm_clip_limit=3
+        replay_size = int(1e6)
+        norm_clip_limit = 3
         steps_per_epoch = 1000
         norm_update = steps_per_epoch
 

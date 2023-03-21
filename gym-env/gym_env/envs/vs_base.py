@@ -183,7 +183,7 @@ class VSBase(gym.Env):
                     ])
         if np.any(conditions):
             print(conditions, self.controller.fk()[:3])
-            # reward = -10
+            reward = -100
             done = True
 
         self.err = err
