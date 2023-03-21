@@ -164,13 +164,23 @@ class MujocoViewer:
         img = self.emptyViewImg()
         mujoco.mjr_readPixels(img, None, self.viewport, self.ctx)
         return np.flipud(img)
+    
+    def toggleVOption(self, val):
+        self.vopt.frame = val - self.vopt.frame
+
+    def toogleTransparancy(self):
+        self._transparent = self.toggleBool(self._transparent)
+        multiplier = 5.0
+        if self._transparent:
+            self.model.geom_rgba[:, 3] /= multiplier
+        else:
+            self.model.geom_rgba[:, 3] *= multiplier
 
     def _key_callback(self, window, key, scancode, action, mods):
         if action != glfw.RELEASE:
             return
         elif key == glfw.KEY_TAB:
             self.iterateCameraView()
-        # Pause simulation
         elif key == glfw.KEY_SPACE:
             self._paused = self.toggleBool(self._paused)
         # Advances simulation by one step.
@@ -178,41 +188,30 @@ class MujocoViewer:
             self._advance_by_one_step = True
             self._paused = True
         elif key == glfw.KEY_S:
-            # self._run_speed /= 2.0
             self.mulSimSpeed(0.5)
         elif key == glfw.KEY_F:
-            # self._run_speed *= 2.0
             self.mulSimSpeed(2)
-        # Turn off / turn on rendering every frame.
         elif key == glfw.KEY_D:
-            # self._render_every_frame = not self._render_every_frame
             self._render_every_frame = self.toggleBool(self._render_every_frame)
         # Capture screenshot
         elif key == glfw.KEY_T:
-            # img = self.emptyViewImg()
-            # mujoco.mjr_readPixels(img, None, self.viewport, self.ctx)
             imageio.imwrite(self._image_path % self._image_idx, self.renderImg())
             self._image_idx += 1
         # Display contact forces
         elif key == glfw.KEY_C:
-            self._contacts = not self._contacts
+            self._contacts = self.toggleBool(self._contacts)
             self.vopt.flags[mujoco.mjtVisFlag.mjVIS_CONTACTPOINT] = self._contacts
             self.vopt.flags[mujoco.mjtVisFlag.mjVIS_CONTACTFORCE] = self._contacts
         # Display coordinate frames
         elif key == glfw.KEY_E:
-            self.vopt.frame = 1 - self.vopt.frame
+            self.toggleVOption(1)
         elif key == glfw.KEY_B:
-            self.vopt.frame = 3 - self.vopt.frame
-        # Hide overlay menu
+            self.toggleVOption(3)
         elif key == glfw.KEY_H:
-            self._hide_menu = not self._hide_menu
+            self._hide_menu = self.toggleBool(self._hide_menu)
         # Make transparent
         elif key == glfw.KEY_R:
-            self._transparent = not self._transparent
-            if self._transparent:
-                self.model.geom_rgba[:, 3] /= 5.0
-            else:
-                self.model.geom_rgba[:, 3] *= 5.0
+            self.toogleTransparancy()
         # Geom group visibility
         elif key in (glfw.KEY_0, glfw.KEY_1, glfw.KEY_2, glfw.KEY_3, glfw.KEY_4):
             self.vopt.geomgroup[key - glfw.KEY_0] ^= 1
