@@ -219,8 +219,7 @@ class MujocoViewer:
         if key == glfw.KEY_ESCAPE:
             print("Pressed ESC")
             print("Quitting.")
-            glfw.terminate()
-            sys.exit(0)
+            glfw.destroy_window(self.window)
 
     def close(self):
         glfw.terminate()
