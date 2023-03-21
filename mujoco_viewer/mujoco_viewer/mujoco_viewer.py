@@ -142,16 +142,19 @@ class MujocoViewer:
         self._overlay = {}
         self._markers = []
 
+    def iterateCameraView(self):
+        self.cam.fixedcamid += 1
+        self.cam.type = mujoco.mjtCamera.mjCAMERA_FIXED
+        if self.cam.fixedcamid >= self.model.ncam:
+                self.cam.fixedcamid = -1
+                self.cam.type = mujoco.mjtCamera.mjCAMERA_FREE
+
     def _key_callback(self, window, key, scancode, action, mods):
         if action != glfw.RELEASE:
             return
         # Switch cameras
         elif key == glfw.KEY_TAB:
-            self.cam.fixedcamid += 1
-            self.cam.type = mujoco.mjtCamera.mjCAMERA_FIXED
-            if self.cam.fixedcamid >= self.model.ncam:
-                self.cam.fixedcamid = -1
-                self.cam.type = mujoco.mjtCamera.mjCAMERA_FREE
+            self.iterateCameraView()
         # Pause simulation
         elif key == glfw.KEY_SPACE and self._paused is not None:
             self._paused = not self._paused
