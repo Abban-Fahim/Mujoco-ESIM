@@ -217,31 +217,40 @@ class MujocoViewer:
             self.vopt.geomgroup[key - glfw.KEY_0] ^= 1
         # Quit
         if key == glfw.KEY_ESCAPE:
-            print("Pressed ESC")
-            print("Quitting.")
-            glfw.destroy_window(self.window)
+            self.close()
 
     def close(self):
-        glfw.terminate()
-        sys.exit(0)
+        glfw.destroy_window(self.window)
 
-    def _cursor_pos_callback(self, window, xpos, ypos):
-        if not (self._button_left_pressed or self._button_right_pressed):
-            return
+    def isRLMousePressed(self):
+        return self._button_left_pressed or self._button_right_pressed
+    
+    def isPressed(self, key):
+        return glfw.get_key(self.window, key) == glfw.PRESS
 
-        mod_shift = (
-            glfw.get_key(window, glfw.KEY_LEFT_SHIFT) == glfw.PRESS or
-            glfw.get_key(window, glfw.KEY_RIGHT_SHIFT) == glfw.PRESS)
+    def isShiftPressed(self):
+        return self.isPressed(glfw.KEY_LEFT_SHIFT) or self.isPressed(glfw.KEY_RIGHT_SHIFT)
+    
+    def currentAction(self):
+        mod_shift = self.isShiftPressed()
         if self._button_right_pressed:
             action = mujoco.mjtMouse.mjMOUSE_MOVE_H if mod_shift else mujoco.mjtMouse.mjMOUSE_MOVE_V
         elif self._button_left_pressed:
             action = mujoco.mjtMouse.mjMOUSE_ROTATE_H if mod_shift else mujoco.mjtMouse.mjMOUSE_ROTATE_V
         else:
             action = mujoco.mjtMouse.mjMOUSE_ZOOM
+        
+        return action
 
-        dx = int(self._scale * xpos) - self._last_mouse_x
-        dy = int(self._scale * ypos) - self._last_mouse_y
+    def _cursor_pos_callback(self, window, xpos, ypos):
+        if not self.isRLMousePressed():
+            return
+        
+        action = self.currentAction()
+
         width, height = glfw.get_framebuffer_size(window)
+        dx = int(self._scale * (xpos - self._last_mouse_x)) / height
+        dy = int(self._scale * (ypos - self._last_mouse_y)) / height
 
         with self._gui_lock:
             if self.pert.active:
@@ -249,29 +258,29 @@ class MujocoViewer:
                     self.model,
                     self.data,
                     action,
-                    dx / height,
-                    dy / height,
+                    dx,
+                    dy,
                     self.scn,
                     self.pert)
             else:
                 mujoco.mjv_moveCamera(
                     self.model,
                     action,
-                    dx / height,
-                    dy / height,
+                    dx,
+                    dy,
                     self.scn,
                     self.cam)
 
-        self._last_mouse_x = int(self._scale * xpos)
-        self._last_mouse_y = int(self._scale * ypos)
+        self._last_mouse_x = xpos
+        self._last_mouse_y = ypos
 
     def _mouse_button_callback(self, window, button, act, mods):
         self._button_left_pressed = button == glfw.MOUSE_BUTTON_LEFT and act == glfw.PRESS
         self._button_right_pressed = button == glfw.MOUSE_BUTTON_RIGHT and act == glfw.PRESS
 
         x, y = glfw.get_cursor_pos(window)
-        self._last_mouse_x = int(self._scale * x)
-        self._last_mouse_y = int(self._scale * y)
+        self._last_mouse_x = x
+        self._last_mouse_y = y
 
         # detect a left- or right- doubleclick
         self._left_double_click_pressed = False
