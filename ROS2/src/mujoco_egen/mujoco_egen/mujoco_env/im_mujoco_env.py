@@ -57,7 +57,6 @@ import mujoco_viewer
 import os, sys
 import time
 import numpy as np
-import itertools
 
 from ..utils.read_cfg import read_cfg
 
@@ -87,14 +86,11 @@ class EsimMujoco:
 
         # init first position
         self.data.qpos = init_pose
-        # print("## Init joint pose", init_pose)
         mujoco.mj_forward(self.model, self.data)
 
         self.err_limit = err_limit # error before accepting the pose
-        # self.des_pose = init_pose # goal pose
-        # self.des_pose = [0.0,0.4,0.55,np.pi + np.deg2rad(0), 0, 0]
+
         pose = self.controller.fk()
-        # self.des_pose = pose + np.array([0, 0, 0, 0, 0,  np.pi/2]) # correction from the mat2eul transformation
         self.des_pose = pose
 
         self.controller.set_action(self.des_pose)
@@ -145,19 +141,11 @@ class EsimMujoco:
 
         torque = self.controller.get_torque()
         self.data.ctrl[:] = torque
-        # self.data.ctrl[:] = np.clip(torque, -300, 300)
-        #self.sim.data.qfrc_applied[:] = self._get_random_applied_force()
-        
         mujoco.mj_step(self.model, self.data)
-
-        # print("# current pose:", self.controller.fk())
-        # print( "dest_pose:", self.des_pose)
-        # print("pose error:", self.controller.pose_error())
 
         return raw_img, events_img, events, 
 
     def set_des_pose(self, des_pose, des_vel=np.array([0,0,0,0,0,0])):
-        # print("## set pose", des_pose)
         self.des_pose = des_pose
         self.des_vel = des_vel
         self.controller.set_action(self.des_pose)
@@ -199,11 +187,7 @@ class EsimMujoco:
         
     def circular_pose(self, t, start_pose):
         r = read_cfg()["saccade"]["radius"]
-        # r = 0.1
         w = read_cfg()["saccade"]["circular_speed"]
-        # w = 10
-        # r = 0.02
-        # w = 10
 
         offset = np.zeros(3)
         offset[0] = r * np.sin(w*t)
@@ -221,9 +205,7 @@ class EsimMujoco:
         rng = np.random.default_rng(int(time.time()))
         tt = rng.random() * 2 * np.pi 
         r = read_cfg()["saccade"]["radius"]
-        # r = 0.1
         w = read_cfg()["saccade"]["circular_speed"]
-        # w = 10
 
         offset = np.zeros(3)
         offset[0] = r * np.sin(w*tt)

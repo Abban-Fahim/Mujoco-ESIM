@@ -75,13 +75,6 @@ class ImControllerActionServer(Node):
     def __init__(self):
         super().__init__('impedance_controller_server_node')
 
-        # # DesiredPoseName action server is created
-        # self._desired_pose_name_action_server = ActionServer(
-        #     self,
-        #     DesiredPoseName,
-        #     'desired_pose_name_topic',
-        #     self.desired_pose_callback)
-
         # DesiredPoseName action server is created
         self._desired_pose_action_server = ActionServer(
             self,
@@ -96,13 +89,6 @@ class ImControllerActionServer(Node):
             'saccades_topic',
             self.saccades_callback)
 
-        # Random Saccades action server is created
-        # self._action_server = ActionServer(
-        #     self,
-        #     Saccades,
-        #     'random_saccades_topic',
-        #     self.random_saccades_callback)
-
         # Camera events Publisher is created
         self.events_publisher = self.create_publisher(CameraEvents, 'camera_events_topic', 10)
         timer_period = 1.0/60  # seconds
@@ -113,14 +99,6 @@ class ImControllerActionServer(Node):
 
         # Camera event image Publisher is created
         self.event_img_publisher = self.create_publisher(Image, 'camera_event_img_topic', 10)
-
-        # Publish parameters to ROS2
-        # self.init_params()
-
-        # get parameters from ROS2
-        # init_pose = np.array(self.get_parameter('HOME_Q').get_parameter_value().double_array_value)
-        # err_limit = self.get_parameter('cerr_limit').get_parameter_value().double_value
-        # des_pose = np.array(self.get_parameter('HOME').get_parameter_value().double_array_value)
 
         # Create MuJoCo environment
         init_pose = read_cfg()["saccade"]["start_pose"]
@@ -141,41 +119,13 @@ class ImControllerActionServer(Node):
 
         self.get_logger().info('Initialized')
 
-    # def init_params(self):
-    #     # publish cartesian space poses to ROS2
-    #     poses_dic = get_cposes()
-    #     for k, v in poses_dic.items():
-    #         self.declare_parameter(k, v.tolist())
-
-    #     # publish joint space poses to ROS2
-    #     poses_dic = get_jposes()
-    #     for k, v in poses_dic.items():
-    #         self.declare_parameter(k, v.tolist())
-        
-    #     # publish cartesian error limit
-    #     self.declare_parameter("cerr_limit", get_cerr_lim())
-
-    #     # publish operation parameter
-    #     operations = get_operations()
-    #     for k, v in operations.items():
-    #         self.declare_parameter(k, v)
-
     def desired_pose_callback(self, goal_handle):
         self.get_logger().info('Executing goal: set_desired_pose...')
 
-        # get goal pose name
-        # des_pose_name = goal_handle.request.des_pose_name
         des_pose = goal_handle.request.des_pose
-
-
-        # set goal pose
-        # des_pose = np.array(self.get_parameter(des_pose_name).get_parameter_value().double_array_value)
-
         self.mj.set_des_pose(des_pose)
 
         # create action messages
-        # feedback_msg = DesiredPoseName.Feedback()
-        # result_msg = DesiredPoseName.Result()
         feedback_msg = DesiredPose.Feedback()
         result_msg = DesiredPose.Result()
 
@@ -185,7 +135,6 @@ class ImControllerActionServer(Node):
             self.composed_callback()
 
             # publish feedback
-            # feedback_msg.feedback_error = self.mj.position_err()
             feedback_msg.feedback_pose_error = self.mj.pose_err().astype(np.float32)
 
             goal_handle.publish_feedback(feedback_msg)
@@ -204,9 +153,6 @@ class ImControllerActionServer(Node):
             return self.saccades_callback_body(goal_handle, self.circular_saccades)
         elif saccade_type == "random_circle":
             return self.saccades_callback_body(goal_handle, self.random_circular_saccades)
-
-    # def random_saccades_callback(self, goal_handle):
-    #     return self.saccades_callback_body(goal_handle, self.random_circular_saccades)
 
     def circular_saccades(self, t, start_pose):
         if not self.is_saccading:
@@ -238,8 +184,6 @@ class ImControllerActionServer(Node):
         t = 0
         # run mj loop until the robot reaches the goal pose
         while t < duration:
-        # while t < 0.000000001:
-
             # set goal pose
             saccade_func(t, start_pose)
 
@@ -346,7 +290,6 @@ class ImControllerActionServer(Node):
         if events is not None:
             # if there are some events
             log_input = f'{events["x"].shape[0]}'
-            # self.get_logger().info(log_start + log_amount + log_input) 
             msg.x = events["x"].tolist()
             msg.y = events["y"].tolist()
             msg.t = events["t"].tolist()
@@ -355,7 +298,6 @@ class ImControllerActionServer(Node):
         else:
             # if no events
             log_input = f'{0}'
-            # self.get_logger().info(log_start + log_amount + log_input)
             return False
 
 def main(args=None):
