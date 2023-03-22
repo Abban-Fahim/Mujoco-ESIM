@@ -610,7 +610,8 @@ class MujocoViewer:
         
         img = self.renderImg()
 
-        if np.all(img < 1):
+        # first two images are all black. It is for avoiding to capture them
+        if np.all(img == 0):
             return None
 
         return img
