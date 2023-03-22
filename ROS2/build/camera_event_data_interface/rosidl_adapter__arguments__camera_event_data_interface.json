@@ -1,6 +1,0 @@
-{
-  "package_name": "camera_event_data_interface",
-  "non_idl_tuples": [
-    "/home/palinauskas/Documents/fortiss_repo/mujoco-eleanor/ROS2/src/camera_event_data_interface:msg/CameraEvents.msg"
-  ]
-}

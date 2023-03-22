@@ -59,11 +59,14 @@ import time
 import numpy as np
 import itertools
 
-from ..utils.quaternion import identity_quat, subQuat, quatAdd, mat2Quat, quat2Vel, quat2Mat, quat2eul
-# from ..utils.read_cfg import get_mjc_xml
 from ..utils.read_cfg import read_cfg
-from ..controllers.full_impedance_controller import FullImpedanceController
-import rclpy
+
+import sys
+import os
+sys.path.append(os.getcwd() + "/..")
+
+from kuka.utils.quaternion import identity_quat, subQuat, quatAdd, mat2Quat, quat2Vel, quat2Mat, quat2eul
+from kuka.controllers.NullSpaceViscoElasticCartesianPDController import NullSpaceViscoElasticCartesianPDController
 
 class EsimMujoco:
 
@@ -80,11 +83,7 @@ class EsimMujoco:
         damping = read_cfg()["motion_controller"]["damping"]
         null_space_damping = read_cfg()["motion_controller"]["null_space_damping"]
         null_space_stiffness = read_cfg()["motion_controller"]["null_space_stiffness"]
-        self.controller = FullImpedanceController(self.model, self.data, 
-                                                    stiffness=np.array(stiffness), 
-                                                    damping = np.array(damping),
-                                                    null_space_damping=null_space_damping,
-                                                    null_space_stiffness=null_space_stiffness)
+        self.controller = NullSpaceViscoElasticCartesianPDController(self.model, self.data)
 
         # init first position
         self.data.qpos = init_pose
@@ -161,7 +160,7 @@ class EsimMujoco:
         # print("## set pose", des_pose)
         self.des_pose = des_pose
         self.des_vel = des_vel
-        self.controller.set_action(self.des_pose, self.des_vel)
+        self.controller.set_action(self.des_pose)
 
     def position_err(self):
         return np.linalg.norm(self.controller.pose_error()[:3])

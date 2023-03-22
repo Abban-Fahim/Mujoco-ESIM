@@ -7,7 +7,7 @@ package_name = 'mujoco_egen'
 setup(
     name=package_name,
     version='0.0.0',
-    packages=[package_name, 'mujoco_egen.controllers', 'mujoco_egen.utils', 'mujoco_egen.mujoco_env'],
+    packages=[package_name, 'mujoco_egen.mujoco_env'],
     include_package_data=True,
     package_data={'mujoco_egen': ['cfg/cfg.yaml', 'kuka/meshes/*','kuka/*'],},
     data_files=[

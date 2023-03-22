@@ -1,9 +1,0 @@
-{
-  "package_name": "controller_interface",
-  "non_idl_tuples": [
-    "/home/palinauskas/Documents/fortiss_repo/mujoco-eleanor/ROS2/src/controller_interface:action/DesiredPoseName.action",
-    "/home/palinauskas/Documents/fortiss_repo/mujoco-eleanor/ROS2/src/controller_interface:action/DesiredPose.action",
-    "/home/palinauskas/Documents/fortiss_repo/mujoco-eleanor/ROS2/src/controller_interface:action/Saccades.action",
-    "/home/palinauskas/Documents/fortiss_repo/mujoco-eleanor/ROS2/src/controller_interface:action/Saccades2.action"
-  ]
-}

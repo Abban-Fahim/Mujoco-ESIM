@@ -1,4 +1,3 @@
-/MujocoEleanor
 **.png
 **.gif
 **.npz
@@ -17,3 +16,6 @@ runs/
 params/
 clip/
 test_esim_output/
+
+ROS2/build
+ROS2/install
