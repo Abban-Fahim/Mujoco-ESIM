@@ -242,15 +242,15 @@ class MujocoViewer:
         
         return action
 
-    def _cursor_pos_callback(self, window, xpos, ypos):
+    def _cursor_pos_callback(self, window, x, y):
         if not self.isRLMousePressed():
             return
         
         action = self.currentAction()
 
         width, height = glfw.get_framebuffer_size(window)
-        dx = int(self._scale * (xpos - self._last_mouse_x)) / height
-        dy = int(self._scale * (ypos - self._last_mouse_y)) / height
+        dx = self._scale * (x - self._last_mouse_x) / height
+        dy = self._scale * (y - self._last_mouse_y) / height
 
         with self._gui_lock:
             if self.pert.active:
@@ -271,16 +271,26 @@ class MujocoViewer:
                     self.scn,
                     self.cam)
 
-        self._last_mouse_x = xpos
-        self._last_mouse_y = ypos
+        self.saveLastMouseCoord(x, y)
+
+    def saveLastMouseCoord(self, x, y):
+        self._last_mouse_x = x
+        self._last_mouse_y = y
+
+    def isButton(self, button, buttonType, act):
+        return button == buttonType and act == glfw.PRESS
 
     def _mouse_button_callback(self, window, button, act, mods):
         self._button_left_pressed = button == glfw.MOUSE_BUTTON_LEFT and act == glfw.PRESS
         self._button_right_pressed = button == glfw.MOUSE_BUTTON_RIGHT and act == glfw.PRESS
 
+        # self._button_left_pressed = self.isButton(button, glfw.MOUSE_BUTTON_LEFT, glfw.PRESS)
+        # self._button_right_pressed = self.isButton(button, glfw.MOUSE_BUTTON_RIGHT, glfw.PRESS)
+
+        print(self._button_left_pressed, self._button_right_pressed, act)
+
         x, y = glfw.get_cursor_pos(window)
-        self._last_mouse_x = x
-        self._last_mouse_y = y
+        self.saveLastMouseCoord(x, y)
 
         # detect a left- or right- doubleclick
         self._left_double_click_pressed = False
