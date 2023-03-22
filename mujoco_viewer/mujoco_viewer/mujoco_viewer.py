@@ -279,41 +279,32 @@ class MujocoViewer:
 
     def isButton(self, button, buttonType, act):
         return button == buttonType and act == glfw.PRESS
+    
+    def isDoubleMouseClick(self, _button_left_pressed, _last_left_click_time):
+        _left_double_click_pressed = False
+        if _button_left_pressed:
+            time_now = glfw.get_time()
+
+            if _last_left_click_time is None:
+                _last_left_click_time = glfw.get_time()
+
+            time_diff = (time_now - _last_left_click_time)
+            if time_diff > 0.01 and time_diff < 0.3:
+                _left_double_click_pressed = True
+                
+            _last_left_click_time = time_now
+
+        return _left_double_click_pressed, _last_left_click_time
 
     def _mouse_button_callback(self, window, button, act, mods):
-        self._button_left_pressed = button == glfw.MOUSE_BUTTON_LEFT and act == glfw.PRESS
-        self._button_right_pressed = button == glfw.MOUSE_BUTTON_RIGHT and act == glfw.PRESS
-
-        # self._button_left_pressed = self.isButton(button, glfw.MOUSE_BUTTON_LEFT, glfw.PRESS)
-        # self._button_right_pressed = self.isButton(button, glfw.MOUSE_BUTTON_RIGHT, glfw.PRESS)
-
-        print(self._button_left_pressed, self._button_right_pressed, act)
-
         x, y = glfw.get_cursor_pos(window)
         self.saveLastMouseCoord(x, y)
 
-        # detect a left- or right- doubleclick
-        self._left_double_click_pressed = False
-        self._right_double_click_pressed = False
-        time_now = glfw.get_time()
+        self._button_left_pressed = self.isButton(button, glfw.MOUSE_BUTTON_LEFT, act)
+        self._button_right_pressed = self.isButton(button, glfw.MOUSE_BUTTON_RIGHT, act)
 
-        if self._button_left_pressed:
-            if self._last_left_click_time is None:
-                self._last_left_click_time = glfw.get_time()
-
-            time_diff = (time_now - self._last_left_click_time)
-            if time_diff > 0.01 and time_diff < 0.3:
-                self._left_double_click_pressed = True
-            self._last_left_click_time = time_now
-
-        if self._button_right_pressed:
-            if self._last_right_click_time is None:
-                self._last_right_click_time = glfw.get_time()
-
-            time_diff = (time_now - self._last_right_click_time)
-            if time_diff > 0.01 and time_diff < 0.2:
-                self._right_double_click_pressed = True
-            self._last_right_click_time = time_now
+        self._left_double_click_pressed, self._last_left_click_time = self.isDoubleMouseClick(self._button_left_pressed, self._last_left_click_time)
+        self._right_double_click_pressed, self._last_right_click_time = self.isDoubleMouseClick(self._button_right_pressed, self._last_right_click_time)
 
         # set perturbation
         key = mods == glfw.MOD_CONTROL
