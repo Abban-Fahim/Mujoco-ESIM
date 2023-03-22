@@ -106,8 +106,6 @@ class ImControllerActionServer(Node):
         err_limit = 0.1
         self.mj = EsimMujoco(init_pose_rad, err_limit)
 
-
-        self.init_pose = read_cfg()["saccade"]["start_pose"]
         self.capture_events_enable = read_cfg()["operations"]["capture_events_enable"]
         self.save_events = read_cfg()["operations"]["save_events"]
         self.capture_frames_enable = read_cfg()["operations"]["capture_frames_enable"]
@@ -215,14 +213,6 @@ class ImControllerActionServer(Node):
         self.transform_callback()
 
     def timer_callback(self):
-        # publishes events to ROS2 topic
-        # capture_events_enable = self.get_parameter('capture_events_enable').get_parameter_value().bool_value
-        # save_events = self.get_parameter('save_events').get_parameter_value().bool_value
-        # capture_frames_enable = self.get_parameter('capture_frames_enable').get_parameter_value().bool_value
-        # save_frames = self.get_parameter('save_frames').get_parameter_value().bool_value
-        # save_path = self.get_parameter('save_path').get_parameter_value().string_value
-        # save_pose = self.get_parameter('save_pose').get_parameter_value().bool_value
-
         if self.is_saccading:
             raw_img, events_img, events = self.mj.loop(             
                     capture_events_enable=self.capture_events_enable,    

@@ -85,6 +85,7 @@ class EsimMujoco:
         self.controller = NullSpaceViscoElasticCartesianPDController(self.model, self.data)
 
         # init first position
+        print("init_pose", init_pose)
         self.data.qpos = init_pose
         mujoco.mj_forward(self.model, self.data)
 
@@ -140,7 +141,7 @@ class EsimMujoco:
         self.controller.set_action(self.des_pose)
 
         torque = self.controller.get_torque()
-        self.data.ctrl[:] = torque
+        # self.data.ctrl[:] = torque
         mujoco.mj_step(self.model, self.data)
 
         return raw_img, events_img, events, 

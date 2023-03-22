@@ -74,8 +74,6 @@ def test_run(controllerClass):
 
     # init first position
     data.qpos = np.array([-1.63042613, -0.95663209,  0.08660753,  1.55094155, -0.11856101, -0.64075765, -1.48511576])
-    
-    
 
     center_pose = np.array([0.0, 0.58, 0.05, 3.14, 0, 0])
 

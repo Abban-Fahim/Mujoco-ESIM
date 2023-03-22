@@ -1,11 +1,11 @@
 
 
 # mujoco_model_xml: "../kuka/envs/assets/sim_ethernet.xml"
-# mujoco_model_xml: "../kuka/envs/assets/sim_vga.xml"
+mujoco_model_xml: "../kuka/envs/assets/sim_vga.xml"
 # mujoco_model_xml: "../kuka/envs/assets/sim_hdmi.xml"
 # mujoco_model_xml: "../kuka/envs/assets/sim_usb.xml"
 # mujoco_model_xml: "../kuka/envs/assets/sim.xml"
-mujoco_model_xml: "../kuka/envs/assets/sim_hole.xml"
+# mujoco_model_xml: "../kuka/envs/assets/sim_hole.xml"
 
 
 operations:
@@ -19,7 +19,7 @@ operations:
 
 saccade: 
   # pose_is_cartesian: False # False - joint pose [deg], True - cartesian pose [m, deg]
-  start_pose: [-90,-50,0,90,0,-38,-90] # 7th joint should be kept in -90 degrees for initialization
+  start_pose: [-93.46391828025477, -54.83878222929936, 4.964762866242038, 88.90747738853501, -6.796491019108279, -36.73133025477707, -85.13402445859872] # 7th joint should be kept in -90 degrees for initialization
   type: "circle" # circle; random_circle
   duration: 0.5 # simulation seconds
   radius: 0.1 # m
