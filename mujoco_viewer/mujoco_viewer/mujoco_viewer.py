@@ -291,23 +291,12 @@ class MujocoViewer:
             time_diff = (time_now - _last_left_click_time)
             if time_diff > 0.01 and time_diff < 0.3:
                 _left_double_click_pressed = True
-                
+
             _last_left_click_time = time_now
 
         return _left_double_click_pressed, _last_left_click_time
-
-    def _mouse_button_callback(self, window, button, act, mods):
-        x, y = glfw.get_cursor_pos(window)
-        self.saveLastMouseCoord(x, y)
-
-        self._button_left_pressed = self.isButton(button, glfw.MOUSE_BUTTON_LEFT, act)
-        self._button_right_pressed = self.isButton(button, glfw.MOUSE_BUTTON_RIGHT, act)
-
-        self._left_double_click_pressed, self._last_left_click_time = self.isDoubleMouseClick(self._button_left_pressed, self._last_left_click_time)
-        self._right_double_click_pressed, self._last_right_click_time = self.isDoubleMouseClick(self._button_right_pressed, self._last_right_click_time)
-
-        # set perturbation
-        key = mods == glfw.MOD_CONTROL
+    
+    def handlePerturbation(self, key):
         newperturb = 0
         if key and self.pert.select > 0:
             # right: translate, left: rotate
@@ -322,7 +311,21 @@ class MujocoViewer:
                     self.model, self.data, self.scn, self.pert)
         self.pert.active = newperturb
 
+    def _mouse_button_callback(self, window, button, act, mods):
+        x, y = glfw.get_cursor_pos(window)
+        self.saveLastMouseCoord(x, y)
+
+        self._button_left_pressed = self.isButton(button, glfw.MOUSE_BUTTON_LEFT, act)
+        self._button_right_pressed = self.isButton(button, glfw.MOUSE_BUTTON_RIGHT, act)
+
+        # set perturbation
+        key = mods == glfw.MOD_CONTROL
+        self.handlePerturbation(key)
+
         # handle doubleclick
+        self._left_double_click_pressed, self._last_left_click_time = self.isDoubleMouseClick(self._button_left_pressed, self._last_left_click_time)
+        self._right_double_click_pressed, self._last_right_click_time = self.isDoubleMouseClick(self._button_right_pressed, self._last_right_click_time)
+
         if self._left_double_click_pressed or self._right_double_click_pressed:
             # determine selection mode
             selmode = 0
@@ -334,24 +337,7 @@ class MujocoViewer:
                 selmode = 3
 
             # find geom and 3D click point, get corresponding body
-            width, height = self.viewport.width, self.viewport.height
-            aspectratio = width / height
-            relx = x / width
-            rely = (self.viewport.height - y) / height
-            selpnt = np.zeros((3, 1), dtype=np.float64)
-            selgeom = np.zeros((1, 1), dtype=np.int32)
-            selskin = np.zeros((1, 1), dtype=np.int32)
-            selbody = mujoco.mjv_select(
-                self.model,
-                self.data,
-                self.vopt,
-                aspectratio,
-                relx,
-                rely,
-                self.scn,
-                selpnt,
-                selgeom,
-                selskin)
+            selbody, selpnt, selskin = self.selectedBody(x, y)
 
             # set lookat point, start tracking is requested
             if selmode == 2 or selmode == 3:
@@ -383,6 +369,27 @@ class MujocoViewer:
         # 3D release
         if act == glfw.RELEASE:
             self.pert.active = 0
+
+    def selectedBody(self, x, y):
+        width, height = self.viewport.width, self.viewport.height
+        aspectratio = width / height
+        relx = x / width
+        rely = (self.viewport.height - y) / height
+        selpnt = np.zeros((3, 1), dtype=np.float64)
+        selgeom = np.zeros((1, 1), dtype=np.int32)
+        selskin = np.zeros((1, 1), dtype=np.int32)
+        return mujoco.mjv_select(
+                    self.model,
+                    self.data,
+                    self.vopt,
+                    aspectratio,
+                    relx,
+                    rely,
+                    self.scn,
+                    selpnt,
+                    selgeom,
+                    selskin), selpnt, selskin
+
 
     def _scroll_callback(self, window, x_offset, y_offset):
         with self._gui_lock:
@@ -439,84 +446,87 @@ class MujocoViewer:
         self.scn.ngeom += 1
 
         return
-
-    def _create_overlay(self):
-        topleft = mujoco.mjtGridPos.mjGRID_TOPLEFT
-        topright = mujoco.mjtGridPos.mjGRID_TOPRIGHT
-        bottomleft = mujoco.mjtGridPos.mjGRID_BOTTOMLEFT
-        bottomright = mujoco.mjtGridPos.mjGRID_BOTTOMRIGHT
-
-        def add_overlay(gridpos, text1, text2):
+    
+    def add_overlay(self, gridpos, text1, text2):
             if gridpos not in self._overlay:
                 self._overlay[gridpos] = ["", ""]
             self._overlay[gridpos][0] += text1 + "\n"
             self._overlay[gridpos][1] += text2 + "\n"
 
+    def createTopLeftOverlay(self):
+        topleft = mujoco.mjtGridPos.mjGRID_TOPLEFT
+
         if self._render_every_frame:
-            add_overlay(topleft, "", "")
+            self.add_overlay(topleft, "", "")
         else:
-            add_overlay(
+            self.add_overlay(
                 topleft,
                 "Run speed = %.3f x real time" %
                 self._run_speed,
                 "[S]lower, [F]aster")
-        add_overlay(
+            
+        self.add_overlay(
             topleft,
             "Ren[d]er every frame",
             "On" if self._render_every_frame else "Off")
-        add_overlay(
+        self.add_overlay(
             topleft, "Switch camera (#cams = %d)" %
             (self.model.ncam + 1), "[Tab] (camera ID = %d)" %
             self.cam.fixedcamid)
-        add_overlay(
+        self.add_overlay(
             topleft,
             "[C]ontact forces",
             "On" if self._contacts else "Off")
-        add_overlay(
+        self.add_overlay(
             topleft,
             "T[r]ansparent",
             "On" if self._transparent else "Off")
         if self._paused is not None:
             if not self._paused:
-                add_overlay(topleft, "Stop", "[Space]")
+                self.add_overlay(topleft, "Stop", "[Space]")
             else:
-                add_overlay(topleft, "Start", "[Space]")
-                add_overlay(
+                self.add_overlay(topleft, "Start", "[Space]")
+                self.add_overlay(
                     topleft,
                     "Advance simulation by one step",
                     "[right arrow]")
-        add_overlay(
+        self.add_overlay(
             topleft,
             "Referenc[e] frames",
             "On" if self.vopt.frame == 1 else "Off")
-        add_overlay(topleft, "[H]ide Menu", "")
+        self.add_overlay(topleft, "[H]ide Menu", "")
         if self._image_idx > 0:
             fname = self._image_path % (self._image_idx - 1)
-            add_overlay(topleft, "Cap[t]ure frame", "Saved as %s" % fname)
+            self.add_overlay(topleft, "Cap[t]ure frame", "Saved as %s" % fname)
         else:
-            add_overlay(topleft, "Cap[t]ure frame", "")
-        add_overlay(topleft, "Toggle geomgroup visibility", "0-4")
+            self.add_overlay(topleft, "Cap[t]ure frame", "")
+        self.add_overlay(topleft, "Toggle geomgroup visibility", "0-4")
 
-        add_overlay(
+    def createBottomLeft(self):
+        bottomleft = mujoco.mjtGridPos.mjGRID_BOTTOMLEFT
+
+        self.add_overlay(
             bottomleft, "FPS", "%d%s" %
             (1 / self._time_per_render, ""))
-        add_overlay(
+        self.add_overlay(
             bottomleft, "Solver iterations", str(
                 self.data.solver_iter + 1))
-        add_overlay(
+        self.add_overlay(
             bottomleft, "Step", str(
                 round(
                     self.data.time / self.model.opt.timestep)))
-        add_overlay(bottomleft, "timestep", "%.5f" % self.model.opt.timestep)
+        self.add_overlay(bottomleft, "timestep", "%.5f" % self.model.opt.timestep)
+
+    def _create_overlay(self):
+        self.createTopLeftOverlay()
+        self.createBottomLeft()
 
     def apply_perturbations(self):
         self.data.xfrc_applied = np.zeros_like(self.data.xfrc_applied)
         mujoco.mjv_applyPerturbPose(self.model, self.data, self.pert, 0)
         mujoco.mjv_applyPerturbForce(self.model, self.data, self.pert)
 
-    def render(self, overlay_on=True):
-        # mjv_updateScene, mjr_render, mjr_overlay
-        def update():
+    def update(self, overlay_on):
             # fill overlay items
             if overlay_on:
                 self._create_overlay()
@@ -527,8 +537,8 @@ class MujocoViewer:
             elif glfw.window_should_close(self.window):
                 glfw.terminate()
                 sys.exit(0)
-            self.viewport.width, self.viewport.height = glfw.get_framebuffer_size(
-                self.window)
+
+            self.viewport.width, self.viewport.height = glfw.get_framebuffer_size(self.window)
             with self._gui_lock:
                 # update scene
                 mujoco.mjv_updateScene(
@@ -562,9 +572,11 @@ class MujocoViewer:
             # clear overlay
             self._overlay.clear()
 
+
+    def render(self, overlay_on=True):        
         if self._paused:
             while self._paused:
-                update()
+                self.update(overlay_on)
                 if self._advance_by_one_step:
                     self._advance_by_one_step = False
                     break
@@ -574,7 +586,7 @@ class MujocoViewer:
             if self._render_every_frame:
                 self._loop_count = 1
             while self._loop_count > 0:
-                update()
+                self.update(overlay_on)
                 self._loop_count -= 1
 
         # clear markers
@@ -725,9 +737,9 @@ class MujocoViewer:
         return e_img_list, e_list
 
 
-    def close_win(self):
-        print("######################################")
-        # glfw.terminate()
-        glfw.destroy_window(self.window)
-        # self.window = glfw.create_window
+    # def close_win(self):
+    #     print("######################################")
+    #     # glfw.terminate()
+    #     glfw.destroy_window(self.window)
+    #     # self.window = glfw.create_window
 
