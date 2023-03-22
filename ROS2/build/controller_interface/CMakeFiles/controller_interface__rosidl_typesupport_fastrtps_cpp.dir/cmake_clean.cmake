@@ -1,0 +1,21 @@
+file(REMOVE_RECURSE
+  "CMakeFiles/controller_interface__rosidl_typesupport_fastrtps_cpp.dir/rosidl_typesupport_fastrtps_cpp/controller_interface/action/detail/dds_fastrtps/desired_pose__type_support.cpp.o"
+  "CMakeFiles/controller_interface__rosidl_typesupport_fastrtps_cpp.dir/rosidl_typesupport_fastrtps_cpp/controller_interface/action/detail/dds_fastrtps/desired_pose_name__type_support.cpp.o"
+  "CMakeFiles/controller_interface__rosidl_typesupport_fastrtps_cpp.dir/rosidl_typesupport_fastrtps_cpp/controller_interface/action/detail/dds_fastrtps/saccades2__type_support.cpp.o"
+  "CMakeFiles/controller_interface__rosidl_typesupport_fastrtps_cpp.dir/rosidl_typesupport_fastrtps_cpp/controller_interface/action/detail/dds_fastrtps/saccades__type_support.cpp.o"
+  "libcontroller_interface__rosidl_typesupport_fastrtps_cpp.pdb"
+  "libcontroller_interface__rosidl_typesupport_fastrtps_cpp.so"
+  "rosidl_typesupport_fastrtps_cpp/controller_interface/action/detail/dds_fastrtps/desired_pose__type_support.cpp"
+  "rosidl_typesupport_fastrtps_cpp/controller_interface/action/detail/dds_fastrtps/desired_pose_name__type_support.cpp"
+  "rosidl_typesupport_fastrtps_cpp/controller_interface/action/detail/dds_fastrtps/saccades2__type_support.cpp"
+  "rosidl_typesupport_fastrtps_cpp/controller_interface/action/detail/dds_fastrtps/saccades__type_support.cpp"
+  "rosidl_typesupport_fastrtps_cpp/controller_interface/action/detail/desired_pose__rosidl_typesupport_fastrtps_cpp.hpp"
+  "rosidl_typesupport_fastrtps_cpp/controller_interface/action/detail/desired_pose_name__rosidl_typesupport_fastrtps_cpp.hpp"
+  "rosidl_typesupport_fastrtps_cpp/controller_interface/action/detail/saccades2__rosidl_typesupport_fastrtps_cpp.hpp"
+  "rosidl_typesupport_fastrtps_cpp/controller_interface/action/detail/saccades__rosidl_typesupport_fastrtps_cpp.hpp"
+)
+
+# Per-language clean rules from dependency scanning.
+foreach(lang CXX)
+  include(CMakeFiles/controller_interface__rosidl_typesupport_fastrtps_cpp.dir/cmake_clean_${lang}.cmake OPTIONAL)
+endforeach()

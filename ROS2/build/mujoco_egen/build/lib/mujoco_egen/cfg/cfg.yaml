@@ -1,0 +1,38 @@
+
+
+# mujoco_model_xml: "src/mujoco_egen/mujoco_egen/kuka/full_kuka_INRC3_mounted_camera_usb.xml" 
+# mujoco_model_xml: "src/mujoco_egen/mujoco_egen/kuka/full_kuka_INRC3_mounted_camera_vga.xml" 
+# mujoco_model_xml: "src/mujoco_egen/mujoco_egen/kuka/full_kuka_INRC3_mounted_camera_ethernet.xml" 
+# mujoco_model_xml: "src/mujoco_egen/mujoco_egen/kuka/full_kuka_INRC3_mounted_camera_hdmi.xml" 
+mujoco_model_xml: "src/mujoco_egen/mujoco_egen/kuka/full_kuka_INRC3_mounted_camera_hole.xml" 
+
+
+operations:
+  capture_events_enable: False
+  save_events: False
+  capture_frames_enable: False
+  save_frames: False
+  save_pose: False
+  save_path: "/home/palinauskas/Documents/fortiss_repo/mujoco-eleanor/dataset" # absolute path
+
+
+saccade: 
+  # pose_is_cartesian: False # False - joint pose [deg], True - cartesian pose [m, deg]
+  start_pose: [-90,-50,0,90,0,-38,-90] # 7th joint should be kept in -90 degrees for initialization
+  type: "circle" # circle; random_circle
+  duration: 0.5 # simulation seconds
+  radius: 0.1 # m
+  sample_frequency: 20 # Hz
+  circular_speed: 10 # rad/s
+
+
+esim: # event simulator parameter
+  Cp: 0.9 # positice contrast threshold
+  Cn: 0.9 # negative contrast threshold
+  refractory_period: 100 # ns
+
+motion_controller: # PD impedance controller is used
+  stiffness: [300.0, 300.0, 300.0, 100.3, 100.3, 100.3]
+  damping: [20.0, 20.0, 20.0, 20.3, 20.3, 20.3]
+  null_space_damping: 100
+  null_space_stiffness: 1000

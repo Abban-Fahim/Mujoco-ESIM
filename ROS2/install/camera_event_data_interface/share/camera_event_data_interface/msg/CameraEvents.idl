@@ -1,0 +1,26 @@
+// generated from rosidl_adapter/resource/msg.idl.em
+// with input from camera_event_data_interface/msg/CameraEvents.msg
+// generated code does not contain a copyright notice
+
+
+module camera_event_data_interface {
+  module msg {
+    @verbatim (language="comment", text=
+      " Message for event data from an event-based camera")
+    struct CameraEvents {
+      @verbatim (language="comment", text=
+        " coordinates")
+      sequence<uint16> x;
+
+      sequence<uint16> y;
+
+      @verbatim (language="comment", text=
+        " time")
+      sequence<uint64> t;
+
+      @verbatim (language="comment", text=
+        " polarity")
+      sequence<int8> p;
+    };
+  };
+};

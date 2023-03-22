@@ -360,13 +360,13 @@ class SmallLavaNetwork(torch.nn.Module):
                     
 
 if __name__ == '__main__':
-    trained_folder = 'Trained_ext_small_lava_merged_pol'
+    trained_folder = 'Trained_new_2'
     os.makedirs(trained_folder, exist_ok=True)
 
     #torch.manual_seed(0)
 
-    #device = torch.device('cpu')
-    device = torch.device('cuda')
+    device = torch.device('cpu')
+    # device = torch.device('cuda')
 
     # test conv
     #test_conv = nn.Conv2d(2, 10, kernel_size=5, padding=2, stride=1, bias=False).to(device)
@@ -388,9 +388,9 @@ if __name__ == '__main__':
     optimizer = torch.optim.Adam(net.parameters(), lr=lr)
     #steps = [50, 200, 500]
 
-    training_set = DVSPlugsDataset(path='/home/neumeier/eleanor/dvs_port_ext_bs2',
+    training_set = DVSPlugsDataset(path='slayer_training/dvs_port_ext_bs2',
                                      train=True, transform=augment, random_shift=True, ds_factor=4)
-    testing_set = DVSPlugsDataset(path='/home/neumeier/eleanor/dvs_port_ext_bs2',
+    testing_set = DVSPlugsDataset(path='slayer_training/dvs_port_ext_bs2',
                                     train=False, transform=augment, random_shift=False, ds_factor=4)
 
     input, label = training_set[0]

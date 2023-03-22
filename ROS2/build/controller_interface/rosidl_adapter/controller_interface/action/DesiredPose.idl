@@ -1,0 +1,28 @@
+// generated from rosidl_adapter/resource/action.idl.em
+// with input from controller_interface/action/DesiredPose.action
+// generated code does not contain a copyright notice
+
+
+module controller_interface {
+  module action {
+    typedef float float__6[6];
+    @verbatim (language="comment", text=
+      " Defines an action msg for the impedance controller" "\n"
+      " goal pose")
+    struct DesiredPose_Goal {
+      float__6 des_pose;
+    };
+    typedef float float__6[6];
+    struct DesiredPose_Result {
+      @verbatim (language="comment", text=
+        " position error after reaching the goal")
+      float__6 pose_error;
+    };
+    typedef float float__6[6];
+    struct DesiredPose_Feedback {
+      @verbatim (language="comment", text=
+        " position error feedback")
+      float__6 feedback_pose_error;
+    };
+  };
+};

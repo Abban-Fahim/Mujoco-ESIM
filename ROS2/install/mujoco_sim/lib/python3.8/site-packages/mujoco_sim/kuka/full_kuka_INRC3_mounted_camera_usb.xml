@@ -1,0 +1,48 @@
+<?xml version="1.0" ?>
+
+<mujoco>
+  <compiler angle="radian" coordinate="local" meshdir="meshes/"/>
+
+  <option>
+    <flag gravity="enable"/>
+  </option>
+
+  <default> 
+    <joint damping="0.5"/>   
+    <default class="visual">
+      <geom contype="0" conaffinity="0"/>
+    </default>
+    <default class="collision">
+      <geom contype="1" conaffinity="1" friction=".6 0.005 0.0001"/>
+    </default>
+    <site rgba="1 0 0 .5"/>
+  </default>  
+
+  <asset>
+    <include file="kuka_assets.xml"/>
+  </asset>
+
+  <worldbody>
+    <!-- camera view for event-based camera -->
+    <camera name="view_camera" mode="fixed" fovy="103" pos="0 1.5 0.5" euler="-1.57 0 3.14"/>
+
+    <light pos="0 0 1000" castshadow="false"/>
+    <body name="robot" pos="0 0 0">
+      <include file="kuka_mesh_collision_peg_ee_camera.xml"/>
+    </body>
+    <body name="table" pos="0 0 0">
+      <geom class="collision" type="box" size=".41 .63 .5" pos="0 0.37 -0.5" rgba="0.6 0.6 0.6 0"/>
+      <geom class="visual" pos="0 0 -1" euler="-1.570796326794897 0 0" type="mesh" mesh="table_mesh" material="kuka_grey"/>
+      <!-- <geom pos="-0.15 0.6 0" euler="0 0 0" type="mesh" mesh="simple_shapes_mesh"/> -->
+      <geom pos="0.0 0.6 0" euler="0 0 0" type="mesh" mesh="usb_mesh"/>
+    </body>
+    <body name="floor" pos="0 0 -1">
+      <geom class="collision" type="plane" size="10 10 1" rgba="0.6 0.6 0.6 1.0"/> 
+    </body>
+  </worldbody>
+
+  <actuator>
+    <include file="kuka_actuators.xml"/>
+  </actuator>
+
+</mujoco>
