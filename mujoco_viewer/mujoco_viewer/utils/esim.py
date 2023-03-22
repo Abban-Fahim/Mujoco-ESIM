@@ -100,8 +100,8 @@ class Esim_interface:
         image_pos = np.zeros(resolution, dtype="uint8")
         image_neg = np.zeros(resolution, dtype="uint8")
 
-        image_pos[pos_events[:,1],pos_events[:,0]] = 50
-        image_neg[neg_events[:,1],neg_events[:,0]] = 50
+        image_pos[pos_events[:,1],pos_events[:,0]] = 255
+        image_neg[neg_events[:,1],neg_events[:,0]] = 255
 
         image_rgb = np.stack(
             [   image_pos, 
