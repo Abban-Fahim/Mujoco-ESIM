@@ -606,14 +606,9 @@ class MujocoViewer:
         self.cam.type = mujoco.mjtCamera.mjCAMERA_FIXED
 
     def get_frame(self, fixedcamid):
-        self.cam.fixedcamid = fixedcamid
-        self.cam.type = mujoco.mjtCamera.mjCAMERA_FIXED
+        self.change_camera(fixedcamid)
         
-        img = np.zeros(
-            (glfw.get_framebuffer_size(
-                self.window)[1], glfw.get_framebuffer_size(
-                self.window)[0], 3), dtype=np.uint8)
-        mujoco.mjr_readPixels(img, None, self.viewport, self.ctx)
+        img = self.renderImg()
 
         if np.all(img < 1):
             return None
@@ -622,7 +617,8 @@ class MujocoViewer:
 
     def save_img(self, img, path):
         path += "/%08d.png" % self._image_idx
-        imageio.imwrite(path, np.flipud(img))
+        imageio.imwrite(path, img)
+
         self._image_idx += 1
 
     def save_events(self, e, path):

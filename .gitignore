@@ -13,6 +13,7 @@ ros2_ws/log/
 
 *.egg-info
 
-runs
-params
-clip
+runs/
+params/
+clip/
+test_esim_output/
