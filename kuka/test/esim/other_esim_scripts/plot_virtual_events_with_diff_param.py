@@ -101,7 +101,7 @@ contrast_thresholds_pos = [0.1, 0.4, 0.9, 1.2, 1.5]
 contrast_thresholds_neg = [0.1, 0.4, 0.9, 1.2, 1.5]
 refractory_periods = [1e-2, 1e-1, 1, 10, 100]
 
-num_events_plot = 30000
+num_events_plot = 100
 
 for i, Cp in enumerate(contrast_thresholds_pos):
     for j, Cn in enumerate(contrast_thresholds_neg):
