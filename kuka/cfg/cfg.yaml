@@ -8,6 +8,8 @@ poses:
     APPROACH_Q: [-96.20, -40.67, 0, 76.07, 0, -63.29, -6.28]
     INSERTION_Q: [-94.99, -41.79, 0, 77.17, 0,-61.03, -5.01]
     TEST_Q: [-90, -54, 0, 80, 0.0, -43, 0]
+    TEST2_Q: [-90, -90, 0, 80, 0.0, -43, 0]
+
 
   cartesian:
     # Cartisian space (orientation in deg)
