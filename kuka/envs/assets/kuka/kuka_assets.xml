@@ -16,7 +16,7 @@
   <mesh name="ethernet_mesh" file="ethernet2.stl"/> 
   <mesh name="usb_mesh" file="usb2.stl"/> 
   <mesh name="vga_mesh" file="vga_broad.stl"/> 
-  <mesh name="hdmi_mesh" file="hdmi2.stl"/> 
+  <mesh name="hdmi_mesh" file="hdmi_broad.stl"/> 
   <mesh name="hole_mesh" file="hole.stl"/> 
   <mesh name="hole_mesh0" file="hole20.stl"/> 
   <mesh name="hole_mesh1" file="hole21.stl"/> 
