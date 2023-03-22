@@ -115,7 +115,7 @@ class EsimMujoco:
         # first output
         raw_img = None
         if capture_frames_enable:
-            raw_img = self.viewer.capture_frame(self.camera_id, save_it=save_frames, path=save_path)
+            raw_img = self.viewer.capture_frame(self.camera_id, self.data.time, save_it=save_frames, path=save_path)
 
         # second output
         # generate events

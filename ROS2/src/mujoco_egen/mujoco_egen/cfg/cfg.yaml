@@ -1,20 +1,20 @@
 
 
 # mujoco_model_xml: "../kuka/envs/assets/sim_ethernet.xml"
-mujoco_model_xml: "../kuka/envs/assets/sim_vga.xml"
+# mujoco_model_xml: "../kuka/envs/assets/sim_vga.xml"
 # mujoco_model_xml: "../kuka/envs/assets/sim_hdmi.xml"
-# mujoco_model_xml: "../kuka/envs/assets/sim_usb.xml"
+mujoco_model_xml: "../kuka/envs/assets/sim_usb.xml"
 # mujoco_model_xml: "../kuka/envs/assets/sim.xml"
 # mujoco_model_xml: "../kuka/envs/assets/sim_hole.xml"
 
 
 operations:
-  capture_events_enable: False
-  save_events: False
-  capture_frames_enable: False
-  save_frames: False
-  save_pose: False
-  save_path: "/home/palinauskas/Documents/fortiss_repo/mujoco-eleanor/dataset" # absolute path
+  capture_events_enable: True
+  save_events: True
+  capture_frames_enable: True
+  save_frames: True
+  save_pose: True
+  save_path: "dataset" 
 
 
 saccade: 
@@ -22,7 +22,7 @@ saccade:
   start_pose: [-93.46391828025477, -54.83878222929936, 4.964762866242038, 88.90747738853501, -6.796491019108279, -36.73133025477707, -85.13402445859872] # 7th joint should be kept in -90 degrees for initialization
   type: "circle" # circle; random_circle
   duration: 0.5 # simulation seconds
-  radius: 0.1 # m
+  radius: 0.01 # m
   sample_frequency: 20 # Hz
   circular_speed: 10 # rad/s
 
