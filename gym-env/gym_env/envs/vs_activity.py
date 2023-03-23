@@ -139,7 +139,7 @@ class VSActivity(VSBase):
 
     def preprocessing(self, img):
 
-        img = cv2.flip(img, 0)
+        # img = cv2.flip(img, 0)
 
         # size crop
         img = np.where(img == 50, 255, img)
@@ -155,10 +155,6 @@ class VSActivity(VSBase):
         # gray background
         img = np.where(img == 0, 127, img)
         img = np.where(img == 129, 0, img)
-
-         # applied noise
-        # img = self.apply_event_noise(img, 1, (32,32))
-
 
         # observe result. (debug camera view) 
         # cv2.imshow("resized image", img)
