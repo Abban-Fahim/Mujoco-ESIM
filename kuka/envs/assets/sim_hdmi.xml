@@ -24,8 +24,8 @@
 
   <worldbody>
     <include file="station.xml"/>
-    <body name="target" pos="0 0 0">
-      <geom pos="0.0 0.6 0" euler="0 0 0" type="mesh" mesh="hdmi_mesh"/>
+    <body name="target" pos="0 0.685 0">
+      <geom pos="0.0 0 0" euler="0 0 0" type="mesh" mesh="hdmi_mesh"/>
     </body>
   </worldbody>
 
