@@ -33,8 +33,8 @@ jerr_limit: 0.1 # accuracy of reaching a position before changing viapoint
 cerr_limit: 0.0005 # accuracy of reaching a position before changing viapoint
 
 # mujoco_model_xml: "kuka/envs/assets/sim_ethernet.xml"
-# mujoco_model_xml: "kuka/envs/assets/sim_vga.xml"
-mujoco_model_xml: "kuka/envs/assets/sim_hdmi.xml"
+mujoco_model_xml: "kuka/envs/assets/sim_vga.xml"
+# mujoco_model_xml: "kuka/envs/assets/sim_hdmi.xml"
 # mujoco_model_xml: "kuka/envs/assets/sim_usb.xml"
 # mujoco_model_xml: "kuka/envs/assets/sim.xml"
 # mujoco_model_xml: "kuka/envs/assets/sim_hole.xml"
