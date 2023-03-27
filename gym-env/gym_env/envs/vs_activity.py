@@ -163,7 +163,7 @@ class VSActivity(VSBase):
         img = np.where(img == 129, 0, img)
 
         # observe result. (debug camera view) 
-        cv2.imshow("resized image", img)
+        # cv2.imshow("resized image", img)
         # cv2.waitKey(0)
 
         return img
@@ -180,8 +180,8 @@ class VSActivity(VSBase):
         latent_img = np.ones(self.ws) * 0
         latent_img = self.box((int(x), int(y)), 20, latent_img)
 
-        cv2.imshow("coord image", latent_img.astype(np.uint8))
-        cv2.waitKey(0)
+        # cv2.imshow("coord image", latent_img.astype(np.uint8))
+        # cv2.waitKey(0)
 
         v = np.array((x, y))
 
