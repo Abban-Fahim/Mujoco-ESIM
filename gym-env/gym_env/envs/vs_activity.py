@@ -63,6 +63,10 @@ class VSActivity(VSBase):
     def __init__(self, headless=False, render_every_frame=True, running_events=True, render_mode=None):
         super().__init__(headless, render_every_frame, running_events)
 
+        y, x = self.viewer.winShape()
+        self.ws = x, y
+        self.winCenter = self.ws[0]/2, self.ws[1]/2 
+
         self.env_reset()
 
         # gym spaces
@@ -73,7 +77,9 @@ class VSActivity(VSBase):
         img_err = 1
         self.observation_space = gym.spaces.Box(low=-1, high=1, shape=(2,), dtype=np.float32)
 
-        self.goal_coord = 15, 15
+        
+
+        self.goal_coord = self.winCenter
 
     def get_pose(self, action):
         pose = self.current_pose.copy()
@@ -112,8 +118,8 @@ class VSActivity(VSBase):
         #               (pose[2] - self.current_pose[2]) / (self.ac_position_scale ), \
         #               err / 45.0
         
-        observation = ((self.activity_coord[0] - 16) / 16.0), \
-                      ((self.activity_coord[1] - 16) / 16.0)
+        observation = ((self.activity_coord[0] - self.winCenter[0]) / self.winCenter[0]), \
+                      ((self.activity_coord[1] - self.winCenter[1]) / self.winCenter[1])
                         # err / 45.0
 
         return observation
@@ -123,7 +129,9 @@ class VSActivity(VSBase):
         self.old_a = self.action.copy()
         err = self.dist_metric(self.img)
 
-        reward = -1 - dx
+        # reward = -1 - dx
+        reward = 1/(0.01*err+0.04) - 1*dx
+        
         # if err < 3:
         #     reward = 1
 
@@ -131,15 +139,13 @@ class VSActivity(VSBase):
 
 
     def env_reset(self):    
-        self.img = np.ones((32, 32)) * 127
-        self.activity_coord = 31, 31
+        self.img = np.ones(self.ws) * 127
+        self.activity_coord = self.ws[0]-1, self.ws[0]-1
 
     def change_to_shape(self, a):
         return a.flatten()
 
     def preprocessing(self, img):
-
-        # img = cv2.flip(img, 0)
 
         # size crop
         img = np.where(img == 50, 255, img)
@@ -149,15 +155,15 @@ class VSActivity(VSBase):
         img = cv2.normalize(img,  img, 0, 255, cv2.NORM_MINMAX)
 
         # maxpool
-        for i in range(1):
-            img = skimage.measure.block_reduce(img, (2,2), np.max)
+        # for i in range(1):
+        #     img = skimage.measure.block_reduce(img, (2,2), np.max)
 
         # gray background
         img = np.where(img == 0, 127, img)
         img = np.where(img == 129, 0, img)
 
         # observe result. (debug camera view) 
-        # cv2.imshow("resized image", img)
+        cv2.imshow("resized image", img)
         # cv2.waitKey(0)
 
         return img
@@ -171,11 +177,11 @@ class VSActivity(VSBase):
             self.activity_coord = x, y 
 
 
-        latent_img = np.ones((32, 32)) * 0
-        latent_img[int(x),int(y)] = 255
+        latent_img = np.ones(self.ws) * 0
+        latent_img = self.box((int(x), int(y)), 20, latent_img)
 
-        # cv2.imshow("coord image", latent_img.astype(np.uint8))
-        # cv2.waitKey(0)
+        cv2.imshow("coord image", latent_img.astype(np.uint8))
+        cv2.waitKey(0)
 
         v = np.array((x, y))
 
@@ -185,6 +191,26 @@ class VSActivity(VSBase):
         err = np.linalg.norm(g_v - v)
         
         return err
+    
+    def box(self, c, r, img):
+        val = 255
+        x, y = c
+        shape = img.shape
+        py = shape[1]-1 if y + r > shape[1]-1 else y + r 
+        ny = 0 if y - r < 0 else y - r
+        px = shape[0]-1 if x + r > shape[0]-1 else  x + r
+        nx = 0 if x - r < 0 else x - r
+
+
+        img[nx, ny:py] = val
+        img[px, ny:py] = val
+        img[nx:px, ny] = val
+        img[nx:px, py] = val
+
+
+        img[x, y] = val
+
+        return img
 
     def get_activity_coord(self, img):
         px, py = np.where(img == 0)

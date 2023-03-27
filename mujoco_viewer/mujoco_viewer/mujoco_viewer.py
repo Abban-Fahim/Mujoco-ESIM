@@ -97,12 +97,14 @@ class MujocoViewer:
 
         # glfw init
         glfw.init()
-        if running_events:
-            width, height = 128, 128
-        else:
-            width, height = glfw.get_video_mode(glfw.get_primary_monitor()).size
-            if win_size is not None:
-                width, height = win_size[0]*2, win_size[1]*2
+        # if running_events:
+        #     width, height = 128, 128
+        # else:
+            # width, height = glfw.get_video_mode(glfw.get_primary_monitor()).size
+            # if win_size is not None:
+            #     width, height = win_size[0]*2, win_size[1]*2
+        width, height = glfw.get_video_mode(glfw.get_primary_monitor()).size
+        
 
         if headless:
             glfw.window_hint(glfw.VISIBLE, glfw.FALSE)
@@ -154,6 +156,9 @@ class MujocoViewer:
 
     def mulSimSpeed(self, val):
         self._run_speed *= val
+
+    def winShape(self):
+        return glfw.get_framebuffer_size(self.window)
 
     def emptyViewImg(self):
         window_shape = glfw.get_framebuffer_size(self.window)

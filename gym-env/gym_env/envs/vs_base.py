@@ -182,13 +182,13 @@ class VSBase(gym.Env):
                     self.controller.fk()[1] > self.current_pose[1] + self.target_off[1] + off,
                     ])
         if np.any(conditions):
-            print(conditions, self.controller.fk()[:3])
+            # print(conditions, self.controller.fk()[:3])
             reward = -100
             done = True
 
         self.err = err
-        
-        if err < 1:
+        # print(err)
+        if err < 20:
             reward = 100
             print("reached")
             done = True
