@@ -18,7 +18,26 @@
     </body>
 
     
-    <body name="fk7" pos="0 0 0.5">
-      <site name="ss" />
+    <body name="fk1" pos="0 0 0.5">
+      <site name="s1" />
     </body>
+    <body name="fk2" pos="0 0 0.5">
+      <site name="s2" />
+    </body>
+    <body name="fk3" pos="0 0 0.5">
+      <site name="s3" />
+    </body>
+    <body name="fk4" pos="0 0 0.5">
+      <site name="s4" />
+    </body>
+    <body name="fk5" pos="0 0 0.5">
+      <site name="s5" />
+    </body>
+    <body name="fk6" pos="0 0 0.5">
+      <site name="s6" />
+    </body>
+    <body name="fk7" pos="0 0 0.5">
+      <site name="s7" />
+    </body>
+
 </mujoco>

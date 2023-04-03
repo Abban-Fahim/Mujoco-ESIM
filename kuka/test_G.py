@@ -60,13 +60,13 @@ from yaml.loader import SafeLoader
 import sys,os
 from utils.read_cfg import get_mjc_xml
 from utils.quaternion import mat2Quat
-from kinematics.fk1  import fk1 
-from kinematics.fk2  import fk2 
-from kinematics.fk3  import fk3 
-from kinematics.fk4  import fk4 
-from kinematics.fk5  import fk5 
-from kinematics.fk6  import fk6 
-from kinematics.fk7  import fk7 
+from kinematics.fk1cm import fk1cm
+from kinematics.fk2cm import fk2cm
+from kinematics.fk3cm import fk3cm
+from kinematics.fk4cm import fk4cm
+from kinematics.fk5cm import fk5cm
+from kinematics.fk6cm import fk6cm
+from kinematics.fk7cm import fk7cm
 from kinematics.G import G
 
 
@@ -79,21 +79,10 @@ print(data.qpos)
 
 t = data.time
 
-ids = []
-for i in range(7):
-    ids.append(mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_BODY, f"fk{i+1}"))
-
 while (True):
     viewer.render()
 
-    for i, f in zip(range(7), [fk1 , fk2 , fk3 , fk4 , fk5 , fk6 , fk7 ]):
-        pos, mat = f(data.qpos)
-        model.body_pos[ids[i]], model.body_quat[ids[i]] = pos, mat2Quat(mat)
-    
-    x=100*np.sin(t)
-    torque=np.ones(7)*x
-    data.ctrl[:] = np.clip(torque, -300, 300)
+    data.ctrl = G(data.qpos)
 
     mujoco.mj_step(model, data)
-
     t = data.time
