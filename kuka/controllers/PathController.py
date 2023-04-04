@@ -1,3 +1,4 @@
+import numpy as np
 
 import sys
 import os
@@ -62,5 +63,8 @@ class PathController:
         
 
     def error(self):
-        return self.targetPose - self.controller.fk()
+        err = self.targetPose - self.controller.fk()
+        for i in range(3,6):
+            err[i] = err[i] - 2*np.pi if err[i] > np.pi else err[i]
+        return err
     
