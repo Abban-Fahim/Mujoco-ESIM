@@ -176,6 +176,9 @@ if __name__ == '__main__':
     parser.add_argument('--start_model_idx', type=int, default=10)
     parser.add_argument('--num_model', type=int, default=10)
     parser.add_argument('--epochs', type=int, default=50)
+    parser.add_argument('--server', type=bool, default=False)
+
+
     args = parser.parse_args()
 
     START_MODEL = args.start_model_idx
@@ -201,7 +204,11 @@ if __name__ == '__main__':
         steps_per_epoch = 1000
         norm_update = steps_per_epoch
 
-        env = gym.make(args.env, headless=True)
+        if args.server:
+            env = gym.make(args.env, headless=True)
+        else:
+            env = gym.make(args.env)
+
         obs_dim, act_dim = env.observation_space, env.action_space
 
         model_name = "pop_sac_" + args.env + "_" + str(num)
