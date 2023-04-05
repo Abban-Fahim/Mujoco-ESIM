@@ -201,7 +201,7 @@ if __name__ == '__main__':
         steps_per_epoch = 1000
         norm_update = steps_per_epoch
 
-        env = gym.make(args.env)
+        env = gym.make(args.env, headless=True)
         obs_dim, act_dim = env.observation_space, env.action_space
 
         model_name = "pop_sac_" + args.env + "_" + str(num)
