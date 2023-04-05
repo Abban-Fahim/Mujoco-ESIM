@@ -130,7 +130,7 @@ class VSActivity(VSBase):
         err = self.dist_metric(self.img)
 
         # reward = -1 - dx
-        reward = 1/(0.01*err+0.04) - 1*dx
+        reward = -1/0.04 + 1/(0.01*err+0.04) - 1*dx
         
         # if err < 3:
         #     reward = 1

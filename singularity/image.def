@@ -77,7 +77,7 @@ Stage: build
     ##########################
     # Viewer
     ##########################
-    # pip install -e mujoco-eleanor/mujoco_viewer
+    pip install -e mujoco-eleanor/mujoco_viewer
 
     ##########################
     # Display
