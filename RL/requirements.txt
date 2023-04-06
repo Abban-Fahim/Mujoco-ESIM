@@ -10,12 +10,12 @@ glfw==2.4.0
 google-auth==2.3.3
 google-auth-oauthlib==0.4.6
 grpcio==1.42.0
-gym
+gym=0.26.2
 idna==3.3
 imageio==2.13.3
 importlib-metadata==4.8.2
 Markdown==3.3.6
-mujoco
+mujoco==2.1.5
 numpy==1.22.3 
 oauthlib==3.1.1
 Pillow==8.4.0
@@ -35,4 +35,4 @@ typing-extensions==4.0.1
 urllib3==1.26.7
 Werkzeug==2.0.2
 zipp==3.6.0
-tqdm
+tqdm==4.63.1
