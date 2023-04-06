@@ -1,8 +1,8 @@
-# Login to the cluster
+## Login to the cluster
 
 For running gym environments that require a screen as in our custom gym environments the -X flag for ssh command is required.
 
-# Navigation commands
+## Navigation commands
 
 
 ```
@@ -15,7 +15,7 @@ cd mujoco-eleanor/singularity
 
 ```
 
-# Build on the cluster
+## Build on the cluster
 
 ```
 sudo singularity build singularity/eleanor.sif singularity/image.def
@@ -23,7 +23,7 @@ sudo singularity build singularity/eleanor.sif singularity/image.def
 ```
 
 
-# Run RL
+## Run RL
 
 Explanation:
 
@@ -40,7 +40,7 @@ sudo sbatch run_script.sh PegInHole-rand_events_visual_servoing_guiding2
 ```
 
 
-# Print progress out 
+## Print progress out 
 
 ```
 tail -n 20 slurm-xxx.out
