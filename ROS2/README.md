@@ -20,7 +20,7 @@ All packages:
 - `colcon build`
 
 Only specific packages:
-- `colcon build --packages-select mujoco_sim`
+- `colcon build --packages-select mujoco_egen`
 
 ## Install local esim_torch before running 
 
@@ -34,11 +34,11 @@ Only specific packages:
 
 - `pip install mujoco==2.1.5`
 
-## Run mujoco_sim node
+## Run mujoco_egen node
 
 - `source /opt/ros/galactic/setup.bash`
 - `. install/setup.bash `
-- `ros2 run mujoco_sim impedance_controller_server`
+- `ros2 run mujoco_egen impedance_controller_server`
 
 ## Sending goal poses to the action server
 
@@ -58,7 +58,7 @@ Sending a request to the Random Saccades action server example
 ## Available launch files
 
 For starting mujoco:
-- run_mujoco_sim.launch.py
+- run_mujoco_egen.launch.py
 
 For selecting desired pose name:
 - run_set_desired_pose.launch.py
@@ -71,7 +71,7 @@ Complementary to run_saccades.launch.py
 
 Command example:
 
-`ros2 launch mujoco_sim run_mujoco_sim.launch.py`
+`ros2 launch mujoco_egen run_mujoco_egen.launch.py`
 
 If running launch files, one needs to becareful to add the correct namespaces and name.
 

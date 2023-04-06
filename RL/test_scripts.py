@@ -13,13 +13,6 @@ sys.path.append(os.getcwd())
 from RL.popsan.SpikeActorDeepCritic import SpikeActorDeepCritic
 
 
-# env_name = "InvertedPendulum-v4"
-# param_path = "params/pop_sac_InvertedPendulum-v4_0/model_e5.pt"
-# rb_param_path = "params/pop_sac_InvertedPendulum-v4_0/replay_buffer_e5.p"
-
-# num_test_episodes = 10
-# max_ep_len = 200
-
 def setup(env_name, param_path, rb_param_path):
 
     ac_kwargs = dict(hidden_sizes=[256, 256],
